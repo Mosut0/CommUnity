@@ -6,7 +6,7 @@ Community is a crowd-powered mobile application designed to allow users to repor
 ## Customer Information:
 - Name: Shrenil Patel
 - Email: patel.shrenil@gmail.com
-- Affiliation: Team Members Cousin
+- Affiliation: University of Waterloo Software Engineering Alumni
 
 ## Team Members:
 - Mostafa Yassine: myass025@uottawa.ca, 300233320
