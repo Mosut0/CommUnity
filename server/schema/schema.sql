@@ -1,21 +1,12 @@
--- Create Users Table
-CREATE TABLE Users (
-    userID VARCHAR(50) PRIMARY KEY,  -- Username or unique identifier
-    email VARCHAR(100) NOT NULL UNIQUE,
-    phoneNumber VARCHAR(15),
-    name VARCHAR(100) NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Create Reports Table
 CREATE TABLE Reports (
     reportID SERIAL PRIMARY KEY,
-    userID VARCHAR(50) NOT NULL,
+    userID UUID NOT NULL,  -- References Supabase's auth.users table
     category VARCHAR(50) NOT NULL,
     description TEXT,
     location POINT NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE
+    FOREIGN KEY (userID) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Create Events Table
@@ -53,6 +44,7 @@ CREATE TABLE FoundItems (
     FOREIGN KEY (reportID) REFERENCES Reports(reportID) ON DELETE CASCADE
 );
 
+-- Add Constraints for Valid Categories and Event Types
 ALTER TABLE Reports
 ADD CONSTRAINT valid_category CHECK (
     category IN ('safety', 'infrastructure', 'wildlife', 'health', 'lost', 'found', 'other')
