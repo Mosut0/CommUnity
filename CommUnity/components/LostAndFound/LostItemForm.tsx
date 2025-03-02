@@ -9,9 +9,10 @@ import { submitLostItem } from '@/services/lostAndFoundService';
 
 interface LostItemFormProps {
   onSubmit: () => void;
+  userId: string;
 }
 
-export default function LostItemForm({ onSubmit }: LostItemFormProps) {
+export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,10 +24,7 @@ export default function LostItemForm({ onSubmit }: LostItemFormProps) {
   const handleSubmit = async () => {
     onSubmit();
     
-    try {
-      //temporary
-      const userId = '79f8f363-0697-4915-a804-b8ab07929546';
-      
+    try {      
       const result = await submitLostItem({
         itemName,
         description,

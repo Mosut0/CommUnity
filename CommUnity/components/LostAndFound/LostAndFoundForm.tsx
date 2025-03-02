@@ -12,9 +12,10 @@ import { modalStyles } from './styles';
 interface LostAndFoundFormProps {
   isVisible: boolean;
   onClose: () => void;
+  userId: string;
 }
 
-export default function LostAndFoundForm({ isVisible, onClose }: LostAndFoundFormProps) {
+export default function LostAndFoundForm({ isVisible, onClose, userId }: LostAndFoundFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const [formType, setFormType] = useState<'lost' | 'found' | null>(null);
 
@@ -77,9 +78,9 @@ export default function LostAndFoundForm({ isVisible, onClose }: LostAndFoundFor
                 </TouchableOpacity>
               </View>
             ) : formType === 'lost' ? (
-              <LostItemForm onSubmit={onClose} />
+              <LostItemForm onSubmit={onClose} userId={userId} />
             ) : (
-              <FoundItemForm onSubmit={onClose} />
+              <FoundItemForm onSubmit={onClose} userId={userId} />
             )}
           </ScrollView>
         </ThemedView>
