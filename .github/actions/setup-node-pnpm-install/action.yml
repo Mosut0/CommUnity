@@ -1,17 +1,13 @@
-name: "Setup Node + PNPM + Install Dependencies"
-description: "Setup Node + PNPM + Install Dependencies"
+name: "Setup Node + NPM + Install Dependencies"
+description: "Setup Node + NPM + Install Dependencies"
 runs:
   using: "composite"
   steps:
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 10
     - uses: actions/setup-node@v3
       with:
-        node-version: 20
-        cache: "pnpm"
+        node-version: 20.18.3  # Use the correct version of Node.js
+        cache: "npm"  # Use npm cache instead of pnpm cache
 
     - name: 📦 Install Project Dependencies
-      run: pnpm install --frozen-lockfile
+      run: npm install --frozen-lockfile  # Use npm instead of pnpm
       shell: bash
-      working-directory: ${{ inputs.working-directory }}

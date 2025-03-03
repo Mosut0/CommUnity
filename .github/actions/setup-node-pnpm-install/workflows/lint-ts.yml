@@ -24,10 +24,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 📦 Setup Node + PNPM + install deps
-        uses: ./.github/actions/setup-node-pnpm-install
-        with: {}
+      - name: 📦 Setup Node + NPM + install deps
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20  # Make sure this is the version your project requires
         working-directory: CommUnity  # 👈 Run setup inside CommUnity/
+
+      - name: 📦 Install Project Dependencies
+        run: npm install --frozen-lockfile  # Use npm install instead of pnpm
+        working-directory: CommUnity  # 👈 Run inside CommUnity/
 
       - name: 🏃‍♂️ Run ESLint PR
         if: github.event_name == 'pull_request'
@@ -40,4 +45,4 @@ jobs:
 
       - name: 🏃‍♂️ Run ESLint Commit
         if: github.event_name != 'pull_request'
-        run: pnpm run lint
+        run: npm run lint  # Use npm run instead of pnpm
