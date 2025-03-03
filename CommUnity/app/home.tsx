@@ -1,52 +1,78 @@
-import 'react-native-url-polyfill/auto'
-import { View, Text } from 'react-native'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { Session } from '@supabase/supabase-js'
+import 'react-native-url-polyfill/auto';
+import { View, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { Session } from '@supabase/supabase-js';
 import { StyleSheet, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { LostAndFoundForm } from '@/components/LostAndFound';
+import { HazardForm } from '@/components/Hazards';
 
 export default function Home() {
-    const [session, setSession] = useState<Session | null>(null)
-    const [isFormVisible, setIsFormVisible] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLostAndFoundFormVisible, setIsLostAndFoundFormVisible] = useState(false);
+  const [isHazardFormVisible, setIsHazardFormVisible] = useState(false);
 
-    useEffect(() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session)
-      })
-  
-      supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session)
-      })
-    }, [])
-  
-    return (
-      <View>
-        {session && session.user && <Text>{session.user.id}</Text>}
-        
-        <ThemedView style={styles.testContainer}>
-          <ThemedText type="subtitle">Test Lost & Found Form</ThemedText>
-          <Button 
-            title="Open Lost & Found Form" 
-            onPress={() => setIsFormVisible(true)} 
-            disabled={!session}
-          />
-          {!session && (
-            <ThemedText style={{color: 'red'}}>
-              Please log in to submit reports
-            </ThemedText>
-          )}
-        </ThemedView>
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-        <LostAndFoundForm 
-          isVisible={isFormVisible}
-          onClose={() => setIsFormVisible(false)}
-          userId={session?.user?.id || ''}
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
+
+  return (
+    <View>
+      {session && session.user && <Text>{session.user.id}</Text>}
+
+      {/* Lost & Found Form Section */}
+      <ThemedView style={styles.testContainer}>
+        <ThemedText type="subtitle">Test Lost & Found Form</ThemedText>
+        <Button
+          title="Open Lost & Found Form"
+          onPress={() => setIsLostAndFoundFormVisible(true)}
+          disabled={!session}
         />
-      </View>
-    );
+        {!session && (
+          <ThemedText style={{ color: 'red' }}>
+            Please log in to submit reports
+          </ThemedText>
+        )}
+      </ThemedView>
+
+      {/* Hazard Form Section */}
+      <ThemedView style={styles.testContainer}>
+        <ThemedText type="subtitle">Test Hazard Form</ThemedText>
+        <Button
+          title="Open Hazard Form"
+          onPress={() => setIsHazardFormVisible(true)}
+          disabled={!session}
+        />
+        {!session && (
+          <ThemedText style={{ color: 'red' }}>
+            Please log in to submit reports
+          </ThemedText>
+        )}
+      </ThemedView>
+
+      {/* Lost & Found Form Modal */}
+      <LostAndFoundForm
+        isVisible={isLostAndFoundFormVisible}
+        onClose={() => setIsLostAndFoundFormVisible(false)}
+        userId={session?.user?.id || ''}
+      />
+
+      {/* Hazard Form Modal */}
+      <HazardForm
+        isVisible={isHazardFormVisible}
+        onClose={() => setIsHazardFormVisible(false)}
+        userId={session?.user?.id || ''}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
