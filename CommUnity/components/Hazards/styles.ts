@@ -93,5 +93,14 @@ export const modalStyles = StyleSheet.create({
   optionButtonText: {
     fontSize: 18,
     fontWeight: '600'
-  }
+  },
+  headerTitle: {
+
+    fontSize: 20,
+
+    fontWeight: 'bold',
+
+    textAlign: 'center',
+
+  },
 });

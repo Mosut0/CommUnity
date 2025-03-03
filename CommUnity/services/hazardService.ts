@@ -13,8 +13,17 @@ interface HazardData {
 }
 
 function locationToPoint(locationStr: string): { lat: number; lng: number } {
-  // Temporary implementation
-  return { lat: 0, lng: 0 };
+  // Expecting locationStr in the format "lat,lng"
+  const parts = locationStr.split(',');
+  if (parts.length !== 2) {
+    return { lat: 0, lng: 0 };
+  }
+  const lat = parseFloat(parts[0].trim());
+  const lng = parseFloat(parts[1].trim());
+  if (isNaN(lat) || isNaN(lng)) {
+    return { lat: 0, lng: 0 };
+  }
+  return { lat, lng };
 }
 
 export async function submitHazard(data: HazardData, userId: string) {

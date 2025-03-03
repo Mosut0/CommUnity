@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Platform, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import * as Location from 'expo-location';
 import { formStyles } from './styles';
 import { submitLostItem } from '@/services/lostAndFoundService';
 
@@ -16,42 +16,68 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [date, setDate] = useState(new Date());
+  // Remove the manual location input since we’ll fetch it automatically
   const [contactInfo, setContactInfo] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [loadingLocation, setLoadingLocation] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      // Request permission to access location
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permission Denied", "Permission to access location was denied.");
+        setLoadingLocation(false);
+        return;
+      }
+      // Get current position
+      let location = await Location.getCurrentPositionAsync({});
+      setCurrentCoordinates({
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+      });
+      setLoadingLocation(false);
+    })();
+  }, []);
 
   const handleSubmit = async () => {
     onSubmit();
-    
-    try {      
+
+    if (!currentCoordinates) {
+      Alert.alert("Error", "Current location not available.");
+      return;
+    }
+
+    try {
+      // Format the location as "lat,lng"
+      const locationStr = `${currentCoordinates.lat},${currentCoordinates.lng}`;
       const result = await submitLostItem({
         itemName,
         description,
-        location,
-        date,
+        location: locationStr,
+        date: new Date(),
         contactInfo
       }, userId);
       
       if (result.success) {
-        Alert.alert(
-          "Success",
-          "Your lost item report has been submitted successfully."
-        );
+        Alert.alert("Success", "Your lost item report has been submitted successfully.");
       } else {
-        Alert.alert(
-          "Error",
-          "There was an error submitting your report. Please try again."
-        );
+        Alert.alert("Error", "There was an error submitting your report. Please try again.");
       }
     } catch (error) {
       console.error(error);
-      Alert.alert(
-        "Error",
-        "There was an error submitting your report. Please try again."
-      );
+      Alert.alert("Error", "There was an error submitting your report. Please try again.");
     }
   };
+
+  if (loadingLocation) {
+    return (
+      <View style={formStyles.container}>
+        <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
+        <ThemedText>Fetching current location...</ThemedText>
+      </View>
+    );
+  }
 
   return (
     <View style={formStyles.container}>
@@ -83,6 +109,14 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
           multiline
           numberOfLines={4}
         />
+      </View>
+
+      {/* Display current location for user reference */}
+      <View style={formStyles.inputGroup}>
+        <ThemedText type="defaultSemiBold">Current Location:</ThemedText>
+        <ThemedText>
+          {currentCoordinates ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` : 'Not available'}
+        </ThemedText>
       </View>
 
       <View style={formStyles.inputGroup}>

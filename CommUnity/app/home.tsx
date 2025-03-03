@@ -7,6 +7,7 @@ import { StyleSheet, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { LostAndFoundForm } from '@/components/LostAndFound';
+import MapScreen from '../components/MapScreen';
 import { HazardForm } from '@/components/Hazards';
 
 export default function Home() {
@@ -25,8 +26,9 @@ export default function Home() {
   }, []);
 
   return (
-    <View>
-      {session && session.user && <Text>{session.user.id}</Text>}
+    <View style={{ flex: 1 }}>
+        <MapScreen />
+      {/* {session && session.user && <Text>{session.user.id}</Text>} */}
 
       {/* Lost & Found Form Section */}
       <ThemedView style={styles.testContainer}>

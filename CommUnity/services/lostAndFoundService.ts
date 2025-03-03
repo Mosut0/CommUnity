@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';;
 
-
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface LostItemData {
@@ -22,8 +21,17 @@ interface FoundItemData {
 }
 
 function locationToPoint(locationStr: string): { lat: number; lng: number } {
-  //temporary
-  return { lat: 0, lng: 0 };
+  // Expecting locationStr in the format "lat,lng"
+  const parts = locationStr.split(',');
+  if (parts.length !== 2) {
+    return { lat: 0, lng: 0 };
+  }
+  const lat = parseFloat(parts[0].trim());
+  const lng = parseFloat(parts[1].trim());
+  if (isNaN(lat) || isNaN(lng)) {
+    return { lat: 0, lng: 0 };
+  }
+  return { lat, lng };
 }
 
 export async function submitLostItem(data: LostItemData, userId: string) {
