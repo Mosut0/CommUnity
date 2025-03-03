@@ -29,6 +29,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
         itemName,
         description,
         location,
+        date,
         contactInfo
       }, userId);
       

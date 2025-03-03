@@ -7,11 +7,9 @@ on:
       - master
     paths:
       - "CommUnity/package.json"
-      - "CommUnity/pnpm-lock.yaml"
   pull_request:
     paths:
       - "CommUnity/package.json"
-      - "CommUnity/pnpm-lock.yaml"
 
 jobs:
   doctor:
@@ -27,10 +25,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 📦 Setup Node + PNPM + install deps
-        uses: ./.github/actions/setup-node-pnpm-install
-        with: {}
+      - name: 📦 Setup Node + NPM + install deps
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20  # Make sure this is the version your project requires
+        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
+
+      - name: 📦 Install Project Dependencies
+        run: npm install --frozen-lockfile  # Use npm install instead of pnpm
         working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
 
       - name: 🚑 Run Doctor Checks
         run: npx expo-doctor@latest
+        working-directory: CommUnity  # 👈 Ensure command runs inside CommUnity/

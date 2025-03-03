@@ -90,6 +90,15 @@ export const modalStyles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center'
   },
+  headerTitle: {
+
+    fontSize: 20,
+
+    fontWeight: 'bold',
+
+    textAlign: 'center',
+
+  },
   optionButtonText: {
     fontSize: 18,
     fontWeight: '600'
