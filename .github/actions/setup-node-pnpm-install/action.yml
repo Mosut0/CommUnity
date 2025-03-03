@@ -1,13 +1,19 @@
-name: "Setup Node + NPM + Install Dependencies"
-description: "Setup Node + NPM + Install Dependencies"
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/actions/setup-node-pnpm-install/action.yml
+
+name: "Setup  Node + PNPM + Install Dependencies"
+description: "Setup  Node + PNPM + Install Dependencies"
 runs:
   using: "composite"
   steps:
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 10
     - uses: actions/setup-node@v3
       with:
-        node-version: 20.18.3  # Use the correct version of Node.js
-        cache: "npm"  # Use npm cache instead of pnpm cache
+        node-version: 20
+        cache: "pnpm"
 
     - name: 📦 Install Project Dependencies
-      run: npm install --frozen-lockfile  # Use npm instead of pnpm
+      run: pnpm install --frozen-lockfile
       shell: bash

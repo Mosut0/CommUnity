@@ -1,23 +1,22 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/expo-doctor.yml
+
 name: Expo Doctor (expo)
 
 on:
   push:
-    branches:
-      - main
-      - master
     paths:
-      - "CommUnity/package.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
   pull_request:
     paths:
-      - "CommUnity/package.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
   doctor:
     name: Expo Doctor (expo)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: CommUnity  # 👈 All run: steps happen inside CommUnity/
 
     steps:
       - name: 📦 Checkout project repo
@@ -25,16 +24,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 📦 Setup Node + NPM + install deps
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20  # Make sure this is the version your project requires
-        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
-
-      - name: 📦 Install Project Dependencies
-        run: npm install --frozen-lockfile  # Use npm install instead of pnpm
-        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
 
       - name: 🚑 Run Doctor Checks
         run: npx expo-doctor@latest
-        working-directory: CommUnity  # 👈 Ensure command runs inside CommUnity/
