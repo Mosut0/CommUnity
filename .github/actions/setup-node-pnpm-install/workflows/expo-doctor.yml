@@ -1,0 +1,36 @@
+name: Expo Doctor (expo)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "CommUnity/package.json"
+      - "CommUnity/pnpm-lock.yaml"
+  pull_request:
+    paths:
+      - "CommUnity/package.json"
+      - "CommUnity/pnpm-lock.yaml"
+
+jobs:
+  doctor:
+    name: Expo Doctor (expo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CommUnity  # 👈 All run: steps happen inside CommUnity/
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+        with: {}
+        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
+
+      - name: 🚑 Run Doctor Checks
+        run: npx expo-doctor@latest
