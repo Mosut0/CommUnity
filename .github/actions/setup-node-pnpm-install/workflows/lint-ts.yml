@@ -2,7 +2,6 @@ name: Lint TS (eslint, prettier)
 
 on:
   push:
-    branches: [main, master]
   pull_request:
     paths:
       - 'CommUnity/**'
