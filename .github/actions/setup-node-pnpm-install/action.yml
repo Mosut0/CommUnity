@@ -1,8 +1,5 @@
-# 🔗 Links:
-# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/actions/setup-node-pnpm-install/action.yml
-
-name: "Setup  Node + PNPM + Install Dependencies"
-description: "Setup  Node + PNPM + Install Dependencies"
+name: "Setup Node + PNPM + Install Dependencies"
+description: "Setup Node + PNPM + Install Dependencies"
 runs:
   using: "composite"
   steps:
@@ -17,3 +14,4 @@ runs:
     - name: 📦 Install Project Dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
