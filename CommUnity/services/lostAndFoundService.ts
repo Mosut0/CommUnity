@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';;
 
-
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface LostItemData {
@@ -34,7 +33,6 @@ function locationToPoint(locationStr: string): { lat: number; lng: number } {
   }
   return { lat, lng };
 }
-
 
 export async function submitLostItem(data: LostItemData, userId: string) {
   try {

@@ -1,0 +1,40 @@
+name: Expo Doctor (expo)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "CommUnity/package.json"
+  pull_request:
+    paths:
+      - "CommUnity/package.json"
+
+jobs:
+  doctor:
+    name: Expo Doctor (expo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CommUnity  # 👈 All run: steps happen inside CommUnity/
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + NPM + install deps
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20  # Make sure this is the version your project requires
+        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
+
+      - name: 📦 Install Project Dependencies
+        run: npm install --frozen-lockfile  # Use npm install instead of pnpm
+        working-directory: CommUnity  # 👈 Ensure install happens in CommUnity/
+
+      - name: 🚑 Run Doctor Checks
+        run: npx expo-doctor@latest
+        working-directory: CommUnity  # 👈 Ensure command runs inside CommUnity/
