@@ -53,5 +53,6 @@ jobs:
         if: github.event_name == 'pull_request' && always()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
+          message: "Expo Doctor checks have completed successfully."
           header: expo-doctor
           path: .expo/expo-doctor.md
