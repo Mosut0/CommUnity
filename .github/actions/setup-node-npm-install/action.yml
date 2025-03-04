@@ -9,8 +9,6 @@ runs:
         cache: npm
         cache-dependency-path: CommUnity/package-lock.json
 
-
     - name: Install Dependencies
-      working-directory: ./CommUnity/CommUnity
       run: npm ci
       shell: bash
