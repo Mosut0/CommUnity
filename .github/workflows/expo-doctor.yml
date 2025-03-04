@@ -12,14 +12,7 @@ name: Expo Doctor (expo)
 
 on:
   push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'CommUnity/package-lock.json'
   pull_request:
-    paths:
-      - 'CommUnity/package-lock.json'
 
 permissions:
   contents: read
