@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -9,11 +9,13 @@ import { ThemedView } from '@/components/ThemedView';
 import { LostAndFoundForm } from '@/components/LostAndFound';
 import MapScreen from '../components/MapScreen';
 import { HazardForm } from '@/components/Hazards';
+import { EventForm } from '@/components/Events';
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLostAndFoundFormVisible, setIsLostAndFoundFormVisible] = useState(false);
   const [isHazardFormVisible, setIsHazardFormVisible] = useState(false);
+  const [isEventFormVisible, setIsEventFormVisible] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +30,6 @@ export default function Home() {
   return (
     <View style={{ flex: 1 }}>
         <MapScreen />
-      {/* {session && session.user && <Text>{session.user.id}</Text>} */}
 
       {/* Lost & Found Form Section */}
       <ThemedView style={styles.testContainer}>
@@ -60,6 +61,21 @@ export default function Home() {
         )}
       </ThemedView>
 
+      {/* Event Form Section */}
+      <ThemedView style={styles.testContainer}>
+        <ThemedText type="subtitle">Test Event Form</ThemedText>
+        <Button
+          title="Open Event Form"
+          onPress={() => setIsEventFormVisible(true)}
+          disabled={!session}
+        />
+        {!session && (
+          <ThemedText style={{ color: 'red' }}>
+            Please log in to submit reports
+          </ThemedText>
+        )}
+      </ThemedView>
+
       {/* Lost & Found Form Modal */}
       <LostAndFoundForm
         isVisible={isLostAndFoundFormVisible}
@@ -71,6 +87,13 @@ export default function Home() {
       <HazardForm
         isVisible={isHazardFormVisible}
         onClose={() => setIsHazardFormVisible(false)}
+        userId={session?.user?.id || ''}
+      />
+
+      {/* Event Form Modal */}
+      <EventForm
+        isVisible={isEventFormVisible}
+        onClose={() => setIsEventFormVisible(false)}
         userId={session?.user?.id || ''}
       />
     </View>

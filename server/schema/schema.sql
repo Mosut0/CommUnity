@@ -47,10 +47,5 @@ CREATE TABLE FoundItems (
 -- Add Constraints for Valid Categories and Event Types
 ALTER TABLE Reports
 ADD CONSTRAINT valid_category CHECK (
-    category IN ('safety', 'infrastructure', 'wildlife', 'health', 'lost', 'found', 'other')
-);
-
-ALTER TABLE Events
-ADD CONSTRAINT valid_eventType CHECK (
-    eventType IN ('crime', 'accident', 'celebration', 'other')
+    category IN ('safety', 'infrastructure', 'wildlife', 'health', 'lost', 'found', 'other', 'event')
 );
