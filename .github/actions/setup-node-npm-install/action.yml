@@ -10,5 +10,5 @@ runs:
         cache-dependency-path: CommUnity/package-lock.json
 
     - name: Install Dependencies
-      run: npm ci
+      run: npm install
       shell: bash
