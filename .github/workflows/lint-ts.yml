@@ -26,13 +26,13 @@ jobs:
         with:
           node-version: 16
 
-      - name: 📦 Install dependencies in CommUnity
-        run: |
-          cd /home/runner/work/CommUnity/CommUnity && sudo npm install
+      - name: 🏃‍♂️ Install dependencies
+        run: npm install
+        working-directory: ./CommUnity  # Ensure npm install runs inside CommUnity
         shell: bash
+        if: github.event_name == 'pull_request'
 
       - name: 🏃‍♂️ Run ESLint PR
-        if: github.event_name == 'pull_request'
         uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
