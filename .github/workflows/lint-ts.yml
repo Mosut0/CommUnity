@@ -39,6 +39,10 @@ jobs:
       - name: 📦 Setup Node + NPM + install deps
         uses: ./.github/actions/setup-node-npm-install
 
+      - name: 📦 Install Reviewdog
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-setup@v1
+
       - name: 🏃‍♂️ Run ESLint PR # Reviewdog eslint errorformat
         if: github.event_name == 'pull_request'
         run: |
