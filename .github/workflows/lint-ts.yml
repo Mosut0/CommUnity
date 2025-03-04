@@ -29,7 +29,7 @@ jobs:
       - name: 📦 Install dependencies in CommUnity
         run: |
           cd CommUnity
-          npm install
+          sudo npm install
         shell: bash
 
       - name: 🏃‍♂️ Run ESLint PR
