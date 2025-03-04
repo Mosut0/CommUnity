@@ -11,5 +11,6 @@ runs:
 
 
     - name: Install Dependencies
-      run: cd CommUnity && npm ci
+      working-directory: ./CommUnity/CommUnity
+      run: npm ci
       shell: bash
