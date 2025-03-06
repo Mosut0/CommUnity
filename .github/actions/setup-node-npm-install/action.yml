@@ -7,9 +7,7 @@ runs:
       with:
         node-version: 16
         cache: npm
-        cache-dependency-path: CommUnity/package-lock.json  # Cache key refers to package-lock.json inside CommUnity
 
     - name: Install Dependencies
       run: npm install
-      working-directory: ./CommUnity  # Ensure npm install runs inside CommUnity
       shell: bash
