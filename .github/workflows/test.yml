@@ -26,4 +26,4 @@ jobs:
 
       - name: 🏃‍♂️ Run Tests
         working-directory: CommUnity
-        run: npm test
+        run: npm test -- --ci
