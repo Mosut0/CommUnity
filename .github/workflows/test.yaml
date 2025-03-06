@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test:
-    name: Run Jest Service Tests
+    name: Run Jest Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +20,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 📦 Setup Node + NPM + install deps
-        working-directory: CommUnity
-        run: |
-          npm install
+        run: npm install
+        working-directory: ${{ github.workspace }}/CommUnity
 
       - name: 🏃‍♂️ Run Tests
-        run: npm test
+        run: npm test -- --ci
+        working-directory: ${{ github.workspace }}/CommUnity
