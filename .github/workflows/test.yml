@@ -18,14 +18,12 @@ jobs:
     steps:
       - name: 📦 Checkout project repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          cache-dependency-path: CommUnity/package-lock.json
-          node-version: 16
-          cache: npm
 
       - name: 📦 Setup Node + NPM + install deps
-        uses: ./.github/actions/setup-node-npm-install
+        working-directory: CommUnity
+        run: |
+          npm install
 
       - name: 🏃‍♂️ Run Tests
+        working-directory: CommUnity
         run: npm test
