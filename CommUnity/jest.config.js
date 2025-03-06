@@ -1,8 +1,12 @@
 module.exports = {
-    preset: 'jest-expo', // Use jest-expo preset for Expo projects
-    testEnvironment: 'node', // Use 'node' for backend/service tests
-    setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-    moduleNameMapper: {
-        '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.ts',
+    preset: 'react-native',
+    testEnvironment: 'node',
+    transform: {
+        '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
     },
+    transformIgnorePatterns: [
+        'node_modules/(?!(react-native|@react-native|@expo|expo)/)', 
+    ],
+    setupFilesAfterEnv: ['./jest.setup.js'],
+    silent: true,
 };
