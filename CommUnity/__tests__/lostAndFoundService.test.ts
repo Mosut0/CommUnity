@@ -33,7 +33,7 @@ describe('Found Service', () => {
         const result = await submitFoundItem(
             {
                 itemName: 'phone',
-                description: 'lost phone',
+                description: 'found phone',
                 contactInfo: '123-456-7890',
                 location: '45.4215,-75.6972',
             },
