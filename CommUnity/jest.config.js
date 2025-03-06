@@ -5,8 +5,11 @@ module.exports = {
         '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(react-native|@react-native|@expo|expo)/)', 
+        'node_modules/(?!(react-native|@react-native|@expo|expo)/)',
     ],
     setupFilesAfterEnv: ['./jest.setup.js'],
+    moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/$1',
+    },
     silent: true,
 };

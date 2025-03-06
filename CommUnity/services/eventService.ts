@@ -40,21 +40,21 @@ export async function submitEvent(data: EventData, userId: string) {
 
     if (reportError) {
       console.error('Report insert error:', reportError);
-      throw reportError;
+      return { success: false, error: reportError.message };
     }
 
     if (!reportData || reportData.length === 0) {
-      throw new Error('No report data returned after insert');
+      return { success: false, error: 'No report data returned after insert' };
     }
 
     const reportId = reportData[0].reportid;
-    
+
     const eventDateTime = new Date(data.date);
     if (data.time) {
       const [hours, minutes] = data.time.split(':').map(Number);
       eventDateTime.setHours(hours, minutes);
     }
-    
+
     const { error: eventError } = await supabase
       .from('events')
       .insert({
@@ -65,12 +65,12 @@ export async function submitEvent(data: EventData, userId: string) {
 
     if (eventError) {
       console.error('Event insert error:', eventError);
-      throw eventError;
+      return { success: false, error: eventError.message };
     }
 
     return { success: true };
   } catch (error) {
     console.error('Error submitting event:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
