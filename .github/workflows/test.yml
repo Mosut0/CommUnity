@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test:
-    name: Run Jest Tests
+    name: Run Jest Service Tests
     runs-on: ubuntu-latest
 
     steps:
