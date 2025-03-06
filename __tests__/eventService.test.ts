@@ -1,5 +1,4 @@
 import { submitEvent } from '../services/eventService';
-import { createClient } from '@supabase/supabase-js';
 
 jest.mock('@supabase/supabase-js');
 

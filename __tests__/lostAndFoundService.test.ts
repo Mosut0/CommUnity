@@ -1,5 +1,4 @@
 import { submitFoundItem, submitLostItem } from '../services/lostAndFoundService';
-import { createClient } from '@supabase/supabase-js';
 
 jest.mock('@supabase/supabase-js');
 
