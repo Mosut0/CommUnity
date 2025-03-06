@@ -41,7 +41,6 @@ export const modalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
   modalView: {
     width: '90%',
