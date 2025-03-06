@@ -49,4 +49,4 @@ jobs:
 
       - name: 🏃‍♂️ Run TypeScript Commit
         if: github.event_name != 'pull_request'
-        run: npm run lint
+        run: npm run lint -- --ext .js,.jsx,.ts,.tsx
