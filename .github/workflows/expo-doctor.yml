@@ -32,7 +32,6 @@ jobs:
       - name: 📦 Checkout project repo
         uses: actions/checkout@v4
         with:
-          cache-dependency-path: CommUnity/package-lock.json
           fetch-depth: 0
           node-version: 16
           cache: npm
