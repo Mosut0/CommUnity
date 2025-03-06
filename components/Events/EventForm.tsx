@@ -16,9 +16,9 @@ interface EventFormProps {
 
 export default function EventForm({ isVisible, onClose, userId }: EventFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [formType, setFormType] = useState<'event' | null>(null);
+    const [formType, setFormType] = useState<'event' | null>(null);
 
-  const resetForm = () => {
+    const resetForm = () => {
     setFormType(null);
   };
 
@@ -31,6 +31,7 @@ export default function EventForm({ isVisible, onClose, userId }: EventFormProps
     >
       <View style={modalStyles.centeredView}>
         <ThemedView style={modalStyles.modalView}>
+          {/* Modal Header with back button */}
           <View style={modalStyles.header}>
             <TouchableOpacity 
               onPress={formType ? resetForm : onClose}
@@ -52,6 +53,7 @@ export default function EventForm({ isVisible, onClose, userId }: EventFormProps
             contentContainerStyle={modalStyles.scrollContent}
           >
             {formType === null ? (
+              // Initial options screen
               <View style={modalStyles.optionsContainer}>
                 <TouchableOpacity
                   style={[modalStyles.optionButton, { backgroundColor: Colors[colorScheme].tint }]}
@@ -63,6 +65,7 @@ export default function EventForm({ isVisible, onClose, userId }: EventFormProps
                 </TouchableOpacity>
               </View>
             ) : (
+              // Display the event creation form
               <FillEventForm onSubmit={onClose} userId={userId} />
             )}
           </ScrollView>

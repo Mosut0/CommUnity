@@ -14,14 +14,13 @@ interface LostItemFormProps {
 
 export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [itemName, setItemName] = useState('');
+    const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
-  // Remove the manual location input since we’ll fetch it automatically
   const [contactInfo, setContactInfo] = useState('');
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       // Request permission to access location
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -40,7 +39,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
     })();
   }, []);
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     onSubmit();
 
     if (!currentCoordinates) {
@@ -70,6 +69,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
     }
   };
 
+  // Show loading indicator while fetching location
   if (loadingLocation) {
     return (
       <View style={formStyles.container}>
@@ -79,8 +79,10 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
     );
   }
 
+  // Render the form once location is available
   return (
     <View style={formStyles.container}>
+      {/* Item Name Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Item Name*</ThemedText>
         <TextInput
@@ -95,6 +97,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
         />
       </View>
 
+      {/* Item Description Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Description*</ThemedText>
         <TextInput
@@ -119,6 +122,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
         </ThemedText>
       </View>
 
+      {/* Contact Information Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Contact Information*</ThemedText>
         <TextInput
@@ -133,6 +137,7 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
         />
       </View>
 
+      {/* Submit Button - disabled if required fields are empty */}
       <TouchableOpacity
         style={[
           formStyles.submitButton,

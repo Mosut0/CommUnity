@@ -14,13 +14,13 @@ interface FillHazardFormProps {
 
 export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [hazardType, setHazardType] = useState('');
+    const [hazardType, setHazardType] = useState('');
   const [description, setDescription] = useState('');
-  // Remove manual location input; we fetch it automatically.
+// Remove manual location input; we fetch it automatically.
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       // Request permission to access location
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -39,7 +39,7 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
     })();
   }, []);
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     onSubmit();
 
     if (!currentCoordinates) {
@@ -68,6 +68,7 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
     }
   };
 
+  // Show loading indicator while fetching location
   if (loadingLocation) {
     return (
       <View style={formStyles.container}>
@@ -77,8 +78,10 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
     );
   }
 
+  // Render the form once location is available
   return (
     <View style={formStyles.container}>
+      {/* Hazard Type Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Hazard Type*</ThemedText>
         <TextInput
@@ -93,6 +96,7 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
         />
       </View>
 
+      {/* Hazard Description Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Description*</ThemedText>
         <TextInput
@@ -117,6 +121,7 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
         </ThemedText>
       </View>
 
+      {/* Submit Button - disabled if required fields are empty */}
       <TouchableOpacity
         style={[
           formStyles.submitButton,

@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';;
-
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface LostItemData {
@@ -20,6 +19,7 @@ interface FoundItemData {
   contactInfo: string;
 }
 
+// Convert location string to latitude and longitude
 function locationToPoint(locationStr: string): { lat: number; lng: number } {
   // Expecting locationStr in the format "lat,lng"
   const parts = locationStr.split(',');
@@ -36,6 +36,7 @@ function locationToPoint(locationStr: string): { lat: number; lng: number } {
 
 export async function submitLostItem(data: LostItemData, userId: string) {
   try {
+    // Insert report into 'reports' table
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -57,6 +58,7 @@ export async function submitLostItem(data: LostItemData, userId: string) {
 
     const reportId = reportData[0].reportid;
     
+    // Insert lost item details into 'lostitems' table
     const { error: lostItemError } = await supabase
       .from('lostitems')
       .insert({
@@ -79,6 +81,7 @@ export async function submitLostItem(data: LostItemData, userId: string) {
 
 export async function submitFoundItem(data: FoundItemData, userId: string) {
   try {
+    // Insert report into 'reports' table
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -100,6 +103,7 @@ export async function submitFoundItem(data: FoundItemData, userId: string) {
 
     const reportId = reportData[0].reportid;
     
+    // Insert found item details into 'founditems' table
     const { error: foundItemError } = await supabase
       .from('founditems')
       .insert({
