@@ -17,9 +17,9 @@ interface LostAndFoundFormProps {
 
 export default function LostAndFoundForm({ isVisible, onClose, userId }: LostAndFoundFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [formType, setFormType] = useState<'lost' | 'found' | null>(null);
+    const [formType, setFormType] = useState<'lost' | 'found' | null>(null);
 
-  const resetForm = () => {
+    const resetForm = () => {
     setFormType(null);
   };
 
@@ -32,6 +32,7 @@ export default function LostAndFoundForm({ isVisible, onClose, userId }: LostAnd
     >
       <View style={modalStyles.centeredView}>
         <ThemedView style={modalStyles.modalView}>
+          {/* Modal Header with back button */}
           <View style={modalStyles.header}>
             <TouchableOpacity 
               onPress={formType ? resetForm : onClose}
@@ -58,6 +59,7 @@ export default function LostAndFoundForm({ isVisible, onClose, userId }: LostAnd
             contentContainerStyle={modalStyles.scrollContent}
           >
             {formType === null ? (
+              // Initial selection screen with two options
               <View style={modalStyles.optionsContainer}>
                 <TouchableOpacity
                   style={[modalStyles.optionButton, { backgroundColor: Colors[colorScheme].tint }]}
@@ -78,8 +80,10 @@ export default function LostAndFoundForm({ isVisible, onClose, userId }: LostAnd
                 </TouchableOpacity>
               </View>
             ) : formType === 'lost' ? (
+              // Display the lost item form when selected
               <LostItemForm onSubmit={onClose} userId={userId} />
             ) : (
+              // Display the found item form when selected
               <FoundItemForm onSubmit={onClose} userId={userId} />
             )}
           </ScrollView>

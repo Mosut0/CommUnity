@@ -16,9 +16,9 @@ interface HazardFormProps {
 
 export default function HazardForm({ isVisible, onClose, userId }: HazardFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [formType, setFormType] = useState<'hazard' | null>(null);
+    const [formType, setFormType] = useState<'hazard' | null>(null);
 
-  const resetForm = () => {
+    const resetForm = () => {
     setFormType(null);
   };
 
@@ -31,6 +31,7 @@ export default function HazardForm({ isVisible, onClose, userId }: HazardFormPro
     >
       <View style={modalStyles.centeredView}>
         <ThemedView style={modalStyles.modalView}>
+          {/* Modal Header with back button */}
           <View style={modalStyles.header}>
             <TouchableOpacity 
               onPress={formType ? resetForm : onClose}
@@ -52,6 +53,7 @@ export default function HazardForm({ isVisible, onClose, userId }: HazardFormPro
             contentContainerStyle={modalStyles.scrollContent}
           >
             {formType === null ? (
+              // Initial options screen with hazard reporting button
               <View style={modalStyles.optionsContainer}>
                 <TouchableOpacity
                   style={[modalStyles.optionButton, { backgroundColor: Colors[colorScheme].tint }]}
@@ -63,6 +65,7 @@ export default function HazardForm({ isVisible, onClose, userId }: HazardFormPro
                 </TouchableOpacity>
               </View>
             ) : (
+              // Display the hazard reporting form
               <FillHazardForm onSubmit={onClose} userId={userId} />
             )}
           </ScrollView>

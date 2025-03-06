@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
-
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface HazardData {
@@ -12,6 +11,7 @@ interface HazardData {
   date: Date;
 }
 
+// Convert location string to latitude and longitude
 function locationToPoint(locationStr: string): { lat: number; lng: number } {
   // Expecting locationStr in the format "lat,lng"
   const parts = locationStr.split(',');
@@ -28,6 +28,7 @@ function locationToPoint(locationStr: string): { lat: number; lng: number } {
 
 export async function submitHazard(data: HazardData, userId: string) {
   try {
+    // Insert report into 'reports' table
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -49,6 +50,7 @@ export async function submitHazard(data: HazardData, userId: string) {
 
     const reportId = reportData[0].reportid;
 
+    // Insert hazard details into 'hazards' table
     const { error: hazardError } = await supabase
       .from('hazards')
       .insert({

@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
-
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface EventData {
@@ -13,6 +12,7 @@ interface EventData {
   time: string;
 }
 
+// Convert location string to latitude and longitude
 function locationToPoint(locationStr: string): { lat: number; lng: number } {
   const parts = locationStr.split(',');
   if (parts.length !== 2) {
@@ -28,6 +28,7 @@ function locationToPoint(locationStr: string): { lat: number; lng: number } {
 
 export async function submitEvent(data: EventData, userId: string) {
   try {
+    // Insert report into 'reports' table
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -49,12 +50,14 @@ export async function submitEvent(data: EventData, userId: string) {
 
     const reportId = reportData[0].reportid;
     
+    // Combine date and time into a single Date object
     const eventDateTime = new Date(data.date);
     if (data.time) {
       const [hours, minutes] = data.time.split(':').map(Number);
       eventDateTime.setHours(hours, minutes);
     }
     
+    // Insert event details into 'events' table
     const { error: eventError } = await supabase
       .from('events')
       .insert({

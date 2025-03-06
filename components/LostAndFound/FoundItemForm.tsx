@@ -14,14 +14,13 @@ interface FoundItemFormProps {
 
 export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [itemName, setItemName] = useState('');
+    const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
   const [contactInfo, setContactInfo] = useState('');
-  // Remove manual location input; we'll fetch the current coordinates automatically.
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       // Request permission to access location
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -40,7 +39,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
     })();
   }, []);
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     onSubmit();
 
     if (!currentCoordinates) {
@@ -69,6 +68,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
     }
   };
 
+  // Show loading indicator while fetching location
   if (loadingLocation) {
     return (
       <View style={formStyles.container}>
@@ -78,8 +78,10 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
     );
   }
 
+  // Render the form once location is available
   return (
     <View style={formStyles.container}>
+      {/* Item Name Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Item Name*</ThemedText>
         <TextInput
@@ -94,6 +96,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
         />
       </View>
 
+      {/* Item Description Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Description*</ThemedText>
         <TextInput
@@ -118,6 +121,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
         </ThemedText>
       </View>
 
+      {/* Contact Information Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Contact Information*</ThemedText>
         <TextInput
@@ -132,6 +136,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
         />
       </View>
 
+      {/* Submit Button - disabled if required fields are empty */}
       <TouchableOpacity
         style={[
           formStyles.submitButton,

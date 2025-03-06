@@ -15,18 +15,18 @@ interface FillEventFormProps {
 
 export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const [eventType, setEventType] = useState('');
+    const [eventType, setEventType] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   
-  // Location handling
+  // Location handling state
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -43,6 +43,10 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     })();
   }, []);
 
+  /**
+   * Handles date picker change events
+   * Closes the picker and updates the selected date
+   */
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -50,6 +54,10 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     }
   };
 
+  /**
+   * Handles time picker change events
+   * Closes the picker and formats the selected time
+   */
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     setShowTimePicker(false);
     if (selectedTime) {
@@ -59,6 +67,9 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     }
   };
 
+  /**
+   * Formats a Date object into MM/DD/YYYY format for display
+   */
   const formatDate = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -66,7 +77,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     return `${month}/${day}/${year}`;
   };
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     onSubmit();
 
     if (!currentCoordinates) {
@@ -100,6 +111,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     }
   };
 
+  // Show loading indicator while fetching location
   if (loadingLocation) {
     return (
       <View style={formStyles.container}>
@@ -109,8 +121,10 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     );
   }
 
+  // Render the form once location is available
   return (
     <View style={formStyles.container}>
+      {/* Event Type Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Event Type*</ThemedText>
         <TextInput
@@ -125,6 +139,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         />
       </View>
 
+      {/* Event Description Input */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Description*</ThemedText>
         <TextInput
@@ -141,6 +156,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         />
       </View>
 
+      {/* Date Selector with DateTimePicker */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Date*</ThemedText>
         <TouchableOpacity
@@ -163,6 +179,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         )}
       </View>
 
+      {/* Time Selector with DateTimePicker */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Time*</ThemedText>
         <TouchableOpacity
@@ -184,6 +201,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         )}
       </View>
 
+      {/* Display the current location */}
       <View style={formStyles.inputGroup}>
         <ThemedText type="defaultSemiBold">Current Location:</ThemedText>
         <ThemedText>
@@ -191,6 +209,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         </ThemedText>
       </View>
 
+      {/* Submit Button - disabled if required fields are empty */}
       <TouchableOpacity
         style={[
           formStyles.submitButton,
