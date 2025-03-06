@@ -21,8 +21,6 @@ jobs:
 
       - name: 📦 Setup Node + NPM + install deps
         run: npm install
-        working-directory: ${{ github.workspace }}/CommUnity
 
       - name: 🏃‍♂️ Run Tests
         run: npm test -- --ci
-        working-directory: ${{ github.workspace }}/CommUnity
