@@ -32,23 +32,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          node-version: 18
-          cache: npm
 
       - name: 📦 Setup Node + NPM + install deps
         uses: ./.github/actions/setup-node-npm-install
 
-      - name: 📦 Install Reviewdog
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-setup@v1
-
-      - name: 🏃‍♂️ Run ESLint PR # Reviewdog eslint errorformat
-        if: github.event_name == 'pull_request'
-        run: |
-          npm run lint -- --ext .js,.jsx,.ts,.tsx | reviewdog -name="eslint" -efm="%f(%l,%c): %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 🏃‍♂️ Run TypeScript Commit
-        if: github.event_name != 'pull_request'
         run: npm run lint

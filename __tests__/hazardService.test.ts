@@ -1,5 +1,4 @@
 import { submitHazard } from '../services/hazardService';
-import { createClient } from '@supabase/supabase-js';
 
 jest.mock('@supabase/supabase-js');
 
