@@ -1,0 +1,29 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Run Jest Service Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node + NPM + install deps
+        working-directory: CommUnity
+        run: |
+          npm install
+
+      - name: 🏃‍♂️ Run Tests
+        working-directory: CommUnity
+        run: npm test
