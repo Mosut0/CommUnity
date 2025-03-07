@@ -44,6 +44,7 @@ export async function submitHazard(data: HazardData, userId: string) {
         category: 'safety',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
+        imageurl: imageUrl
       })
       .select();
 
@@ -64,7 +65,6 @@ export async function submitHazard(data: HazardData, userId: string) {
       .insert({
         reportid: reportId,
         hazardtype: data.hazardType,
-        imageurl: imageUrl
       });
 
     if (hazardError) {
