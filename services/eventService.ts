@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { uploadImage } from '@/services/imageService';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -10,6 +11,7 @@ interface EventData {
   location: string;
   date: Date;
   time: string;
+  imageUri?: string;
 }
 
 // Convert location string to latitude and longitude
@@ -28,6 +30,12 @@ function locationToPoint(locationStr: string): { lat: number; lng: number } {
 
 export async function submitEvent(data: EventData, userId: string) {
   try {
+    // Upload image if provided
+    let imageUrl = null;
+    if (data.imageUri) {
+      imageUrl = await uploadImage(data.imageUri);
+    }
+
     // Insert report into 'reports' table
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
@@ -36,6 +44,7 @@ export async function submitEvent(data: EventData, userId: string) {
         category: 'event',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
+        imageurl: imageUrl
       })
       .select();
 
