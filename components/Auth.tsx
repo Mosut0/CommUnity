@@ -4,10 +4,12 @@ import { supabase } from '../lib/supabase'
 import { Button, Input } from '@rneui/themed'
 
 export default function Auth() {
+  // State variables for email, password, and loading status
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Function to handle sign-in with email and password
   async function signInWithEmail() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({
@@ -19,6 +21,7 @@ export default function Auth() {
     setLoading(false)
   }
 
+  // Function to handle sign-up with email and password
   async function signUpWithEmail() {
     setLoading(true)
     const {
@@ -36,6 +39,7 @@ export default function Auth() {
 
   return (
     <View style={styles.container}>
+      {/* Email input field */}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -46,6 +50,7 @@ export default function Auth() {
           autoCapitalize={'none'}
         />
       </View>
+      {/* Password input field */}
       <View style={styles.verticallySpaced}>
         <Input
           label="Password"
@@ -57,9 +62,11 @@ export default function Auth() {
           autoCapitalize={'none'}
         />
       </View>
+      {/* Sign in button */}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
       </View>
+      {/* Sign up button */}
       <View style={styles.verticallySpaced}>
         <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
       </View>
