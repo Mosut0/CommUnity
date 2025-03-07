@@ -14,6 +14,7 @@ describe('Hazard Service', () => {
                 description: 'category 2 hurricane',
                 location: '45.4215,-75.6972',
                 date: new Date(),
+                imageUri: 'image.jpg'
             },
             'user-123'
         );

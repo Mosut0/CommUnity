@@ -7,6 +7,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
 import { formStyles } from './styles';
 import { submitEvent } from '@/services/eventService';
+import ImagePicker from '@/components/ImagePicker';
 
 interface FillEventFormProps {
   onSubmit: () => void;
@@ -15,12 +16,13 @@ interface FillEventFormProps {
 
 export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-    const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
   
   // Location handling state
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -42,6 +44,14 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
       setLoadingLocation(false);
     })();
   }, []);
+
+  const handleImageSelected = (uri: string) => {
+    setImageUri(uri);
+  };
+
+  const handleImageRemoved = () => {
+    setImageUri(null);
+  };
 
   /**
    * Handles date picker change events
@@ -98,6 +108,7 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         location: locationStr,
         date,
         time,
+        imageUri: imageUri || undefined
       }, userId);
 
       if (result.success) {
@@ -207,6 +218,15 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
         <ThemedText>
           {currentCoordinates ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` : 'Not available'}
         </ThemedText>
+      </View>
+
+      {/* Image Picker */}
+      <View style={formStyles.inputGroup}>
+        <ThemedText type="defaultSemiBold">Add Photo (Optional)</ThemedText>
+        <ImagePicker 
+          onImageSelected={handleImageSelected} 
+          onImageRemoved={handleImageRemoved} 
+        />
       </View>
 
       {/* Submit Button - disabled if required fields are empty */}
