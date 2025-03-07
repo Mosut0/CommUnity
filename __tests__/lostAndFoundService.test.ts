@@ -15,6 +15,7 @@ describe('Lost Service', () => {
                 contactInfo: '123-456-7890',
                 location: '45.4215,-75.6972',
                 date: new Date(),
+                imageUri: 'image.jpg'
             },
             'user-123'
         );
@@ -35,6 +36,7 @@ describe('Found Service', () => {
                 description: 'found phone',
                 contactInfo: '123-456-7890',
                 location: '45.4215,-75.6972',
+                imageUri: 'image.jpg'
             },
             'user-123'
         );
