@@ -23,6 +23,7 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   
+  // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -32,29 +33,35 @@ export default function Home() {
     });
   }, []);
 
+  // Toggle the visibility of the panel
   const togglePanel = () => {
     setIsPanelVisible(!isPanelVisible);
   };
 
+  // Open a specific form and close the panel
   const openForm = (formType: string) => {
     setSelectedForm(formType);
     setIsPanelVisible(false);
   };
 
+  // Toggle the visibility of the profile modal
   const toggleProfileModal = () => {
     setIsProfileModalVisible(!isProfileModalVisible);
   };
 
+  // Toggle the visibility of the change password modal
   const toggleChangePasswordModal = () => {
     setIsChangePasswordModalVisible(!isChangePasswordModalVisible);
   };
 
+  // Handle user sign out
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setIsProfileModalVisible(false);
     router.push('/'); // Redirect to the authentication page
   };
 
+  // Handle password change
   const handleChangePassword = async () => {
     // Re-authenticate the user with the old password
     const { error: signInError } = await supabase.auth.signInWithPassword({
