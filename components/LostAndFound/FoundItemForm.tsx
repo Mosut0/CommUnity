@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
 import { formStyles } from './styles';
 import { submitFoundItem } from '@/services/lostAndFoundService';
+import ImagePicker from '@/components/ImagePicker';
 
 interface FoundItemFormProps {
   onSubmit: () => void;
@@ -14,11 +15,12 @@ interface FoundItemFormProps {
 
 export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-    const [itemName, setItemName] = useState('');
+  const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
   const [contactInfo, setContactInfo] = useState('');
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
     useEffect(() => {
     (async () => {
@@ -39,6 +41,14 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
     })();
   }, []);
 
+    const handleImageSelected = (uri: string) => {
+      setImageUri(uri);
+    };
+
+    const handleImageRemoved = () => {
+      setImageUri(null);
+    };
+
     const handleSubmit = async () => {
     onSubmit();
 
@@ -55,6 +65,7 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
         description,
         location: locationStr,
         contactInfo,
+        imageUri: imageUri || undefined
       }, userId);
       
       if (result.success) {
@@ -133,6 +144,15 @@ export default function FoundItemForm({ onSubmit, userId }: FoundItemFormProps) 
           onChangeText={setContactInfo}
           placeholder="How can the owner reach you?"
           placeholderTextColor={Colors[colorScheme].icon}
+        />
+      </View>
+
+      {/* Image Picker */}
+      <View style={formStyles.inputGroup}>
+        <ThemedText type="defaultSemiBold">Add Photo (Optional)</ThemedText>
+        <ImagePicker 
+          onImageSelected={handleImageSelected} 
+          onImageRemoved={handleImageRemoved} 
         />
       </View>
 

@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
 import { formStyles } from './styles';
 import { submitHazard } from '@/services/hazardService';
+import ImagePicker from '@/components/ImagePicker';
 
 interface FillHazardFormProps {
   onSubmit: () => void;
@@ -14,11 +15,11 @@ interface FillHazardFormProps {
 
 export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
-    const [hazardType, setHazardType] = useState('');
+  const [hazardType, setHazardType] = useState('');
   const [description, setDescription] = useState('');
-// Remove manual location input; we fetch it automatically.
   const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
     useEffect(() => {
     (async () => {
@@ -39,6 +40,14 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
     })();
   }, []);
 
+    const handleImageSelected = (uri: string) => {
+      setImageUri(uri);
+    };
+
+    const handleImageRemoved = () => {
+      setImageUri(null);
+    };
+
     const handleSubmit = async () => {
     onSubmit();
 
@@ -54,7 +63,8 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
         hazardType,
         description,
         location: locationStr,
-        date: new Date()
+        date: new Date(),
+        imageUri: imageUri || undefined
       }, userId);
 
       if (result.success) {
@@ -119,6 +129,15 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
         <ThemedText>
           {currentCoordinates ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` : 'Not available'}
         </ThemedText>
+      </View>
+
+      {/* Image Picker */}
+      <View style={formStyles.inputGroup}>
+        <ThemedText type="defaultSemiBold">Add Photo (Optional)</ThemedText>
+        <ImagePicker 
+          onImageSelected={handleImageSelected} 
+          onImageRemoved={handleImageRemoved} 
+        />
       </View>
 
       {/* Submit Button - disabled if required fields are empty */}
