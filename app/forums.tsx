@@ -27,6 +27,13 @@ const categoryDatabaseNames: { [key: string]: string } = {
   'Reported Hazards': 'safety',
 };
 
+const categoryColors: { [key: string]: string } = {
+  event: '#800080', // Purple
+  lost: '#FFFF00', // Yellow
+  found: '#008000', // Green
+  safety: '#FF0000', // Red
+};
+
 export default function Forums() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Reports');
   const [reports, setReports] = useState<Report[]>([]);
@@ -85,6 +92,10 @@ export default function Forums() {
     setIsDropdownVisible(false);
   };
 
+  const getCategoryColor = (category: string) => {
+    return categoryColors[category] || '#000'; // Default to black if category not found
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
@@ -122,7 +133,9 @@ export default function Forums() {
             <Text style={styles.reportTitle}>
               {report.eventtype || report.itemtype || report.hazardtype}
             </Text>
-            <Text style={styles.reportCategory}>{report.category}</Text>
+            <Text style={[styles.reportCategory, { borderColor: getCategoryColor(report.category) }]}>
+              {report.category}
+            </Text>
           </View>
         ))}
       </ScrollView>
@@ -182,5 +195,10 @@ const styles = StyleSheet.create({
   reportCategory: {
     fontSize: 14,
     color: '#666',
+    borderWidth: 2,
+    borderRadius: 5,
+    padding: 5,
+    marginTop: 5,
+    alignSelf: 'flex-start',
   },
 });
