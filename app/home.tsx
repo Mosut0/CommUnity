@@ -21,6 +21,7 @@ export default function Home() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const colorScheme = useColorScheme();
+  const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
   
   // Fetch the current session and listen for authentication state changes
@@ -31,6 +32,16 @@ export default function Home() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+  }, []);
+
+  useEffect(() => {
+    // Short delay to let the map initialize properly
+    const timer = setTimeout(() => {
+      console.log('Forcing re-render to make pins display');
+      setForceRender(true);
+    }, 600);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Toggle the visibility of the panel
