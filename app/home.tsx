@@ -128,14 +128,14 @@ export default function Home() {
           },
         }
       });
-  
+
       if (error) {
         Alert.alert('Error', 'Failed to update distance radius');
         console.error('Failed to update distance radius:', error);
       } else {
         Alert.alert('Success', 'Distance radius updated successfully');
         console.log('Updated distance radius to:', sliderValue);
-  
+
         // Fetch updated user data after saving
         const { data: updatedUser, error: fetchError } = await supabase.auth.getUser();
         if (fetchError) {
@@ -146,7 +146,7 @@ export default function Home() {
         }
       }
     }
-  };  
+  };
 
   return (
     <View style={{ flex: 1 }}>
