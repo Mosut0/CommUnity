@@ -163,6 +163,14 @@ export default function Home() {
         <ThemedText style={styles.fabText}>+</ThemedText>
       </TouchableOpacity>
 
+      {/* View Forums Button */}
+      <TouchableOpacity
+        style={[styles.forumsButton, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
+        onPress={() => router.push('/forums')}
+      >
+        <ThemedText style={styles.forumsButtonText}>View Forums</ThemedText>
+      </TouchableOpacity>
+
       {/* Expandable Panel with form options */}
       {isPanelVisible && (
         <Modal transparent animationType="none" visible={isPanelVisible}>
@@ -302,5 +310,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
+  },
+  // View Forums Button styles
+  forumsButton: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    width: 120,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+  forumsButtonText: {
+    fontSize: 18,
+    color: '#fff',
   },
 });
