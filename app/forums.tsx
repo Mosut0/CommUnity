@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Alert } from 'react-native';
-import * as Location from 'expo-location'; // Correct import for Location
+import * as Location from 'expo-location';
 import { supabase } from '@/lib/supabase';
 
 interface Report {
     reportid: number;
     category: string;
     description: string;
-    location: string; // Include location property
+    location: string;
     eventtype?: string;
     itemtype?: string;
     hazardtype?: string;
@@ -58,7 +58,7 @@ export default function Forums() {
                 // Get the current location once
                 let currentLocation = await Location.getCurrentPositionAsync({});
                 setLocation(currentLocation);
-                setErrorMsg(null); // Clear any previous error messages
+                setErrorMsg(null);
             } catch (error) {
                 console.error("Error getting location:", error);
                 setErrorMsg("Failed to get location. Please try again.");
