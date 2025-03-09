@@ -50,3 +50,7 @@ ALTER TABLE Reports
 ADD CONSTRAINT valid_category CHECK (
     category IN ('safety', 'infrastructure', 'wildlife', 'health', 'lost', 'found', 'other', 'event')
 );
+
+-- Add column for distance radius in users table
+ALTER TABLE auth.users
+ADD COLUMN distance_radius INT DEFAULT 20; -- Default distance radius of 20 km

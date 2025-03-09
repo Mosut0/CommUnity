@@ -9,6 +9,7 @@ import { HazardForm } from '@/components/Hazards';
 import { EventForm } from '@/components/Events';
 import { ThemedText } from '@/components/ThemedText';
 import { MaterialIcons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 
 export default function Home() {
   // Authentication state management
@@ -23,11 +24,27 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
+  const [distanceRadius, setDistanceRadius] = useState(20);
+  const [sliderValue, setSliderValue] = useState(20);
+  const [isDistanceModalVisible, setIsDistanceModalVisible] = useState(false);
 
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        // Fetch the user's distance radius from the database
+        supabase.auth.getUser().then(({ data, error }) => {
+          if (error) {
+            console.error('Error fetching distance radius:', error);
+          } else if (data && data.user) {
+            const userMetadata = data.user.user_metadata;
+            console.log('Fetched user metadata:', userMetadata);
+            setDistanceRadius(userMetadata.distance_radius || 20);
+            setSliderValue(userMetadata.distance_radius || 20);
+          }
+        });
+      }
     });
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -100,10 +117,41 @@ export default function Home() {
     }
   };
 
+  // Handle saving the new distance radius
+  const handleSaveDistance = async () => {
+    if (session) {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          distance_radius: sliderValue,
+          user_metadata: {
+            distance_radius: sliderValue,
+          },
+        }
+      });
+
+      if (error) {
+        Alert.alert('Error', 'Failed to update distance radius');
+        console.error('Failed to update distance radius:', error);
+      } else {
+        Alert.alert('Success', 'Distance radius updated successfully');
+        console.log('Updated distance radius to:', sliderValue);
+
+        // Fetch updated user data after saving
+        const { data: updatedUser, error: fetchError } = await supabase.auth.getUser();
+        if (fetchError) {
+          console.error('Error fetching updated user:', fetchError);
+        } else {
+          console.log('Updated user metadata:', updatedUser?.user?.user_metadata);
+          setDistanceRadius(updatedUser?.user?.user_metadata?.distance_radius || 20);
+        }
+      }
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {/* Map display showing the community data */}
-      <MapScreen />
+      <MapScreen distanceRadius={distanceRadius} />
 
       {/* Profile Icon */}
       <TouchableOpacity
@@ -121,6 +169,9 @@ export default function Home() {
           <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
             <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); toggleChangePasswordModal(); }}>
               <ThemedText>Change Password</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); setIsDistanceModalVisible(true); }}>
+              <ThemedText>Change Distance</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={handleSignOut}>
               <ThemedText>Sign Out</ThemedText>
@@ -149,6 +200,30 @@ export default function Home() {
               onChangeText={setNewPassword}
             />
             <TouchableOpacity style={styles.modalButton} onPress={handleChangePassword}>
+              <ThemedText>Save</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Change Distance Modal */}
+      <Modal transparent animationType="none" visible={isDistanceModalVisible}>
+        <Pressable style={styles.modalContainer} onPress={() => setIsDistanceModalVisible(false)}>
+          <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
+            <ThemedText>Change Distance Radius</ThemedText>
+            <Slider
+              style={{ width: 200, height: 40 }}
+              minimumValue={1}
+              maximumValue={100}
+              step={1}
+              value={sliderValue}
+              onValueChange={setSliderValue}
+              minimumTrackTintColor="#1EB1FC"
+              maximumTrackTintColor="#d3d3d3"
+              thumbTintColor="#1EB1FC"
+            />
+            <ThemedText>{sliderValue} km</ThemedText>
+            <TouchableOpacity style={styles.modalButton} onPress={handleSaveDistance}>
               <ThemedText>Save</ThemedText>
             </TouchableOpacity>
           </View>
@@ -220,7 +295,7 @@ const styles = StyleSheet.create({
   profileIcon: {
     position: 'absolute',
     top: 50,
-    right: 20,
+    left: 20,
     zIndex: 10,
   },
   profileIconCircle: {
