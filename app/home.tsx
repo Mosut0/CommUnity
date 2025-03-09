@@ -23,7 +23,7 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
-  
+
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -40,7 +40,7 @@ export default function Home() {
       console.log('Forcing re-render to make pins display');
       setForceRender(true);
     }, 600);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -163,6 +163,14 @@ export default function Home() {
         <ThemedText style={styles.fabText}>+</ThemedText>
       </TouchableOpacity>
 
+      {/* View Forums Button */}
+      <TouchableOpacity
+        style={[styles.forumsButton, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
+        onPress={() => router.push('/forums')}
+      >
+        <ThemedText style={styles.forumsButtonText}>View Forums</ThemedText>
+      </TouchableOpacity>
+
       {/* Expandable Panel with form options */}
       {isPanelVisible && (
         <Modal transparent animationType="none" visible={isPanelVisible}>
@@ -172,17 +180,17 @@ export default function Home() {
               <TouchableOpacity style={styles.button} onPress={() => openForm('lostAndFound')} disabled={!session}>
                 <ThemedText>Lost & Found</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Hazard reporting option */}
               <TouchableOpacity style={styles.button} onPress={() => openForm('hazard')} disabled={!session}>
                 <ThemedText>Hazard</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Event creation option */}
               <TouchableOpacity style={styles.button} onPress={() => openForm('event')} disabled={!session}>
                 <ThemedText>Event</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Warning message if user is not logged in */}
               {!session && <ThemedText style={{ color: 'red', textAlign: 'center' }}>Please log in to submit reports</ThemedText>}
             </View>
@@ -277,7 +285,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#fff',
   },
-  
+
   // Panel styles
   panelContainer: {
     flex: 1,
@@ -294,7 +302,7 @@ const styles = StyleSheet.create({
   panelDark: {
     backgroundColor: '#333',
   },
-  
+
   // Action button styles
   button: {
     padding: 15,
@@ -302,5 +310,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
+  },
+  // View Forums Button styles
+  forumsButton: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    width: 120,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+  forumsButtonText: {
+    fontSize: 18,
+    color: '#fff',
   },
 });
