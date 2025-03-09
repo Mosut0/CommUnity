@@ -23,7 +23,7 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
-  
+
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -40,7 +40,7 @@ export default function Home() {
       console.log('Forcing re-render to make pins display');
       setForceRender(true);
     }, 600);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -180,17 +180,17 @@ export default function Home() {
               <TouchableOpacity style={styles.button} onPress={() => openForm('lostAndFound')} disabled={!session}>
                 <ThemedText>Lost & Found</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Hazard reporting option */}
               <TouchableOpacity style={styles.button} onPress={() => openForm('hazard')} disabled={!session}>
                 <ThemedText>Hazard</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Event creation option */}
               <TouchableOpacity style={styles.button} onPress={() => openForm('event')} disabled={!session}>
                 <ThemedText>Event</ThemedText>
               </TouchableOpacity>
-              
+
               {/* Warning message if user is not logged in */}
               {!session && <ThemedText style={{ color: 'red', textAlign: 'center' }}>Please log in to submit reports</ThemedText>}
             </View>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#fff',
   },
-  
+
   // Panel styles
   panelContainer: {
     flex: 1,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   panelDark: {
     backgroundColor: '#333',
   },
-  
+
   // Action button styles
   button: {
     padding: 15,
