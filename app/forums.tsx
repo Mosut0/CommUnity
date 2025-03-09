@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Alert } from 'react-native';
+import * as Location from 'expo-location'; // Correct import for Location
 import { supabase } from '@/lib/supabase';
 
 interface Report {
     reportid: number;
     category: string;
     description: string;
+    location: string; // Include location property
     eventtype?: string;
     itemtype?: string;
     hazardtype?: string;
@@ -38,16 +40,61 @@ export default function Forums() {
     const [selectedCategory, setSelectedCategory] = useState<string>('All Reports');
     const [reports, setReports] = useState<Report[]>([]);
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const [distanceRadius, setDistanceRadius] = useState<number>(20);
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Fetch user location
+    useEffect(() => {
+        (async () => {
+            try {
+                // Request location permissions
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    setErrorMsg("Permission to access location was denied");
+                    return;
+                }
+
+                // Get the current location once
+                let currentLocation = await Location.getCurrentPositionAsync({});
+                setLocation(currentLocation);
+                setErrorMsg(null); // Clear any previous error messages
+            } catch (error) {
+                console.error("Error getting location:", error);
+                setErrorMsg("Failed to get location. Please try again.");
+            }
+        })();
+    }, []);
+
+    // Fetch the user's distance radius from the database
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data, error }) => {
+            if (error) {
+                console.error('Error fetching distance radius:', error);
+            } else if (data && data.user) {
+                const userMetadata = data.user.user_metadata;
+                console.log('Fetched user metadata:', userMetadata);
+                setDistanceRadius(userMetadata.distance_radius || 20);
+            }
+        });
+    }, []);
 
     useEffect(() => {
-        fetchReports();
-    }, [selectedCategory]);
+        if (location) {
+            fetchReports();
+        }
+    }, [selectedCategory, distanceRadius, location]);
 
-    const fetchReports = async () => {
+    const fetchReports = useCallback(async () => {
+        if (!location) {
+            return;
+        }
+
         let query = supabase.from('reports').select(`
       reportid,
       category,
       description,
+      location,
       eventtype:events(eventtype),
       lostitemtype:lostitems(itemtype),
       founditemtype:founditems(itemtype),
@@ -63,24 +110,68 @@ export default function Forums() {
         if (error) {
             console.error('Error fetching reports:', error);
         } else {
-            const formattedData = data.map((report: any) => ({
+            const filteredData = data.filter((report: any) => {
+                const coords = parseLocation(report.location);
+                if (!coords) return false;
+
+                const distance = getDistanceFromLatLonInKm(
+                    location.coords.latitude,
+                    location.coords.longitude,
+                    coords.latitude,
+                    coords.longitude
+                );
+
+                return distance <= distanceRadius;
+            });
+
+            const formattedData = filteredData.map((report: any) => ({
                 reportid: report.reportid,
                 category: report.category,
                 description: report.description,
-                eventtype: formatText(report.eventtype?.[0]?.eventtype || ''),
-                itemtype: formatText(report.lostitemtype?.[0]?.itemtype || report.founditemtype?.[0]?.itemtype || ''),
-                hazardtype: formatText(report.hazardtype?.[0]?.hazardtype || ''),
+                location: report.location,
+                eventtype: report.eventtype?.[0]?.eventtype || '',
+                itemtype: report.lostitemtype?.[0]?.itemtype || report.founditemtype?.[0]?.itemtype || '',
+                hazardtype: report.hazardtype?.[0]?.hazardtype || '',
             }));
+
             setReports(formattedData);
+        }
+    }, [selectedCategory, distanceRadius, location]);
+
+    const parseLocation = (
+        locationStr: string
+    ): { latitude: number; longitude: number } | null => {
+        try {
+            // Expected format: "(lat,lng)"
+            const coordsStr = locationStr.substring(1, locationStr.length - 1);
+            const [lat, lng] = coordsStr.split(",").map(parseFloat);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                return null;
+            }
+
+            return { latitude: lat, longitude: lng };
+        } catch (error) {
+            console.error("Error parsing location:", error);
+            return null;
         }
     };
 
-    const formatText = (text: string) => {
-        return text
-            .toLowerCase()
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+    const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2 - lat1);
+        var dLon = deg2rad(lon2 - lon1);
+        var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c; // Distance in km
+        return d;
+    };
+
+    const deg2rad = (deg: number): number => {
+        return deg * (Math.PI / 180);
     };
 
     const toggleDropdown = () => {
@@ -98,6 +189,7 @@ export default function Forums() {
 
     return (
         <View style={styles.container}>
+            {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
             <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
                 <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
             </TouchableOpacity>
@@ -200,5 +292,10 @@ const styles = StyleSheet.create({
         padding: 5,
         marginTop: 5,
         alignSelf: 'flex-start',
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: 10,
     },
 });
