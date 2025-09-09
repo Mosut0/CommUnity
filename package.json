@@ -73,10 +73,18 @@
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
         "exclude": [
-          "react-native-maps"
+          "react-native-maps",
+          "@rneui/base",
+          "@rneui/themed",
+          "react-native-safe-area-context"
         ]
       }
-    }
+    },
+    "install": {
+    "exclude": [
+      "react-native-safe-area-context"
+    ]
+  }
   },
   "private": true
 }
