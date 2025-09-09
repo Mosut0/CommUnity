@@ -39,7 +39,10 @@
           "photosPermission": "The app needs access to your photos to share images.",
           "cameraPermission": "The app needs access to your camera to take photos."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
