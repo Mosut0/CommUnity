@@ -279,21 +279,21 @@ export default function Forums() {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Top actions row */}
       <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => setIsCreateVisible(true)}>
-          <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
-          <Text style={styles.actionText}>New Item</Text>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
+            <Ionicons name="map-outline" size={18} color={theme.textPrimary} />
+            <Text style={styles.actionText}>Map</Text>
         </TouchableOpacity>
 
         <View style={styles.actionSpacer} />
 
         <TouchableOpacity style={styles.actionBtn} onPress={() => setIsDistanceVisible(true)}>
-          <Ionicons name="locate-outline" size={18} color={theme.textPrimary} />
-          <Text style={styles.actionText}>Distance</Text>
+            <Ionicons name="locate-outline" size={18} color={theme.textPrimary} />
+            <Text style={styles.actionText}>Distance</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
-          <Ionicons name="map-outline" size={18} color={theme.textPrimary} />
-          <Text style={styles.actionText}>Map</Text>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => setIsCreateVisible(true)}>
+            <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
+            <Text style={styles.actionText}>New Item</Text>
         </TouchableOpacity>
       </View>
 
