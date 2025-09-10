@@ -1,17 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme } from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter } from 'expo-router';
 import MapScreen from '../components/MapScreen';
+import { MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { LostAndFoundForm } from '@/components/LostAndFound';
 import { HazardForm } from '@/components/Hazards';
 import { EventForm } from '@/components/Events';
 import { ThemedText } from '@/components/ThemedText';
-import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
+  // Filter state for map pins
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lostAndFound'>('all');
+  // Filter bar component (defined inside to use hooks/state correctly)
+  const FilterBar = () => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={[styles.filterContent]}
+      style={[styles.filterBarContainer, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
+    >
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'all' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('all')}
+      >
+        <MaterialIcons name="layers" size={22} color={selectedFilter === 'all' ? '#0A7EA4' : '#888'} />
+        <ThemedText style={styles.filterText}>All</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'hazard' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('hazard')}
+      >
+        <MaterialCommunityIcons name="alert-circle" size={22} color={selectedFilter === 'hazard' ? '#E74C3C' : '#888'} />
+        <ThemedText style={styles.filterText}>Hazards</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'event' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('event')}
+      >
+        <MaterialIcons name="event" size={22} color={selectedFilter === 'event' ? '#27AE60' : '#888'} />
+        <ThemedText style={styles.filterText}>Events</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'lostAndFound' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('lostAndFound')}
+      >
+        <FontAwesome name="search" size={20} color={selectedFilter === 'lostAndFound' ? '#F1C40F' : '#888'} />
+        <ThemedText style={styles.filterText}>Lost & Found</ThemedText>
+      </TouchableOpacity>
+    </ScrollView>
+  );
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   // UI state management
@@ -150,8 +190,12 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Filter Bar at the top */}
+      <View style={{ zIndex: 20 }}>
+        <FilterBar />
+      </View>
       {/* Map display showing the community data */}
-      <MapScreen distanceRadius={distanceRadius} />
+      <MapScreen distanceRadius={distanceRadius} filter={selectedFilter} />
 
       {/* Profile Icon */}
       <TouchableOpacity
@@ -291,12 +335,62 @@ export default function Home() {
  * Component styles
  */
 const styles = StyleSheet.create({
+  // Filter bar styles
+  filterBarContainer: {
+  // overlay positioned above the map
+  position: 'absolute',
+  top: 60,
+  left: 8,
+  right: 8,
+  zIndex: 20,
+  backgroundColor: '#fff',
+  paddingVertical: 8,
+  paddingHorizontal: 4,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+  borderRadius: 12,
+  elevation: 6,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginHorizontal: 2,
+  },
+  filterButtonActive: {
+    backgroundColor: 'rgba(10, 126, 164, 0.08)',
+  },
+  filterText: {
+    marginLeft: 4,
+    fontSize: 15,
+    fontWeight: '500',
+  // color comes from ThemedText; keep style minimal here
+  },
+  filterContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  paddingHorizontal: 8,
+  gap: 8,
+  },
+  filterBarLight: {
+    backgroundColor: '#fff',
+  },
+  filterBarDark: {
+    backgroundColor: '#222',
+  },
   // Profile Icon styles
   profileIcon: {
-    position: 'absolute',
-    top: 50,
+  position: 'absolute',
+  top: 110,
     left: 20,
-    zIndex: 10,
+  zIndex: 30,
   },
   profileIconCircle: {
     width: 40,

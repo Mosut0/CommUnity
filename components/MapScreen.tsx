@@ -24,9 +24,10 @@ interface Report {
 
 interface MapScreenProps {
   distanceRadius: number;
+  filter?: 'all' | 'hazard' | 'event' | 'lostAndFound';
 }
 
-export default function MapScreen({ distanceRadius }: MapScreenProps) {
+export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenProps) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
@@ -415,8 +416,19 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
         showsUserLocation={true}
         followsUserLocation={false}
       >
-        {/* Render markers for all reports */}
+        {/* Render markers for reports matching the selected filter */}
         {reports.map((report) => {
+          // Map the app filter to report.category values
+          const matchesFilter = (() => {
+            if (filter === 'all') return true;
+            if (filter === 'hazard') return report.category === 'safety';
+            if (filter === 'event') return report.category === 'event';
+            if (filter === 'lostAndFound') return report.category === 'lost' || report.category === 'found';
+            return true;
+          })();
+
+          if (!matchesFilter) return null;
+
           const coords = parseLocation(report.location);
           if (!coords) return null;
 
