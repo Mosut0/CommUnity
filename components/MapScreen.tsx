@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import MapView, { Marker, Callout, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -33,6 +33,15 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const colorScheme = useColorScheme() ?? "light";
+  const isMountedRef = useRef(true);
+  const fetchTimeoutRef = useRef<number | null>(null);
+
+  // Cleanup mounted ref on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Fetch user location
   useEffect(() => {
@@ -79,13 +88,17 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
   // Function to fetch all reports
   const fetchReports = useCallback(async () => {
     try {
-      setIsLoading(true);
       console.log("Fetching reports...");
+      
+      // Create a timestamp to track this fetch request
+      const fetchId = Date.now();
+      console.log(`Starting fetch request ${fetchId}`);
 
       // First fetch basic report data
       const { data: reportsData, error: reportsError } = await supabase
         .from("reports")
-        .select("*");
+        .select("*")
+        .order('createdat', { ascending: false }); // Order by newest first
 
       if (reportsError) {
         console.error("Error fetching reports:", reportsError);
@@ -95,64 +108,99 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
       if (!reportsData || reportsData.length === 0) {
         console.log("No reports found");
         setReports([]);
-        setIsLoading(false);
         return;
       }
 
-      console.log(`Found ${reportsData.length} reports`);
+      console.log(`Found ${reportsData.length} reports for fetch ${fetchId}`);
 
       // For each report, fetch additional details based on category
       const enhancedReports = await Promise.all(
         reportsData.map(async (report) => {
-          let additionalData = {};
+          try {
+            let additionalData = {};
 
-          switch (report.category) {
-            case "event":
-              const { data: eventData } = await supabase
-                .from("events")
-                .select("*")
-                .eq("reportid", report.reportid)
-                .single();
-              additionalData = eventData || {};
-              break;
-            case "safety":
-              const { data: hazardData } = await supabase
-                .from("hazards")
-                .select("*")
-                .eq("reportid", report.reportid)
-                .single();
-              additionalData = hazardData || {};
-              break;
-            case "lost":
-              const { data: lostItemData } = await supabase
-                .from("lostitems")
-                .select("*")
-                .eq("reportid", report.reportid)
-                .single();
-              additionalData = lostItemData || {};
-              break;
-            case "found":
-              const { data: foundItemData } = await supabase
-                .from("founditems")
-                .select("*")
-                .eq("reportid", report.reportid)
-                .single();
-              additionalData = foundItemData || {};
-              break;
+            switch (report.category) {
+              case "event":
+                const { data: eventData, error: eventError } = await supabase
+                  .from("events")
+                  .select("*")
+                  .eq("reportid", report.reportid)
+                  .maybeSingle(); // Use maybeSingle instead of single to avoid errors
+                if (eventError) {
+                  console.warn(`Error fetching event data for report ${report.reportid}:`, eventError);
+                }
+                additionalData = eventData || {};
+                break;
+              case "safety":
+                const { data: hazardData, error: hazardError } = await supabase
+                  .from("hazards")
+                  .select("*")
+                  .eq("reportid", report.reportid)
+                  .maybeSingle();
+                if (hazardError) {
+                  console.warn(`Error fetching hazard data for report ${report.reportid}:`, hazardError);
+                }
+                additionalData = hazardData || {};
+                break;
+              case "lost":
+                const { data: lostItemData, error: lostError } = await supabase
+                  .from("lostitems")
+                  .select("*")
+                  .eq("reportid", report.reportid)
+                  .maybeSingle();
+                if (lostError) {
+                  console.warn(`Error fetching lost item data for report ${report.reportid}:`, lostError);
+                }
+                additionalData = lostItemData || {};
+                break;
+              case "found":
+                const { data: foundItemData, error: foundError } = await supabase
+                  .from("founditems")
+                  .select("*")
+                  .eq("reportid", report.reportid)
+                  .maybeSingle();
+                if (foundError) {
+                  console.warn(`Error fetching found item data for report ${report.reportid}:`, foundError);
+                }
+                additionalData = foundItemData || {};
+                break;
+            }
+
+            return { ...report, ...additionalData };
+          } catch (reportError) {
+            console.error(`Error processing report ${report.reportid}:`, reportError);
+            // Return the basic report data even if additional data fails
+            return report;
           }
-
-          return { ...report, ...additionalData };
         })
       );
 
-      setReports(enhancedReports);
-      console.log("Reports processed successfully");
+      console.log(`Successfully processed ${enhancedReports.length} reports for fetch ${fetchId}`);
+      
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setReports(enhancedReports);
+      }
     } catch (error) {
       console.error("Error processing reports:", error);
-    } finally {
-      setIsLoading(false);
+      // Don't clear existing reports on error, keep what we have
     }
   }, []);
+
+  // Debounced version of fetchReports to prevent too many rapid calls
+  const debouncedFetchReports = useCallback(() => {
+    // Clear any existing timeout
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    // Set a new timeout
+    fetchTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        fetchReports();
+      }
+    }, 300); // 300ms debounce
+  }, [fetchReports]);
 
   // Fetch reports on component mount and set up real-time subscription
   useEffect(() => {
@@ -160,10 +208,15 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
     fetchReports();
 
     // Set up Supabase subscription for real-time updates
-    const setupRealtimeSubscription = async () => {
-      // Subscribe to changes in the reports table
-      const reportsSubscription = supabase
-        .channel("custom-all-channel")
+    const setupRealtimeSubscriptions = () => {
+      console.log("Setting up real-time subscriptions...");
+      
+      // Create a unique channel name to avoid conflicts
+      const channelName = `reports-updates-${Date.now()}`;
+      
+      // Subscribe to changes in the reports table and related tables
+      const channel = supabase
+        .channel(channelName)
         .on(
           "postgres_changes",
           {
@@ -171,26 +224,90 @@ export default function MapScreen({ distanceRadius }: MapScreenProps) {
             schema: "public",
             table: "reports",
           },
-          () => {
-            console.log("Reports table changed - refreshing data");
-            fetchReports();
+          (payload) => {
+            console.log("Reports table changed:", payload);
+            debouncedFetchReports();
           }
         )
-        .subscribe();
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "events",
+          },
+          (payload) => {
+            console.log("Events table changed:", payload);
+            debouncedFetchReports();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "hazards",
+          },
+          (payload) => {
+            console.log("Hazards table changed:", payload);
+            debouncedFetchReports();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "lostitems",
+          },
+          (payload) => {
+            console.log("Lost items table changed:", payload);
+            debouncedFetchReports();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "founditems",
+          },
+          (payload) => {
+            console.log("Found items table changed:", payload);
+            debouncedFetchReports();
+          }
+        )
+        .subscribe((status) => {
+          console.log("Subscription status:", status);
+          if (status === "SUBSCRIBED") {
+            console.log("Successfully subscribed to real-time updates");
+          } else if (status === "CHANNEL_ERROR") {
+            console.error("Subscription error, retrying...");
+            // Retry subscription after a delay
+            setTimeout(() => {
+              setupRealtimeSubscriptions();
+            }, 2000);
+          }
+        });
 
       // Return cleanup function
       return () => {
-        supabase.removeChannel(reportsSubscription);
+        console.log("Cleaning up subscriptions...");
+        supabase.removeChannel(channel);
       };
     };
 
-    const cleanup = setupRealtimeSubscription();
+    const cleanup = setupRealtimeSubscriptions();
 
     // Clean up subscription when component unmounts
     return () => {
-      cleanup.then((cleanupFn) => cleanupFn());
+      isMountedRef.current = false;
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+      cleanup();
     };
-  }, [fetchReports]);
+  }, [fetchReports, debouncedFetchReports]);
 
   // Parse location string from the database into latitude and longitude
   const parseLocation = (
