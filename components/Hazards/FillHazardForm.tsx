@@ -32,9 +32,14 @@ export default function FillHazardForm({ onSubmit, userId }: FillHazardFormProps
       }
       // Get current position
       const location = await Location.getCurrentPositionAsync({});
+      
+      // Add small random offset to prevent exact overlaps (±2-3 meters)
+      const offsetLat = location.coords.latitude + (Math.random() - 0.5) * 0.00009;
+      const offsetLng = location.coords.longitude + (Math.random() - 0.5) * 0.00009;
+      
       setCurrentCoordinates({
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
+        lat: offsetLat,
+        lng: offsetLng,
       });
       setLoadingLocation(false);
     })();
