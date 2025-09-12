@@ -251,7 +251,14 @@ export default function Forums() {
     const distanceText = toKmString(item.location);
 
     return (
-      <TouchableOpacity activeOpacity={0.8} style={styles.card}>
+      <TouchableOpacity 
+        activeOpacity={0.8} 
+        style={styles.card}
+        onPress={() => router.push({
+          pathname: "./report-details" as any,
+          params: { reportId: item.reportid }
+        })}
+      >
         <View style={styles.cardLeft}>
           <View style={[styles.iconBubble, { backgroundColor: iconMeta.color + "22" }]}>
             <Ionicons name={iconMeta.name as any} size={22} color={iconMeta.color} />
