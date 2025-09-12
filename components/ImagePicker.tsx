@@ -65,7 +65,7 @@ export default function ImagePicker({
     try {
       setLoading(true);
       const result = await ExpoImagePicker.launchImageLibraryAsync({
-        mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.7,
@@ -93,7 +93,7 @@ export default function ImagePicker({
     try {
       setLoading(true);
       const result = await ExpoImagePicker.launchCameraAsync({
-        mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.7,

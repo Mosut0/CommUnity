@@ -1,16 +1,12 @@
 import { supabase } from "@/lib/supabase";
-import * as FileSystem from "expo-file-system";
-import { decode } from "base64-arraybuffer";
 
 export async function uploadImage(uri: string): Promise<string | null> {
   try {
-    // Read the image and convert to base64
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: "base64",
-    });
-
-    // Convert base64 to ArrayBuffer
-    const arrayBuffer = decode(base64);
+  // Read the image as an ArrayBuffer via fetch — this works in React
+  // Native runtimes where response.blob() may not be available.
+  const response = await fetch(uri);
+  const arrayBuffer = await response.arrayBuffer();
+  const blob = new Uint8Array(arrayBuffer);
 
     // Generate a unique filename using timestamp and random number
     const fileExt = uri.split(".").pop();
@@ -22,7 +18,7 @@ export async function uploadImage(uri: string): Promise<string | null> {
     // Upload image to Supabase Storage
     const { data, error } = await supabase.storage
       .from("images")
-      .upload(filePath, arrayBuffer, {
+      .upload(filePath, blob, {
         contentType: `image/${fileExt === "jpg" ? "jpeg" : fileExt}`,
       });
 
