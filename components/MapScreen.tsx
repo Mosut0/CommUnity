@@ -493,6 +493,7 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
         initialRegion={region}
         showsUserLocation={true}
         followsUserLocation={false}
+        showsCompass={false}
       >
         {/* Render markers for reports matching the selected filter */}
         {reports.map((report) => {

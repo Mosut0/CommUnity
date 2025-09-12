@@ -20,7 +20,7 @@ export default function Home() {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={[styles.filterContent]}
-      style={[styles.filterBarContainer, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
+      style={[styles.filterBarInline, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
     >
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'all' && styles.filterButtonActive]}
@@ -210,22 +210,20 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Filter Bar at the top */}
-      <View style={{ zIndex: 20 }}>
-        <FilterBar />
+      {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
+      <View style={[styles.topBar, colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight]}>
+        <View style={styles.filterWrapper}>
+          <FilterBar />
+        </View>
+        <TouchableOpacity style={styles.profileIcon} onPress={toggleProfileModal}>
+          <View style={styles.profileIconCircle}>
+            <MaterialIcons name="account-circle" size={28} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+          </View>
+        </TouchableOpacity>
       </View>
+
       {/* Map display showing the community data */}
       <MapScreen distanceRadius={distanceRadius} filter={selectedFilter} />
-
-      {/* Profile Icon */}
-      <TouchableOpacity
-        style={styles.profileIcon}
-        onPress={toggleProfileModal}
-      >
-        <View style={styles.profileIconCircle}>
-          <MaterialIcons name="account-circle" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
-        </View>
-      </TouchableOpacity>
 
       {/* Profile Modal */}
       <Modal transparent animationType="none" visible={isProfileModalVisible}>
@@ -302,12 +300,13 @@ export default function Home() {
         <ThemedText style={styles.fabText}>+</ThemedText>
       </TouchableOpacity>
 
-      {/* View Forums Button */}
       <TouchableOpacity
-        style={[styles.forumsButton, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
+        style={[styles.forumsButton, styles.forumsButtonOnFab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
         onPress={() => router.push('/forums')}
+        accessibilityLabel="Open Forums"
+        accessibilityRole="button"
       >
-        <ThemedText style={styles.forumsButtonText}>View Forums</ThemedText>
+        <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
       </TouchableOpacity>
 
       {/* Expandable Panel with form options */}
@@ -405,16 +404,22 @@ const styles = StyleSheet.create({
   filterBarDark: {
     backgroundColor: '#222',
   },
+  // Inline variant for using inside the top bar (non-absolute)
+  filterBarInline: {
+    flex: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderRadius: 10,
+  },
   // Profile Icon styles
   profileIcon: {
-  position: 'absolute',
-  top: 110,
-    left: 20,
+  // moved into top bar; keep minimal margins
+  marginRight: 8,
   zIndex: 30,
   },
   profileIconCircle: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     borderRadius: 20,
     backgroundColor: '#ccc',
     alignItems: 'center',
@@ -480,6 +485,38 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
+
+  // Top bar styles
+  topBar: {
+    position: 'absolute',
+    top: 40,
+    left: 8,
+    right: 8,
+    zIndex: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  topBarLight: {
+    backgroundColor: '#fff',
+  },
+  topBarDark: {
+    backgroundColor: '#222',
+  },
+
+  // Wrapper to ensure filter is scrollable and doesn't overlap the profile icon
+  filterWrapper: {
+    flex: 1,
+    marginRight: 8,
+  },
   panel: {
     padding: 20,
     borderTopLeftRadius: 20,
@@ -505,12 +542,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     left: 20,
-    width: 120,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
+  },
+  // Position the forums button directly on top of the FAB (bottom-right)
+  forumsButtonOnFab: {
+    right: 30,
+    left: undefined,
+    // place above the FAB (FAB bottom 30 + FAB height 60 + 12 spacing = bottom ~102)
+    bottom: 102,
+    zIndex: 60,
+    elevation: 8,
+    // keep circular clipping
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   forumsButtonText: {
     fontSize: 18,
