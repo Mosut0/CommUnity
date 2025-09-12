@@ -1,17 +1,99 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme } from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
+import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LostAndFoundForm } from '@/components/LostAndFound';
 import { HazardForm } from '@/components/Hazards';
 import { EventForm } from '@/components/Events';
 import { ThemedText } from '@/components/ThemedText';
-import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
+  // Filter state for map pins
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
+  // Colors aligned with `app/forums.tsx` categoryColors
+  const FORUM_COLORS = {
+    event: '#7C3AED', // purple-600
+    lost:  '#EAB308', // yellow-500
+    found: '#22C55E', // green-500
+    safety:'#EF4444', // red-500
+  };
+  // Filter bar component (defined inside to use hooks/state correctly)
+  // Preserve horizontal scroll offset when tapping a filter so the selected option
+  // remains in the same visual position.
+  const filterScrollRef = React.useRef<ScrollView | null>(null);
+  const scrollOffsetRef = React.useRef<number>(0);
+
+  const scrollToOffset = (offset: number) => {
+    if (filterScrollRef.current && (filterScrollRef.current as any).scrollTo) {
+      // Instant scroll (no animation) to prevent visual movement when selecting
+      (filterScrollRef.current as any).scrollTo({ x: offset, animated: false });
+    }
+  };
+
+  const handleFilterPress = (filterValue: 'all' | 'hazard' | 'event' | 'lost' | 'found') => {
+    // set selected filter immediately
+    setSelectedFilter(filterValue);
+    // restore previous scroll offset instantly so the tapped item doesn't move
+    // Call several times synchronously and in next frames to beat any layout changes
+    const offset = scrollOffsetRef.current;
+    scrollToOffset(offset);
+    requestAnimationFrame(() => scrollToOffset(offset));
+    setTimeout(() => scrollToOffset(offset), 0);
+  };
+
+  const FilterBar = () => (
+    <ScrollView
+      ref={filterScrollRef}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={[styles.filterContent]}
+      style={[styles.filterBarInline, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
+      onScroll={(e) => {
+        scrollOffsetRef.current = e.nativeEvent.contentOffset.x;
+      }}
+      scrollEventThrottle={16}
+    >
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'all' && styles.filterButtonActive]}
+        onPress={() => handleFilterPress('all')}
+      >
+  <Ionicons name="layers" size={22} color={selectedFilter === 'all' ? '#0A7EA4' : '#888'} />
+        <ThemedText style={styles.filterText}>All</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'hazard' && styles.filterButtonActive]}
+        onPress={() => handleFilterPress('hazard')}
+      >
+  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? FORUM_COLORS.safety : '#888'} />
+        <ThemedText style={styles.filterText}>Hazards</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'event' && styles.filterButtonActive]}
+        onPress={() => handleFilterPress('event')}
+      >
+  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? FORUM_COLORS.event : '#888'} />
+        <ThemedText style={styles.filterText}>Events</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'lost' && styles.filterButtonActive]}
+        onPress={() => handleFilterPress('lost')}
+      >
+  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? FORUM_COLORS.lost : '#888'} />
+        <ThemedText style={styles.filterText}>Lost</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'found' && styles.filterButtonActive]}
+        onPress={() => handleFilterPress('found')}
+      >
+  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? FORUM_COLORS.found : '#888'} />
+        <ThemedText style={styles.filterText}>Found</ThemedText>
+      </TouchableOpacity>
+    </ScrollView>
+  );
   // Get URL parameters
   const { selectedReportId } = useLocalSearchParams();
   
@@ -166,21 +248,23 @@ export default function Home() {
 
     return (
     <View style={{ flex: 1 }}>
+      {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
+      <View style={[styles.topBar, colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight]}>
+        <View style={styles.filterWrapper}>
+          <FilterBar />
+        </View>
+        <TouchableOpacity style={styles.profileIcon} onPress={toggleProfileModal}>
+          <View style={styles.profileIconCircle}>
+            <MaterialIcons name="account-circle" size={28} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+          </View>
+        </TouchableOpacity>
+      </View>
+
       {/* Map display showing the community data */}
       <MapScreen 
         distanceRadius={distanceRadius} 
         selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
-      />
-
-      {/* Profile Icon */}
-      <TouchableOpacity
-        style={styles.profileIcon}
-        onPress={toggleProfileModal}
-      >
-        <View style={styles.profileIconCircle}>
-          <MaterialIcons name="account-circle" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
-        </View>
-      </TouchableOpacity>
+      filter={selectedFilter} />
 
       {/* Profile Modal */}
       <Modal transparent animationType="none" visible={isProfileModalVisible}>
@@ -257,12 +341,13 @@ export default function Home() {
         <ThemedText style={styles.fabText}>+</ThemedText>
       </TouchableOpacity>
 
-      {/* View Forums Button */}
       <TouchableOpacity
-        style={[styles.forumsButton, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
+        style={[styles.forumsButton, styles.forumsButtonOnFab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
         onPress={() => router.push('/forums')}
+        accessibilityLabel="Open Forums"
+        accessibilityRole="button"
       >
-        <ThemedText style={styles.forumsButtonText}>View Forums</ThemedText>
+        <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
       </TouchableOpacity>
 
       {/* Expandable Panel with form options */}
@@ -310,16 +395,72 @@ export default function Home() {
  * Component styles
  */
 const styles = StyleSheet.create({
+  // Filter bar styles
+  filterBarContainer: {
+  // overlay positioned above the map
+  position: 'absolute',
+  top: 60,
+  left: 8,
+  right: 8,
+  zIndex: 20,
+  backgroundColor: '#fff',
+  paddingVertical: 8,
+  paddingHorizontal: 4,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+  borderRadius: 12,
+  elevation: 6,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginHorizontal: 2,
+  },
+  filterButtonActive: {
+    backgroundColor: 'rgba(10, 126, 164, 0.08)',
+  },
+  filterText: {
+    marginLeft: 4,
+    fontSize: 15,
+    fontWeight: '500',
+  // color comes from ThemedText; keep style minimal here
+  },
+  filterContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  paddingHorizontal: 8,
+  gap: 8,
+  },
+  filterBarLight: {
+    backgroundColor: '#fff',
+  },
+  filterBarDark: {
+    backgroundColor: '#222',
+  },
+  // Inline variant for using inside the top bar (non-absolute)
+  filterBarInline: {
+    flex: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderRadius: 10,
+  },
   // Profile Icon styles
   profileIcon: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
+  // moved into top bar; keep minimal margins
+  marginRight: 8,
+  zIndex: 30,
   },
   profileIconCircle: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     borderRadius: 20,
     backgroundColor: '#ccc',
     alignItems: 'center',
@@ -385,6 +526,38 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
+
+  // Top bar styles
+  topBar: {
+    position: 'absolute',
+    top: 40,
+    left: 8,
+    right: 8,
+    zIndex: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  topBarLight: {
+    backgroundColor: '#fff',
+  },
+  topBarDark: {
+    backgroundColor: '#222',
+  },
+
+  // Wrapper to ensure filter is scrollable and doesn't overlap the profile icon
+  filterWrapper: {
+    flex: 1,
+    marginRight: 8,
+  },
   panel: {
     padding: 20,
     borderTopLeftRadius: 20,
@@ -410,12 +583,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     left: 20,
-    width: 120,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
+  },
+  // Position the forums button directly on top of the FAB (bottom-right)
+  forumsButtonOnFab: {
+    right: 30,
+    left: undefined,
+    // place above the FAB (FAB bottom 30 + FAB height 60 + 12 spacing = bottom ~102)
+    bottom: 102,
+    zIndex: 60,
+    elevation: 8,
+    // keep circular clipping
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   forumsButtonText: {
     fontSize: 18,
