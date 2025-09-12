@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LostAndFoundForm } from '@/components/LostAndFound';
@@ -94,6 +94,9 @@ export default function Home() {
       </TouchableOpacity>
     </ScrollView>
   );
+  // Get URL parameters
+  const { selectedReportId } = useLocalSearchParams();
+  
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   // UI state management
@@ -243,7 +246,7 @@ export default function Home() {
     }
   };
 
-  return (
+    return (
     <View style={{ flex: 1 }}>
       {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
       <View style={[styles.topBar, colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight]}>
@@ -258,7 +261,10 @@ export default function Home() {
       </View>
 
       {/* Map display showing the community data */}
-      <MapScreen distanceRadius={distanceRadius} filter={selectedFilter} />
+      <MapScreen 
+        distanceRadius={distanceRadius} 
+        selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
+      filter={selectedFilter} />
 
       {/* Profile Modal */}
       <Modal transparent animationType="none" visible={isProfileModalVisible}>

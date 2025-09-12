@@ -34,6 +34,7 @@ export default function RootLayout() {
         <Stack.Screen name="home" options={{ headerShown: false }} />
         {/* Hide header ONLY on forums */}
         <Stack.Screen name="forums" options={{ headerShown: false }} />
+        <Stack.Screen name="report-details" options={{ headerShown: false }} />
       </Stack>
 
       {/* Translucent status bar so content can start at the safe area */}

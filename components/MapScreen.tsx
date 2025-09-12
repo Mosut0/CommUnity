@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import MapView, { Marker, Callout, Region } from "react-native-maps";
+import MapView, { Marker, Callout, Region, MapMarker } from "react-native-maps";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import { ThemedText } from "./ThemedText";
@@ -25,6 +25,7 @@ interface Report {
 
 interface MapScreenProps {
   distanceRadius: number;
+  selectedReportId?: number;
   filter?: 'all' | 'hazard' | 'event' | 'lost' | 'found';
 }
 
@@ -36,7 +37,7 @@ const FORUM_COLORS = {
   safety:'#EF4444', // red-500
 };
 
-export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenProps) {
+export default function MapScreen({ distanceRadius, selectedReportId, filter = 'all' }: MapScreenProps) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
@@ -47,6 +48,8 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
   const colorScheme = useColorScheme() ?? "light";
   const isMountedRef = useRef(true);
   const fetchTimeoutRef = useRef<number | null>(null);
+  const mapRef = useRef<MapView>(null);
+  const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
 
   // Cleanup mounted ref on unmount
   useEffect(() => {
@@ -321,6 +324,35 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
     };
   }, [fetchReports, debouncedFetchReports]);
 
+  // Auto-select report when selectedReportId is provided
+  useEffect(() => {
+    if (selectedReportId && reports.length > 0) {
+      const reportToSelect = reports.find(report => report.reportid === selectedReportId);
+      if (reportToSelect) {
+        setSelectedReport(reportToSelect);
+        
+        // Focus the map on the selected report
+        const coords = parseLocation(reportToSelect.location);
+        if (coords && mapRef.current) {
+          mapRef.current.animateToRegion({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            latitudeDelta: 0.005, // Smaller delta for closer zoom
+            longitudeDelta: 0.005,
+          }, 100);
+          
+          // Show the callout for the selected marker after the animation
+          setTimeout(() => {
+            const markerRef = markerRefs.current[reportToSelect.reportid];
+            if (markerRef) {
+              markerRef.showCallout();
+            }
+          }, 100);
+        }
+      }
+    }
+  }, [selectedReportId, reports]);
+
   // Parse location string from the database into latitude and longitude
   const parseLocation = (
     locationStr: string
@@ -497,6 +529,7 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         initialRegion={region}
         showsUserLocation={true}
@@ -558,6 +591,7 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
           return (
             <Marker
               key={report.reportid}
+              ref={(ref) => { markerRefs.current[report.reportid] = ref; }}
               coordinate={displayCoords}
               onPress={handlePress}
               anchor={{ x: 0.5, y: 0.5 }}

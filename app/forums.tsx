@@ -8,12 +8,16 @@ import {
   Pressable,
   FlatList,
   useColorScheme,
+  Alert,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import HazardForm from "@/components/Hazards/HazardForm";
+import EventForm from "@/components/Events/EventForm";
+import LostAndFoundForm from "@/components/LostAndFound/LostAndFoundForm";
 
 interface Report {
   reportid: number;
@@ -41,10 +45,10 @@ const dbNameByDisplay: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  event: "#7C3AED",  // purple-600
-  lost:  "#EAB308",  // yellow-500
-  found: "#22C55E",  // green-500
-  safety:"#EF4444",  // red-500
+  event: "#7C3AED", // purple-600
+  lost: "#EAB308", // yellow-500
+  found: "#22C55E", // green-500
+  safety: "#EF4444", // red-500
 };
 
 /* ---------- Theme tokens ---------- */
@@ -73,11 +77,11 @@ const darkTheme: UiTheme = {
 };
 
 const lightTheme: UiTheme = {
-  chipBg: "#F1F5F9",       // slate-100
+  chipBg: "#F1F5F9", // slate-100
   cardBg: "#FFFFFF",
-  pageBg: "#F8FAFC",       // slate-50
-  textPrimary: "#0F172A",  // slate-900
-  textSecondary: "#475569",// slate-600
+  pageBg: "#F8FAFC", // slate-50
+  textPrimary: "#0F172A", // slate-900
+  textSecondary: "#475569", // slate-600
   divider: "#E5E7EB",
   overlay: "rgba(0,0,0,0.25)",
   primaryBtnBg: "#2563EB",
@@ -101,6 +105,12 @@ export default function Forums() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isHazardFormVisible, setIsHazardFormVisible] = useState(false);
+  const [isEventFormVisible, setIsEventFormVisible] = useState(false);
+  const [isLostFoundVisible, setIsLostFoundVisible] = useState(false);
+
+  // Location permission + current coordinates
   useEffect(() => {
     (async () => {
       try {
@@ -119,6 +129,7 @@ export default function Forums() {
     })();
   }, []);
 
+  // Initial user prefs + userId
   useEffect(() => {
     supabase.auth.getUser().then(({ data, error }) => {
       if (error) {
@@ -127,10 +138,10 @@ export default function Forums() {
         const r = data.user.user_metadata?.distance_radius || 20;
         setDistanceRadius(r);
         setPendingRadius(r);
+        setUserId(data.user.id);
       }
     });
   }, []);
-
 
   const fetchReports = useCallback(async () => {
     if (!location) return;
@@ -160,8 +171,8 @@ export default function Forums() {
       const coords = parseLocation(r.location);
       if (!coords) return false;
       const d = getDistanceKm(
-        location.coords.latitude,
-        location.coords.longitude,
+        location!.coords.latitude,
+        location!.coords.longitude,
         coords.latitude,
         coords.longitude
       );
@@ -181,6 +192,7 @@ export default function Forums() {
     setReports(formatted);
   }, [selectedTab, distanceRadius, location]);
 
+  // Refresh when filters / tab / location change
   useEffect(() => {
     if (location) fetchReports();
   }, [selectedTab, distanceRadius, location, fetchReports]);
@@ -239,7 +251,14 @@ export default function Forums() {
     const distanceText = toKmString(item.location);
 
     return (
-      <TouchableOpacity activeOpacity={0.8} style={styles.card}>
+      <TouchableOpacity 
+        activeOpacity={0.8} 
+        style={styles.card}
+        onPress={() => router.push({
+          pathname: "./report-details" as any,
+          params: { reportId: item.reportid }
+        })}
+      >
         <View style={styles.cardLeft}>
           <View style={[styles.iconBubble, { backgroundColor: iconMeta.color + "22" }]}>
             <Ionicons name={iconMeta.name as any} size={22} color={iconMeta.color} />
@@ -280,21 +299,24 @@ export default function Forums() {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Top actions row */}
       <View style={styles.actionsRow}>
+        {/* Map (acts as Back) — left */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
-            <Ionicons name="map-outline" size={18} color={theme.textPrimary} />
-            <Text style={styles.actionText}>Map</Text>
+          <Ionicons name="map-outline" size={18} color={theme.textPrimary} />
+          <Text style={styles.actionText}>Map</Text>
         </TouchableOpacity>
 
         <View style={styles.actionSpacer} />
 
+        {/* Distance */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => setIsDistanceVisible(true)}>
-            <Ionicons name="locate-outline" size={18} color={theme.textPrimary} />
-            <Text style={styles.actionText}>Distance</Text>
+          <Ionicons name="locate-outline" size={18} color={theme.textPrimary} />
+          <Text style={styles.actionText}>Distance</Text>
         </TouchableOpacity>
 
+        {/* New Item — right */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => setIsCreateVisible(true)}>
-            <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
-            <Text style={styles.actionText}>New Item</Text>
+          <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
+          <Text style={styles.actionText}>New Item</Text>
         </TouchableOpacity>
       </View>
 
@@ -333,8 +355,16 @@ export default function Forums() {
       />
 
       {/* Create modal */}
-      <Modal visible={isCreateVisible} transparent animationType="fade" onRequestClose={() => setIsCreateVisible(false)}>
-        <Pressable style={[styles.modalOverlay, { backgroundColor: theme.overlay }]} onPress={() => setIsCreateVisible(false)}>
+      <Modal
+        visible={isCreateVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsCreateVisible(false)}
+      >
+        <Pressable
+          style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}
+          onPress={() => setIsCreateVisible(false)}
+        >
           <View style={[styles.modalSheet, { paddingBottom: 16 + insets.bottom }]}>
             <Text style={styles.modalTitle}>Create new...</Text>
             <View style={styles.modalGrid}>
@@ -344,7 +374,26 @@ export default function Forums() {
                 { key: "found", label: "Found Item", icon: "checkmark-circle-outline", color: categoryColors.found },
                 { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
               ].map((c) => (
-                <TouchableOpacity key={c.key} style={styles.modalCell} onPress={() => setIsCreateVisible(false)}>
+                <TouchableOpacity
+                  key={c.key}
+                  style={styles.modalCell}
+                  onPress={() => {
+                    if (!userId) {
+                      Alert.alert("Not signed in", "Please sign in to submit a report.");
+                      return;
+                    }
+                    setIsCreateVisible(false);
+
+                    if (c.key === "safety") {
+                      setIsHazardFormVisible(true);
+                    } else if (c.key === "event") {
+                      setIsEventFormVisible(true);
+                    } else if (c.key === "lost" || c.key === "found") {
+                      // Open Lost & Found modal (user can choose Lost or Found inside)
+                      setIsLostFoundVisible(true);
+                    }
+                  }}
+                >
                   <View style={[styles.iconBubbleLg, { backgroundColor: c.color + "22" }]}>
                     <Ionicons name={c.icon as any} size={24} color={c.color} />
                   </View>
@@ -356,9 +405,38 @@ export default function Forums() {
         </Pressable>
       </Modal>
 
+      {/* Hazard form modal */}
+      <HazardForm
+        isVisible={isHazardFormVisible}
+        onClose={() => setIsHazardFormVisible(false)}
+        userId={userId ?? ""}
+      />
+
+      {/* Event form modal */}
+      <EventForm
+        isVisible={isEventFormVisible}
+        onClose={() => setIsEventFormVisible(false)}
+        userId={userId ?? ""}
+      />
+
+      {/* Lost & Found form modal */}
+      <LostAndFoundForm
+        isVisible={isLostFoundVisible}
+        onClose={() => setIsLostFoundVisible(false)}
+        userId={userId ?? ""}
+      />
+
       {/* Distance sheet */}
-      <Modal visible={isDistanceVisible} transparent animationType="fade" onRequestClose={() => setIsDistanceVisible(false)}>
-        <Pressable style={[styles.modalOverlay, { backgroundColor: theme.overlay }]} onPress={() => setIsDistanceVisible(false)}>
+      <Modal
+        visible={isDistanceVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsDistanceVisible(false)}
+      >
+        <Pressable
+          style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}
+          onPress={() => setIsDistanceVisible(false)}
+        >
           <View style={[styles.modalSheet, { paddingBottom: 16 + insets.bottom }]}>
             <Text style={styles.modalTitle}>Filter by distance</Text>
 
@@ -446,7 +524,7 @@ const makeStyles = (t: UiTheme) =>
       backgroundColor: t.chipBg,
     },
     tabActive: {
-      backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0", // darker/lighter active
+      backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0",
     },
     tabText: { color: t.textSecondary, fontSize: 13, fontWeight: "600" },
     tabTextActive: { color: t.textPrimary },
@@ -503,9 +581,7 @@ const makeStyles = (t: UiTheme) =>
     /* Distance sheet */
     distanceRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 16 },
     distanceChip: { backgroundColor: t.chipBg, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
-    distanceChipActive: {
-      backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0",
-    },
+    distanceChipActive: { backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0" },
     distanceChipText: { color: t.textSecondary, fontWeight: "700" },
     distanceChipTextActive: { color: t.textPrimary },
     distanceFooter: { flexDirection: "row", alignItems: "center" },
