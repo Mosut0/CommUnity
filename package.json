@@ -72,19 +72,8 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "listUnknownPackages": false,
-        "exclude": [
-          "react-native-maps",
-          "@rneui/base",
-          "@rneui/themed",
-          "react-native-safe-area-context"
-        ]
+        "listUnknownPackages": false
       }
-    },
-    "install": {
-      "exclude": [
-        "react-native-safe-area-context"
-      ]
     }
   },
   "private": true
