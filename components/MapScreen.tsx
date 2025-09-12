@@ -5,7 +5,7 @@ import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 // Define the structure of a report
 interface Report {
@@ -27,6 +27,14 @@ interface MapScreenProps {
   distanceRadius: number;
   filter?: 'all' | 'hazard' | 'event' | 'lost' | 'found';
 }
+
+// Colors must match `app/forums.tsx` categoryColors
+const FORUM_COLORS = {
+  event: '#7C3AED', // purple-600
+  lost:  '#EAB308', // yellow-500
+  found: '#22C55E', // green-500
+  safety:'#EF4444', // red-500
+};
 
 export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenProps) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -429,13 +437,13 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
   const getMarkerColor = (category: string): string => {
     switch (category) {
       case "event":
-        return "#4285F4"; // Blue
+        return FORUM_COLORS.event;
       case "safety":
-        return "#EA4335"; // Red
+        return FORUM_COLORS.safety;
       case "lost":
-        return "#FBBC05"; // Yellow
+        return FORUM_COLORS.lost;
       case "found":
-        return "#34A853"; // Green
+        return FORUM_COLORS.found;
       default:
         return "#9E9E9E"; // Gray
     }
@@ -523,17 +531,18 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
 
           // Render a marker using an icon to match the top bar, with circular background and press animation
           const IconForReport = () => {
+            // Use the same Ionicons names as `app/forums.tsx` for visual consistency
             switch (report.category) {
               case 'event':
-                return <MaterialIcons name="event" size={20} color={getMarkerColor(report.category)} />;
+                return <Ionicons name="calendar-outline" size={20} color={getMarkerColor(report.category)} />;
               case 'safety':
-                return <MaterialCommunityIcons name="alert-circle" size={20} color={getMarkerColor(report.category)} />;
+                return <Ionicons name="alert-circle-outline" size={20} color={getMarkerColor(report.category)} />;
               case 'lost':
-                return <FontAwesome name="question-circle" size={18} color={getMarkerColor(report.category)} />;
+                return <Ionicons name="help-circle-outline" size={18} color={getMarkerColor(report.category)} />;
               case 'found':
-                return <FontAwesome name="search" size={18} color={getMarkerColor(report.category)} />;
+                return <Ionicons name="checkmark-circle-outline" size={18} color={getMarkerColor(report.category)} />;
               default:
-                return <MaterialIcons name="layers" size={18} color={getMarkerColor(report.category)} />;
+                return <Ionicons name="information-circle-outline" size={18} color={getMarkerColor(report.category)} />;
             }
           };
 
@@ -568,15 +577,15 @@ export default function MapScreen({ distanceRadius, filter = 'all' }: MapScreenP
                   (() => {
                     switch (report.category) {
                       case 'event':
-                        return <MaterialIcons name="event" size={20} color="#fff" />;
+                        return <Ionicons name="calendar-outline" size={20} color="#fff" />;
                       case 'safety':
-                        return <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />;
+                        return <Ionicons name="alert-circle-outline" size={20} color="#fff" />;
                       case 'lost':
-                        return <FontAwesome name="question-circle" size={18} color="#fff" />;
+                        return <Ionicons name="help-circle-outline" size={18} color="#fff" />;
                       case 'found':
-                        return <FontAwesome name="search" size={18} color="#fff" />;
+                        return <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />;
                       default:
-                        return <MaterialIcons name="layers" size={18} color="#fff" />;
+                        return <Ionicons name="information-circle-outline" size={18} color="#fff" />;
                     }
                   })()
                 ) : (

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter } from 'expo-router';
 import MapScreen from '../components/MapScreen';
-import { MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LostAndFoundForm } from '@/components/LostAndFound';
 import { HazardForm } from '@/components/Hazards';
 import { EventForm } from '@/components/Events';
@@ -14,47 +14,82 @@ import Slider from '@react-native-community/slider';
 export default function Home() {
   // Filter state for map pins
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
+  // Colors aligned with `app/forums.tsx` categoryColors
+  const FORUM_COLORS = {
+    event: '#7C3AED', // purple-600
+    lost:  '#EAB308', // yellow-500
+    found: '#22C55E', // green-500
+    safety:'#EF4444', // red-500
+  };
   // Filter bar component (defined inside to use hooks/state correctly)
+  // Preserve horizontal scroll offset when tapping a filter so the selected option
+  // remains in the same visual position.
+  const filterScrollRef = React.useRef<ScrollView | null>(null);
+  const scrollOffsetRef = React.useRef<number>(0);
+
+  const scrollToOffset = (offset: number) => {
+    if (filterScrollRef.current && (filterScrollRef.current as any).scrollTo) {
+      // Instant scroll (no animation) to prevent visual movement when selecting
+      (filterScrollRef.current as any).scrollTo({ x: offset, animated: false });
+    }
+  };
+
+  const handleFilterPress = (filterValue: 'all' | 'hazard' | 'event' | 'lost' | 'found') => {
+    // set selected filter immediately
+    setSelectedFilter(filterValue);
+    // restore previous scroll offset instantly so the tapped item doesn't move
+    // Call several times synchronously and in next frames to beat any layout changes
+    const offset = scrollOffsetRef.current;
+    scrollToOffset(offset);
+    requestAnimationFrame(() => scrollToOffset(offset));
+    setTimeout(() => scrollToOffset(offset), 0);
+  };
+
   const FilterBar = () => (
     <ScrollView
+      ref={filterScrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={[styles.filterContent]}
       style={[styles.filterBarInline, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
+      onScroll={(e) => {
+        scrollOffsetRef.current = e.nativeEvent.contentOffset.x;
+      }}
+      scrollEventThrottle={16}
     >
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'all' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('all')}
+        onPress={() => handleFilterPress('all')}
       >
-        <MaterialIcons name="layers" size={22} color={selectedFilter === 'all' ? '#0A7EA4' : '#888'} />
+  <Ionicons name="layers" size={22} color={selectedFilter === 'all' ? '#0A7EA4' : '#888'} />
         <ThemedText style={styles.filterText}>All</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'hazard' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('hazard')}
+        onPress={() => handleFilterPress('hazard')}
       >
-        <MaterialCommunityIcons name="alert-circle" size={22} color={selectedFilter === 'hazard' ? '#E74C3C' : '#888'} />
+  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? FORUM_COLORS.safety : '#888'} />
         <ThemedText style={styles.filterText}>Hazards</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'event' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('event')}
+        onPress={() => handleFilterPress('event')}
       >
-        <MaterialIcons name="event" size={22} color={selectedFilter === 'event' ? '#27AE60' : '#888'} />
+  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? FORUM_COLORS.event : '#888'} />
         <ThemedText style={styles.filterText}>Events</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'lost' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('lost')}
+        onPress={() => handleFilterPress('lost')}
       >
-        <FontAwesome name="question-circle" size={20} color={selectedFilter === 'lost' ? '#F1C40F' : '#888'} />
+  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? FORUM_COLORS.lost : '#888'} />
         <ThemedText style={styles.filterText}>Lost</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'found' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('found')}
+        onPress={() => handleFilterPress('found')}
       >
-        <FontAwesome name="search" size={20} color={selectedFilter === 'found' ? '#F1C40F' : '#888'} />
+  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? FORUM_COLORS.found : '#888'} />
         <ThemedText style={styles.filterText}>Found</ThemedText>
       </TouchableOpacity>
     </ScrollView>
