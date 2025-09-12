@@ -131,9 +131,6 @@ export default function Forums() {
     });
   }, []);
 
-  useEffect(() => {
-    if (location) fetchReports();
-  }, [selectedTab, distanceRadius, location]);
 
   const fetchReports = useCallback(async () => {
     if (!location) return;
@@ -183,6 +180,10 @@ export default function Forums() {
 
     setReports(formatted);
   }, [selectedTab, distanceRadius, location]);
+
+  useEffect(() => {
+    if (location) fetchReports();
+  }, [selectedTab, distanceRadius, location, fetchReports]);
 
   const parseLocation = (loc: string): { latitude: number; longitude: number } | null => {
     try {
