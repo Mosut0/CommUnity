@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
 import { LostAndFoundForm } from '@/components/LostAndFound';
 import { HazardForm } from '@/components/Hazards';
@@ -12,6 +12,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
+  // Get URL parameters
+  const { selectedReportId } = useLocalSearchParams();
+  
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   // UI state management
@@ -161,10 +164,13 @@ export default function Home() {
     }
   };
 
-  return (
+    return (
     <View style={{ flex: 1 }}>
       {/* Map display showing the community data */}
-      <MapScreen distanceRadius={distanceRadius} />
+      <MapScreen 
+        distanceRadius={distanceRadius} 
+        selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
+      />
 
       {/* Profile Icon */}
       <TouchableOpacity
