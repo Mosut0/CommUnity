@@ -13,7 +13,7 @@ import Slider from '@react-native-community/slider';
 
 export default function Home() {
   // Filter state for map pins
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lostAndFound'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
   // Filter bar component (defined inside to use hooks/state correctly)
   const FilterBar = () => (
     <ScrollView
@@ -44,11 +44,18 @@ export default function Home() {
         <ThemedText style={styles.filterText}>Events</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.filterButton, selectedFilter === 'lostAndFound' && styles.filterButtonActive]}
-        onPress={() => setSelectedFilter('lostAndFound')}
+        style={[styles.filterButton, selectedFilter === 'lost' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('lost')}
       >
-        <FontAwesome name="search" size={20} color={selectedFilter === 'lostAndFound' ? '#F1C40F' : '#888'} />
-        <ThemedText style={styles.filterText}>Lost & Found</ThemedText>
+        <FontAwesome name="question-circle" size={20} color={selectedFilter === 'lost' ? '#F1C40F' : '#888'} />
+        <ThemedText style={styles.filterText}>Lost</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.filterButton, selectedFilter === 'found' && styles.filterButtonActive]}
+        onPress={() => setSelectedFilter('found')}
+      >
+        <FontAwesome name="search" size={20} color={selectedFilter === 'found' ? '#F1C40F' : '#888'} />
+        <ThemedText style={styles.filterText}>Found</ThemedText>
       </TouchableOpacity>
     </ScrollView>
   );
