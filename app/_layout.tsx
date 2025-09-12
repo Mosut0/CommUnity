@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -8,7 +9,6 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -23,9 +23,7 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -33,9 +31,13 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
         <Stack.Screen name="index" />
-        <Stack.Screen name="home" options={{ headerShown: false }}/>
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+        {/* Hide header ONLY on forums */}
+        <Stack.Screen name="forums" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
+
+      {/* Translucent status bar so content can start at the safe area */}
+      <StatusBar style="light" translucent backgroundColor="transparent" />
     </ThemeProvider>
   );
 }

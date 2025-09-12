@@ -6,7 +6,7 @@ export async function uploadImage(uri: string): Promise<string | null> {
   try {
     // Read the image and convert to base64
     const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: "base64",
     });
 
     // Convert base64 to ArrayBuffer

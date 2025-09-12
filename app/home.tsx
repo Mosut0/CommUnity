@@ -117,9 +117,22 @@ export default function Home() {
     setIsProfileModalVisible(!isProfileModalVisible);
   };
 
+
   // Toggle the visibility of the change password modal
   const toggleChangePasswordModal = () => {
     setIsChangePasswordModalVisible(!isChangePasswordModalVisible);
+  };
+
+  // Toggle the visibility of the change distance modal and fetch current value
+  const toggleDistanceModal = async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data && data.user) {
+        const userMetadata = data.user.user_metadata;
+        setSliderValue(userMetadata.distance_radius || 20);
+      }
+    }
+    setIsDistanceModalVisible(!isDistanceModalVisible);
   };
 
   // Handle user sign out
@@ -214,7 +227,7 @@ export default function Home() {
             <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); toggleChangePasswordModal(); }}>
               <ThemedText>Change Password</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); setIsDistanceModalVisible(true); }}>
+            <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); toggleDistanceModal(); }}>
               <ThemedText>Change Distance</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={handleSignOut}>
@@ -252,7 +265,7 @@ export default function Home() {
 
       {/* Change Distance Modal */}
       <Modal transparent animationType="none" visible={isDistanceModalVisible}>
-        <Pressable style={styles.modalContainer} onPress={() => setIsDistanceModalVisible(false)}>
+        <Pressable style={styles.modalContainer} onPress={toggleDistanceModal}>
           <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
             <ThemedText>Change Distance Radius</ThemedText>
             <Slider
