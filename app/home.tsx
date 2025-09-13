@@ -254,7 +254,7 @@ export default function Home() {
       {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
       <View style={[
         styles.topBar,
-        { top: (insets?.top || 0) + 8 },
+        { top: (insets?.top || 0) },
         colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight,
       ]}>
         <View style={styles.filterWrapper}>
