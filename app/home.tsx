@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -115,6 +115,17 @@ export default function Home() {
   const [distanceRadius, setDistanceRadius] = useState(20);
   const [sliderValue, setSliderValue] = useState(20);
   const [isDistanceModalVisible, setIsDistanceModalVisible] = useState(false);
+  const [isFabExpanded, setIsFabExpanded] = useState(false);
+  const fabAnim = React.useRef(new Animated.Value(0)).current; // 0 collapsed, 1 expanded
+
+  const runFabAnimation = (to: number) => {
+    Animated.timing(fabAnim, {
+      toValue: to,
+      duration: 220,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  };
 
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
@@ -152,12 +163,15 @@ export default function Home() {
   // Toggle the visibility of the panel
   const togglePanel = () => {
     setIsPanelVisible(!isPanelVisible);
+  // Collapse speed dial when opening panel
+  if (!isPanelVisible) setIsFabExpanded(false);
   };
 
   // Open a specific form and close the panel
   const openForm = (formType: string) => {
     setSelectedForm(formType);
     setIsPanelVisible(false);
+  setIsFabExpanded(false);
   };
 
   // Toggle the visibility of the profile modal
@@ -273,6 +287,15 @@ export default function Home() {
         selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
       filter={selectedFilter} />
 
+      {/* Overlay to close speed dial when expanded */}
+      {isFabExpanded && (
+        <Pressable
+          style={styles.fabOverlay}
+          onPress={() => { setIsFabExpanded(false); runFabAnimation(0); }}
+          accessibilityLabel="Close actions overlay"
+        />
+      )}
+
       {/* Profile Modal */}
       <Modal transparent animationType="none" visible={isProfileModalVisible}>
         <Pressable style={styles.modalContainer} onPress={toggleProfileModal}>
@@ -340,22 +363,86 @@ export default function Home() {
         </Pressable>
       </Modal>
 
-      {/* Floating Action Button to open the panel */}
+      {/* Speed Dial Root FAB */}
       <TouchableOpacity
         style={[styles.fab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
-        onPress={togglePanel}
-      >
-        <ThemedText style={styles.fabText}>+</ThemedText>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.forumsButton, styles.forumsButtonOnFab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
-        onPress={() => router.push('/forums')}
-        accessibilityLabel="Open Forums"
+        onPress={() => {
+          const next = !isFabExpanded;
+            setIsFabExpanded(next);
+            runFabAnimation(next ? 1 : 0);
+        }}
+        accessibilityLabel={isFabExpanded ? 'Close actions' : 'Open actions'}
         accessibilityRole="button"
       >
-        <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
+        <Animated.View
+          style={{
+            transform: [
+              { rotate: fabAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] }) },
+            ],
+          }}
+        >
+          <MaterialIcons name={isFabExpanded ? 'close' : 'apps'} size={26} color={'#fff'} />
+        </Animated.View>
       </TouchableOpacity>
+
+      {/* Speed Dial Actions (appear above root) */}
+      {/** Animated Speed Dial Actions */}
+      <Animated.View
+        pointerEvents={isFabExpanded ? 'auto' : 'none'}
+        style={{
+          position: 'absolute',
+          right: 30,
+          bottom: 30,
+          zIndex: 60,
+        }}
+      >
+        {/* Second (top) action */}
+        <Animated.View
+          style={[
+            styles.speedDialButton,
+            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            {
+              transform: [
+                { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -136] }) },
+                { scale: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              ],
+              opacity: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.speedDialTouchable}
+            onPress={() => { setIsFabExpanded(false); runFabAnimation(0); router.push('/forums'); }}
+            accessibilityLabel="Open Forums"
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+        {/* First (middle) action */}
+        <Animated.View
+          style={[
+            styles.speedDialButton,
+            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            {
+              transform: [
+                { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -70] }) },
+                { scale: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              ],
+              opacity: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.speedDialTouchable}
+            onPress={() => { togglePanel(); runFabAnimation(0); }}
+            accessibilityLabel="Create report"
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="add" size={26} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
 
       {/* Expandable Panel with form options */}
       {isPanelVisible && (
@@ -517,6 +604,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
+  zIndex: 70,
   },
   fabLight: {
     backgroundColor: '#0A7EA4', // Primary color for light theme
@@ -527,6 +615,15 @@ const styles = StyleSheet.create({
   fabText: {
     fontSize: 24,
     color: '#fff',
+  },
+  fabOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+  zIndex: 40,
   },
 
   // Panel styles
@@ -587,32 +684,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   // View Forums Button styles
-  forumsButton: {
+  // Speed Dial action buttons
+  speedDialButton: {
     position: 'absolute',
-    bottom: 30,
-    left: 20,
+    bottom: 0,
+    right: 0,
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
+    elevation: 6,
   },
-  // Position the forums button directly on top of the FAB (bottom-right)
-  forumsButtonOnFab: {
-    right: 30,
-    left: undefined,
-  // place above the FAB (bottom 30 + height 56 + 12 spacing = 98)
-  bottom: 98,
-    zIndex: 60,
-    elevation: 8,
-    // keep circular clipping
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-  },
-  forumsButtonText: {
-    fontSize: 18,
-    color: '#fff',
+  speedDialTouchable: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
 });
