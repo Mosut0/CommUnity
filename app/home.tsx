@@ -510,9 +510,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  // Unified size with forums button
+  width: 56,
+  height: 56,
+  borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
@@ -601,8 +602,8 @@ const styles = StyleSheet.create({
   forumsButtonOnFab: {
     right: 30,
     left: undefined,
-    // place above the FAB (FAB bottom 30 + FAB height 60 + 12 spacing = bottom ~102)
-    bottom: 102,
+  // place above the FAB (bottom 30 + height 56 + 12 spacing = 98)
+  bottom: 98,
     zIndex: 60,
     elevation: 8,
     // keep circular clipping
