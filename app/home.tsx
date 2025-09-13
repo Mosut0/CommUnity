@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -12,6 +13,8 @@ import { ThemedText } from '@/components/ThemedText';
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
+  // Safe area insets (to avoid notch / dynamic island overlap)
+  const insets = useSafeAreaInsets();
   // Filter state for map pins
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
   // Colors aligned with `app/forums.tsx` categoryColors
@@ -249,7 +252,11 @@ export default function Home() {
     return (
     <View style={{ flex: 1 }}>
       {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
-      <View style={[styles.topBar, colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight]}>
+      <View style={[
+        styles.topBar,
+        { top: (insets?.top || 0) + 8 },
+        colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight,
+      ]}>
         <View style={styles.filterWrapper}>
           <FilterBar />
         </View>
@@ -530,7 +537,7 @@ const styles = StyleSheet.create({
   // Top bar styles
   topBar: {
     position: 'absolute',
-    top: 40,
+    // top is now dynamic via insets; keep default fallback minimal
     left: 8,
     right: 8,
     zIndex: 40,
