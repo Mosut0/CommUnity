@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform } from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -103,7 +103,8 @@ export default function Home() {
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   // UI state management
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  // Forums-style create sheet visibility
+  const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] = useState(false);
@@ -292,18 +293,11 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Toggle the visibility of the panel
-  const togglePanel = () => {
-    setIsPanelVisible(!isPanelVisible);
-  // Collapse speed dial when opening panel
-  if (!isPanelVisible) setIsFabExpanded(false);
-  };
-
-  // Open a specific form and close the panel
+  // Open a specific form from create sheet
   const openForm = (formType: string) => {
     setSelectedForm(formType);
-    setIsPanelVisible(false);
-  setIsFabExpanded(false);
+    setIsCreateVisible(false);
+    setIsFabExpanded(false);
   };
 
   // Toggle the visibility of the profile modal
@@ -605,7 +599,7 @@ export default function Home() {
         </Animated.View>
       </TouchableOpacity>
 
-      {/* Speed Dial Actions (appear above root) */}
+  {/* Speed Dial Actions (appear above root) */}
       {/** Animated Speed Dial Actions */}
       <Animated.View
         pointerEvents={isFabExpanded ? 'auto' : 'none'}
@@ -655,7 +649,7 @@ export default function Home() {
         >
           <TouchableOpacity
             style={styles.speedDialTouchable}
-            onPress={() => { togglePanel(); runFabAnimation(0); }}
+            onPress={() => { setIsCreateVisible(true); runFabAnimation(0); setIsFabExpanded(false); }}
             accessibilityLabel="Create report"
             accessibilityRole="button"
           >
@@ -664,32 +658,53 @@ export default function Home() {
         </Animated.View>
       </Animated.View>
 
-      {/* Expandable Panel with form options */}
-      {isPanelVisible && (
-        <Modal transparent animationType="none" visible={isPanelVisible}>
-          <Pressable style={styles.panelContainer} onPress={togglePanel}>
-            <View style={[styles.panel, colorScheme === 'dark' ? styles.panelDark : styles.panelLight]}>
-              {/* Lost & Found reporting option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('lostAndFound')} disabled={!session}>
-                <ThemedText>Lost & Found</ThemedText>
-              </TouchableOpacity>
-
-              {/* Hazard reporting option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('hazard')} disabled={!session}>
-                <ThemedText>Hazard</ThemedText>
-              </TouchableOpacity>
-
-              {/* Event creation option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('event')} disabled={!session}>
-                <ThemedText>Event</ThemedText>
-              </TouchableOpacity>
-
-              {/* Warning message if user is not logged in */}
-              {!session && <ThemedText style={{ color: 'red', textAlign: 'center' }}>Please log in to submit reports</ThemedText>}
+      {/* Forums-style Create Sheet */}
+      <Modal
+        visible={isCreateVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsCreateVisible(false)}
+      >
+        <Pressable
+          style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay }]}
+          onPress={() => setIsCreateVisible(false)}
+        >
+          <Animated.View
+            style={[styles.createSheet, { backgroundColor: uiTheme.cardBg, borderColor: uiTheme.divider, paddingBottom: 20 + insets.bottom }]}
+          >
+            <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
+            <View style={styles.createGrid}>
+              {[
+                { key: 'event', label: 'Event', icon: 'calendar-outline', color: FORUM_COLORS.event },
+                { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: FORUM_COLORS.lost },
+                { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: FORUM_COLORS.found },
+                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
+              ].map(c => (
+                <TouchableOpacity
+                  key={c.key}
+                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F1F5F9' }]}
+                  onPress={() => {
+                    if (!session) {
+                      Alert.alert('Not signed in', 'Please sign in to submit a report.');
+                      return;
+                    }
+                    setIsCreateVisible(false);
+                    if (c.key === 'safety') openForm('hazard');
+                    else if (c.key === 'event') openForm('event');
+                    else if (c.key === 'lost' || c.key === 'found') openForm('lostAndFound');
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <View style={[styles.iconBubbleLg, { backgroundColor: c.color + '22' }]}> 
+                    <Ionicons name={c.icon as any} size={24} color={c.color} />
+                  </View>
+                  <Text style={[styles.createCellText, { color: uiTheme.textPrimary }]}>{c.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          </Pressable>
-        </Modal>
-      )}
+          </Animated.View>
+        </Pressable>
+      </Modal>
 
       {/* Conditional rendering of different form modals based on selection */}
       {selectedForm === 'lostAndFound' && (
@@ -1002,6 +1017,40 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 15,
+    fontWeight: '600',
+  },
+  /* Create sheet (forums-style) */
+  createSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  createTitle: {
+    fontWeight: '700',
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  createGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  createCell: {
+    width: '47%',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconBubbleLg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createCellText: {
     fontWeight: '600',
   },
 });
