@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -12,6 +13,8 @@ import { ThemedText } from '@/components/ThemedText';
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
+  // Safe area insets (to avoid notch / dynamic island overlap)
+  const insets = useSafeAreaInsets();
   // Filter state for map pins
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
   // Colors aligned with `app/forums.tsx` categoryColors
@@ -100,18 +103,162 @@ export default function Home() {
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   // UI state management
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  // Forums-style create sheet visibility
+  const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const colorScheme = useColorScheme();
+  // Theme tokens mirroring forums page
+  const uiTheme = React.useMemo(() => {
+    if (colorScheme === 'dark') {
+      return {
+        pageBg: '#0B1220',
+        cardBg: '#0F172A',
+        surface: '#1F2937',
+        textPrimary: '#E5E7EB',
+        textSecondary: '#9CA3AF',
+        divider: '#1F2A37',
+        overlay: 'rgba(0,0,0,0.55)',
+        accent: '#2563EB',
+        danger: '#DC2626',
+        chipBg: '#1F2937',
+        inputBg: '#1F2937',
+      };
+    }
+    return {
+      pageBg: '#F8FAFC',
+      cardBg: '#FFFFFF',
+      surface: '#F1F5F9',
+      textPrimary: '#0F172A',
+      textSecondary: '#475569',
+      divider: '#E2E8F0',
+      overlay: 'rgba(0,0,0,0.25)',
+      accent: '#2563EB',
+      danger: '#DC2626',
+      chipBg: '#F1F5F9',
+      inputBg: '#FFFFFF',
+    };
+  }, [colorScheme]);
   const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
   const [distanceRadius, setDistanceRadius] = useState(20);
   const [sliderValue, setSliderValue] = useState(20);
   const [isDistanceModalVisible, setIsDistanceModalVisible] = useState(false);
+  const [isFabExpanded, setIsFabExpanded] = useState(false);
+  const fabAnim = React.useRef(new Animated.Value(0)).current; // 0 collapsed, 1 expanded
+  // Animated settings sheet
+  const [profileSheetMounted, setProfileSheetMounted] = useState(false);
+  const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
+  const [nextModal, setNextModal] = useState<null | 'password' | 'distance'>(null);
+  // Animated password & distance sheets
+  const [changePasswordMounted, setChangePasswordMounted] = useState(false);
+  const [distanceMounted, setDistanceMounted] = useState(false);
+  const passwordAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden 1 visible
+  const distanceAnim = React.useRef(new Animated.Value(0)).current;
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  // Keyboard handling so password sheet isn't covered
+  useEffect(() => {
+    const showEvent = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow';
+    const hideEvent = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide';
+    const onShow = (e: any) => {
+      const height = e?.endCoordinates?.height || 0;
+      setKeyboardOffset(height);
+    };
+    const onHide = () => setKeyboardOffset(0);
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
+
+  const runFabAnimation = (to: number) => {
+    Animated.timing(fabAnim, {
+      toValue: to,
+      duration: 220,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Animate settings sheet open/close
+  useEffect(() => {
+    if (isProfileModalVisible) {
+      setProfileSheetMounted(true);
+      settingsAnim.stopAnimation();
+      settingsAnim.setValue(0);
+      Animated.timing(settingsAnim, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else if (profileSheetMounted) {
+      // closing animation then unmount and trigger deferred modal
+      Animated.timing(settingsAnim, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setProfileSheetMounted(false);
+          if (nextModal === 'password') {
+            setIsChangePasswordModalVisible(true);
+          } else if (nextModal === 'distance') {
+            openDistanceModal();
+          }
+          setNextModal(null);
+        }
+      });
+    }
+  }, [isProfileModalVisible, profileSheetMounted, nextModal]);
+
+  const openDistanceModal = async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        const userMetadata = data.user.user_metadata;
+        setSliderValue(userMetadata?.distance_radius || 20);
+      }
+    }
+    setIsDistanceModalVisible(true);
+  };
+
+  // Animate password modal
+  useEffect(() => {
+    if (isChangePasswordModalVisible) {
+      setChangePasswordMounted(true);
+      passwordAnim.stopAnimation();
+      passwordAnim.setValue(0);
+      Animated.timing(passwordAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    } else if (changePasswordMounted) {
+      Animated.timing(passwordAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
+        .start(({ finished }) => { 
+          if (finished) { 
+            setChangePasswordMounted(false); 
+            // Clear any unsaved input when the sheet fully closes
+            setOldPassword('');
+            setNewPassword('');
+          } 
+        });
+    }
+  }, [isChangePasswordModalVisible, changePasswordMounted]);
+
+  // Animate distance modal
+  useEffect(() => {
+    if (isDistanceModalVisible) {
+      setDistanceMounted(true);
+      distanceAnim.stopAnimation();
+      distanceAnim.setValue(0);
+      Animated.timing(distanceAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    } else if (distanceMounted) {
+      Animated.timing(distanceAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
+        .start(({ finished }) => { if (finished) setDistanceMounted(false); });
+    }
+  }, [isDistanceModalVisible, distanceMounted]);
 
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
@@ -146,15 +293,11 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Toggle the visibility of the panel
-  const togglePanel = () => {
-    setIsPanelVisible(!isPanelVisible);
-  };
-
-  // Open a specific form and close the panel
+  // Open a specific form from create sheet
   const openForm = (formType: string) => {
     setSelectedForm(formType);
-    setIsPanelVisible(false);
+    setIsCreateVisible(false);
+    setIsFabExpanded(false);
   };
 
   // Toggle the visibility of the profile modal
@@ -249,7 +392,11 @@ export default function Home() {
     return (
     <View style={{ flex: 1 }}>
       {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
-      <View style={[styles.topBar, colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight]}>
+      <View style={[
+        styles.topBar,
+        { top: (insets?.top || 0) },
+        colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight,
+      ]}>
         <View style={styles.filterWrapper}>
           <FilterBar />
         </View>
@@ -266,116 +413,298 @@ export default function Home() {
         selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
       filter={selectedFilter} />
 
-      {/* Profile Modal */}
-      <Modal transparent animationType="none" visible={isProfileModalVisible}>
-        <Pressable style={styles.modalContainer} onPress={toggleProfileModal}>
-          <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
-            <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); toggleChangePasswordModal(); }}>
-              <ThemedText>Change Password</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={() => { setIsProfileModalVisible(false); toggleDistanceModal(); }}>
-              <ThemedText>Change Distance</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleSignOut}>
-              <ThemedText>Sign Out</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
+      {/* Overlay to close speed dial when expanded */}
+      {isFabExpanded && (
+        <Pressable
+          style={styles.fabOverlay}
+          onPress={() => { setIsFabExpanded(false); runFabAnimation(0); }}
+          accessibilityLabel="Close actions overlay"
+        />
+      )}
+
+      {/* Settings / Profile Bottom Sheet with animation */}
+      <Modal
+        transparent
+        animationType="none"
+        visible={profileSheetMounted}
+        onRequestClose={toggleProfileModal}
+      >
+        <Animated.View
+          style={[styles.sheetOverlay, {
+            backgroundColor: uiTheme.overlay,
+            opacity: settingsAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] })
+          }]}
+        >
+          <Pressable style={{ flex: 1 }} onPress={toggleProfileModal} />
+          <Animated.View
+            style={[
+              styles.sheetInner,
+              {
+                backgroundColor: uiTheme.cardBg,
+                borderColor: uiTheme.divider,
+                paddingBottom: 20 + insets.bottom,
+                borderTopWidth: 1,
+                transform: [
+                  {
+                    translateY: settingsAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [60, 0],
+                    }),
+                  },
+                ],
+                opacity: settingsAnim,
+              },
+            ]}
+          >
+            <View style={styles.sheetHandleWrap}>
+              <View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} />
+            </View>
+            <View style={styles.sheetHeaderRow}>
+              <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}>Settings</ThemedText>
+            </View>
+            <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}> 
+              <TouchableOpacity style={styles.sheetRow} onPress={() => { setNextModal('password'); setIsProfileModalVisible(false); }}>
+                <View style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}>
+                  <MaterialIcons name="lock-outline" size={20} color={uiTheme.textSecondary} />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}>Change Password</ThemedText>
+                  <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Update your account password</ThemedText>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
+              </TouchableOpacity>
+              <View style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]} />
+              <TouchableOpacity style={styles.sheetRow} onPress={() => { setNextModal('distance'); setIsProfileModalVisible(false); }}>
+                <View style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}>
+                  <MaterialIcons name="my-location" size={20} color={uiTheme.textSecondary} />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}>Change Distance</ThemedText>
+                  <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Radius filter for reports</ThemedText>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}> 
+              <TouchableOpacity style={styles.sheetRow} onPress={handleSignOut}>
+                <View style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}>
+                  <MaterialIcons name="logout" size={20} color={uiTheme.danger} />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.danger }]}>Sign Out</ThemedText>
+                  <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Return to login screen</ThemedText>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
 
       {/* Change Password Modal */}
-      <Modal transparent animationType="none" visible={isChangePasswordModalVisible}>
-        <Pressable style={styles.modalContainer} onPress={toggleChangePasswordModal}>
-          <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
-            <ThemedText>Change Password</ThemedText>
+      <Modal transparent animationType="none" visible={changePasswordMounted} onRequestClose={toggleChangePasswordModal}>
+        <Animated.View style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay, opacity: passwordAnim }]}> 
+          <Pressable style={{ flex: 1 }} onPress={toggleChangePasswordModal} />
+          <Animated.View
+            style={[styles.sheetInner, {
+              backgroundColor: uiTheme.cardBg,
+              borderColor: uiTheme.divider,
+              paddingBottom: 20 + insets.bottom,
+              borderTopWidth: 1,
+              transform: [{ translateY: passwordAnim.interpolate({ inputRange: [0,1], outputRange: [60,0] }) }],
+              opacity: passwordAnim,
+              // Lift sheet above keyboard
+              marginBottom: keyboardOffset > 0 ? keyboardOffset - insets.bottom : 0,
+            }]}
+          >
+            <View style={styles.sheetHandleWrap}><View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} /></View>
+            <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 12 }]}>Change Password</ThemedText>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: uiTheme.inputBg, color: uiTheme.textPrimary, borderColor: uiTheme.divider }]}
               placeholder="Old Password"
+              placeholderTextColor={uiTheme.textSecondary}
               secureTextEntry
               value={oldPassword}
               onChangeText={setOldPassword}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: uiTheme.inputBg, color: uiTheme.textPrimary, borderColor: uiTheme.divider }]}
               placeholder="New Password"
+              placeholderTextColor={uiTheme.textSecondary}
               secureTextEntry
               value={newPassword}
               onChangeText={setNewPassword}
             />
-            <TouchableOpacity style={styles.modalButton} onPress={handleChangePassword}>
-              <ThemedText>Save</ThemedText>
+            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={handleChangePassword}>
+              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
             </TouchableOpacity>
-          </View>
-        </Pressable>
+          </Animated.View>
+        </Animated.View>
       </Modal>
 
       {/* Change Distance Modal */}
-      <Modal transparent animationType="none" visible={isDistanceModalVisible}>
-        <Pressable style={styles.modalContainer} onPress={toggleDistanceModal}>
-          <View style={[styles.modal, colorScheme === 'dark' ? styles.modalDark : styles.modalLight]}>
-            <ThemedText>Change Distance Radius</ThemedText>
+      <Modal transparent animationType="none" visible={distanceMounted} onRequestClose={toggleDistanceModal}>
+        <Animated.View style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay, opacity: distanceAnim }]}> 
+          <Pressable style={{ flex: 1 }} onPress={toggleDistanceModal} />
+          <Animated.View
+            style={[styles.sheetInner, {
+              backgroundColor: uiTheme.cardBg,
+              borderColor: uiTheme.divider,
+              paddingBottom: 20 + insets.bottom,
+              borderTopWidth: 1,
+              transform: [{ translateY: distanceAnim.interpolate({ inputRange: [0,1], outputRange: [60,0] }) }],
+              opacity: distanceAnim,
+            }]}
+          >
+            <View style={styles.sheetHandleWrap}><View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} /></View>
+            <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 12 }]}>Distance Radius</ThemedText>
             <Slider
-              style={{ width: 200, height: 40 }}
+              style={{ width: '100%', height: 40 }}
               minimumValue={1}
               maximumValue={100}
               step={1}
               value={sliderValue}
               onValueChange={setSliderValue}
-              minimumTrackTintColor="#1EB1FC"
-              maximumTrackTintColor="#d3d3d3"
-              thumbTintColor="#1EB1FC"
+              minimumTrackTintColor={uiTheme.accent}
+              maximumTrackTintColor={colorScheme==='dark' ? '#374151' : '#CBD5E1'}
+              thumbTintColor={uiTheme.accent}
             />
-            <ThemedText>{sliderValue} km</ThemedText>
-            <TouchableOpacity style={styles.modalButton} onPress={handleSaveDistance}>
-              <ThemedText>Save</ThemedText>
+            <ThemedText style={{ color: uiTheme.textSecondary, marginBottom: 14 }}>{sliderValue} km</ThemedText>
+            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={handleSaveDistance}>
+              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
             </TouchableOpacity>
-          </View>
-        </Pressable>
+          </Animated.View>
+        </Animated.View>
       </Modal>
 
-      {/* Floating Action Button to open the panel */}
+      {/* Speed Dial Root FAB */}
       <TouchableOpacity
         style={[styles.fab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
-        onPress={togglePanel}
-      >
-        <ThemedText style={styles.fabText}>+</ThemedText>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.forumsButton, styles.forumsButtonOnFab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
-        onPress={() => router.push('/forums')}
-        accessibilityLabel="Open Forums"
+        onPress={() => {
+          const next = !isFabExpanded;
+            setIsFabExpanded(next);
+            runFabAnimation(next ? 1 : 0);
+        }}
+        accessibilityLabel={isFabExpanded ? 'Close actions' : 'Open actions'}
         accessibilityRole="button"
       >
-        <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
+        <Animated.View
+          style={{
+            transform: [
+              { rotate: fabAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] }) },
+            ],
+          }}
+        >
+          <MaterialIcons name={isFabExpanded ? 'close' : 'apps'} size={26} color={'#fff'} />
+        </Animated.View>
       </TouchableOpacity>
 
-      {/* Expandable Panel with form options */}
-      {isPanelVisible && (
-        <Modal transparent animationType="none" visible={isPanelVisible}>
-          <Pressable style={styles.panelContainer} onPress={togglePanel}>
-            <View style={[styles.panel, colorScheme === 'dark' ? styles.panelDark : styles.panelLight]}>
-              {/* Lost & Found reporting option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('lostAndFound')} disabled={!session}>
-                <ThemedText>Lost & Found</ThemedText>
-              </TouchableOpacity>
+  {/* Speed Dial Actions (appear above root) */}
+      {/** Animated Speed Dial Actions */}
+      <Animated.View
+        pointerEvents={isFabExpanded ? 'auto' : 'none'}
+        style={{
+          position: 'absolute',
+          right: 30,
+          bottom: 30,
+          zIndex: 60,
+        }}
+      >
+        {/* Second (top) action */}
+        <Animated.View
+          style={[
+            styles.speedDialButton,
+            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            {
+              transform: [
+                { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -136] }) },
+                { scale: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              ],
+              opacity: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.speedDialTouchable}
+            onPress={() => { setIsFabExpanded(false); runFabAnimation(0); router.push('/forums'); }}
+            accessibilityLabel="Open Forums"
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+        {/* First (middle) action */}
+        <Animated.View
+          style={[
+            styles.speedDialButton,
+            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            {
+              transform: [
+                { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -70] }) },
+                { scale: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              ],
+              opacity: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.speedDialTouchable}
+            onPress={() => { setIsCreateVisible(true); runFabAnimation(0); setIsFabExpanded(false); }}
+            accessibilityLabel="Create report"
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="add" size={26} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
 
-              {/* Hazard reporting option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('hazard')} disabled={!session}>
-                <ThemedText>Hazard</ThemedText>
-              </TouchableOpacity>
-
-              {/* Event creation option */}
-              <TouchableOpacity style={styles.button} onPress={() => openForm('event')} disabled={!session}>
-                <ThemedText>Event</ThemedText>
-              </TouchableOpacity>
-
-              {/* Warning message if user is not logged in */}
-              {!session && <ThemedText style={{ color: 'red', textAlign: 'center' }}>Please log in to submit reports</ThemedText>}
+      {/* Forums-style Create Sheet */}
+      <Modal
+        visible={isCreateVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsCreateVisible(false)}
+      >
+        <Pressable
+          style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay }]}
+          onPress={() => setIsCreateVisible(false)}
+        >
+          <Animated.View
+            style={[styles.createSheet, { backgroundColor: uiTheme.cardBg, borderColor: uiTheme.divider, paddingBottom: 20 + insets.bottom }]}
+          >
+            <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
+            <View style={styles.createGrid}>
+              {[
+                { key: 'event', label: 'Event', icon: 'calendar-outline', color: FORUM_COLORS.event },
+                { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: FORUM_COLORS.lost },
+                { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: FORUM_COLORS.found },
+                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
+              ].map(c => (
+                <TouchableOpacity
+                  key={c.key}
+                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F1F5F9' }]}
+                  onPress={() => {
+                    if (!session) {
+                      Alert.alert('Not signed in', 'Please sign in to submit a report.');
+                      return;
+                    }
+                    setIsCreateVisible(false);
+                    if (c.key === 'safety') openForm('hazard');
+                    else if (c.key === 'event') openForm('event');
+                    else if (c.key === 'lost' || c.key === 'found') openForm('lostAndFound');
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <View style={[styles.iconBubbleLg, { backgroundColor: c.color + '22' }]}> 
+                    <Ionicons name={c.icon as any} size={24} color={c.color} />
+                  </View>
+                  <Text style={[styles.createCellText, { color: uiTheme.textPrimary }]}>{c.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          </Pressable>
-        </Modal>
-      )}
+          </Animated.View>
+        </Pressable>
+      </Modal>
 
       {/* Conditional rendering of different form modals based on selection */}
       {selectedForm === 'lostAndFound' && (
@@ -503,12 +832,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  // Unified size with forums button
+  width: 56,
+  height: 56,
+  borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
+  zIndex: 70,
   },
   fabLight: {
     backgroundColor: '#0A7EA4', // Primary color for light theme
@@ -520,6 +851,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#fff',
   },
+  fabOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+  zIndex: 40,
+  },
 
   // Panel styles
   panelContainer: {
@@ -530,7 +870,7 @@ const styles = StyleSheet.create({
   // Top bar styles
   topBar: {
     position: 'absolute',
-    top: 40,
+    // top is now dynamic via insets; keep default fallback minimal
     left: 8,
     right: 8,
     zIndex: 40,
@@ -579,32 +919,138 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   // View Forums Button styles
-  forumsButton: {
+  // Speed Dial action buttons
+  speedDialButton: {
     position: 'absolute',
-    bottom: 30,
-    left: 20,
+    bottom: 0,
+    right: 0,
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
+    elevation: 6,
   },
-  // Position the forums button directly on top of the FAB (bottom-right)
-  forumsButtonOnFab: {
-    right: 30,
-    left: undefined,
-    // place above the FAB (FAB bottom 30 + FAB height 60 + 12 spacing = bottom ~102)
-    bottom: 102,
-    zIndex: 60,
-    elevation: 8,
-    // keep circular clipping
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  speedDialTouchable: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
-  forumsButtonText: {
-    fontSize: 18,
-    color: '#fff',
+  /* Settings sheet styles */
+  sheetOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  sheetContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  sheetInner: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    borderTopWidth: 1,
+  },
+  sheetHandleWrap: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  sheetHandle: {
+    width: 42,
+    height: 5,
+    borderRadius: 3,
+  },
+  sheetHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    marginBottom: 4,
+  },
+  sheetTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  sheetSection: {
+    borderWidth: 1,
+    borderRadius: 18,
+    marginTop: 14,
+    overflow: 'hidden',
+  },
+  sheetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 14,
+  },
+  sheetIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetRowTextWrap: {
+    flex: 1,
+  },
+  sheetRowTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  sheetRowSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  rowDivider: {
+    height: 1,
+    opacity: 0.65,
+    marginLeft: 14 + 40 + 14, // indent after icon
+  },
+  primaryBtn: {
+    marginTop: 4,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  primaryBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  /* Create sheet (forums-style) */
+  createSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  createTitle: {
+    fontWeight: '700',
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  createGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  createCell: {
+    width: '47%',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconBubbleLg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createCellText: {
+    fontWeight: '600',
   },
 });
