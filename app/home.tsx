@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform, Text } from 'react-native';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
-import { LostAndFoundForm } from '@/components/LostAndFound';
-import { HazardForm } from '@/components/Hazards';
-import { EventForm } from '@/components/Events';
-import { ThemedText } from '@/components/ThemedText';
+import LostItemForm from '@/components/LostAndFound/LostItemForm';
+import FoundItemForm from '@/components/LostAndFound/FoundItemForm';
+import FillHazardForm from '@/components/Hazards/FillHazardForm';
+import FillEventForm from '@/components/Events/FillEventForm';
+
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
@@ -595,7 +599,7 @@ export default function Home() {
             ],
           }}
         >
-          <MaterialIcons name={isFabExpanded ? 'close' : 'apps'} size={26} color={'#fff'} />
+          <MaterialIcons name={isFabExpanded ? 'close' : 'more-vert'} size={26} color={'#fff'} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -675,10 +679,10 @@ export default function Home() {
             <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
             <View style={styles.createGrid}>
               {[
+                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
                 { key: 'event', label: 'Event', icon: 'calendar-outline', color: FORUM_COLORS.event },
                 { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: FORUM_COLORS.lost },
                 { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: FORUM_COLORS.found },
-                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
               ].map(c => (
                 <TouchableOpacity
                   key={c.key}
@@ -691,7 +695,8 @@ export default function Home() {
                     setIsCreateVisible(false);
                     if (c.key === 'safety') openForm('hazard');
                     else if (c.key === 'event') openForm('event');
-                    else if (c.key === 'lost' || c.key === 'found') openForm('lostAndFound');
+                    else if (c.key === 'lost') openForm('lost');
+                    else if (c.key === 'found') openForm('found');
                   }}
                   activeOpacity={0.85}
                 >
@@ -707,15 +712,37 @@ export default function Home() {
       </Modal>
 
       {/* Conditional rendering of different form modals based on selection */}
-      {selectedForm === 'lostAndFound' && (
-        <LostAndFoundForm isVisible={true} onClose={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-      )}
-      {selectedForm === 'hazard' && (
-        <HazardForm isVisible={true} onClose={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-      )}
-      {selectedForm === 'event' && (
-        <EventForm isVisible={true} onClose={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-      )}
+      {/* Lost Item Form Modal */}
+      <LostItemForm 
+        visible={selectedForm === 'lost'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
+      
+      {/* Found Item Form Modal */}
+      <FoundItemForm 
+        visible={selectedForm === 'found'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
+      
+      {/* Hazard Form Modal */}
+      <FillHazardForm 
+        visible={selectedForm === 'hazard'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
+      
+      {/* Event Form Modal */}
+      <FillEventForm 
+        visible={selectedForm === 'event'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
     </View>
   );
 }

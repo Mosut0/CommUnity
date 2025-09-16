@@ -1,64 +1,155 @@
 import { StyleSheet } from 'react-native';
 
-export const formStyles = StyleSheet.create({
-  container: {
-    gap: 16
-  },
-  inputGroup: {
-    gap: 8
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16
-  },
-  textArea: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    height: 100,
-    textAlignVertical: 'top'
-  },
-  submitButton: {
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  disabledButton: {
-    opacity: 0.5
-  },
-  dateTimeRow: {
-    flexDirection: 'row',
-    gap: 10
-  },
-  dateInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16
-  },
-  timeInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16
-  }
-});
+/* ---------- Theme tokens ---------- */
+type UiTheme = {
+  chipBg: string;
+  cardBg: string;
+  pageBg: string;
+  textPrimary: string;
+  textSecondary: string;
+  divider: string;
+  primaryBtnBg: string;
+  primaryBtnText: string;
+  inputBg: string;
+};
+
+const darkTheme: UiTheme = {
+  chipBg: "#1F2937",
+  cardBg: "#0F172A",
+  pageBg: "#0B1220",
+  textPrimary: "#E5E7EB",
+  textSecondary: "#9CA3AF",
+  divider: "#1F2A37",
+  primaryBtnBg: "#2563EB",
+  primaryBtnText: "#FFFFFF",
+  inputBg: "#1F2937",
+};
+
+const lightTheme: UiTheme = {
+  chipBg: "#F1F5F9",
+  cardBg: "#FFFFFF",
+  pageBg: "#F8FAFC",
+  textPrimary: "#0F172A",
+  textSecondary: "#475569",
+  divider: "#E5E7EB",
+  primaryBtnBg: "#2563EB",
+  primaryBtnText: "#FFFFFF",
+  inputBg: "#FFFFFF",
+};
+
+export const makeFormStyles = (theme: UiTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.pageBg,
+      padding: 16,
+    },
+    scrollContent: {
+      gap: 20,
+      paddingBottom: 32,
+    },
+    inputGroup: {
+      gap: 8,
+    },
+    label: {
+      color: theme.textPrimary,
+      fontSize: 14,
+      fontWeight: "600",
+      marginTop: 8,
+    },
+    input: {
+      backgroundColor: theme.inputBg,
+      borderWidth: 1,
+      borderColor: theme.divider,
+      borderRadius: 12,
+      padding: 14,
+      fontSize: 16,
+      color: theme.textPrimary,
+      minHeight: 50,
+    },
+    textArea: {
+      backgroundColor: theme.inputBg,
+      borderWidth: 1,
+      borderColor: theme.divider,
+      borderRadius: 12,
+      padding: 14,
+      fontSize: 16,
+      color: theme.textPrimary,
+      height: 100,
+      textAlignVertical: 'top',
+    },
+    locationDisplay: {
+      backgroundColor: theme.chipBg,
+      borderRadius: 12,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: theme.divider,
+    },
+    locationText: {
+      color: theme.textSecondary,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    submitButton: {
+      backgroundColor: theme.primaryBtnBg,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    submitButtonText: {
+      color: theme.primaryBtnText,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    disabledButton: {
+      opacity: 0.5,
+    },
+    dateTimeRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    dateTimeButton: {
+      flex: 1,
+      backgroundColor: theme.inputBg,
+      borderWidth: 1,
+      borderColor: theme.divider,
+      borderRadius: 12,
+      padding: 14,
+      minHeight: 50,
+      justifyContent: 'center',
+    },
+    dateTimeText: {
+      color: theme.textPrimary,
+      fontSize: 16,
+    },
+    dateTimePlaceholder: {
+      color: theme.textSecondary,
+      fontSize: 16,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.pageBg,
+      gap: 16,
+    },
+    loadingText: {
+      color: theme.textSecondary,
+      fontSize: 16,
+    },
+  });
+
+export const getTheme = (colorScheme: 'light' | 'dark') => 
+  colorScheme === 'dark' ? darkTheme : lightTheme;
 
 export const modalStyles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    paddingBottom: 105,
   },
   modalView: {
     width: '90%',
@@ -80,8 +171,9 @@ export const modalStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)'
+    marginBottom: -5,
+    marginTop: -15,
+    marginLeft: -25,
   },
   closeButton: {
     padding: 4
@@ -111,6 +203,7 @@ export const modalStyles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginLeft: 20,
   },
   optionButtonText: {
     fontSize: 18,

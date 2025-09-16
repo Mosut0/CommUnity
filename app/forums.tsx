@@ -9,15 +9,18 @@ import {
   FlatList,
   useColorScheme,
   Alert,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import HazardForm from "@/components/Hazards/HazardForm";
-import EventForm from "@/components/Events/EventForm";
-import LostAndFoundForm from "@/components/LostAndFound/LostAndFoundForm";
+import FillHazardForm from "@/components/Hazards/FillHazardForm";
+import FillEventForm from "@/components/Events/FillEventForm";
+import LostItemForm from "@/components/LostAndFound/LostItemForm";
+import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
+import { ThemedText } from "@/components/ThemedText";
 
 interface Report {
   reportid: number;
@@ -108,7 +111,8 @@ export default function Forums() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isHazardFormVisible, setIsHazardFormVisible] = useState(false);
   const [isEventFormVisible, setIsEventFormVisible] = useState(false);
-  const [isLostFoundVisible, setIsLostFoundVisible] = useState(false);
+  const [isLostItemVisible, setIsLostItemVisible] = useState(false);
+  const [isFoundItemVisible, setIsFoundItemVisible] = useState(false);
 
   // Location permission + current coordinates
   useEffect(() => {
@@ -369,10 +373,10 @@ export default function Forums() {
             <Text style={styles.modalTitle}>Create new...</Text>
             <View style={styles.modalGrid}>
               {[
+                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
                 { key: "event", label: "Event", icon: "calendar-outline", color: categoryColors.event },
                 { key: "lost", label: "Lost Item", icon: "help-circle-outline", color: categoryColors.lost },
                 { key: "found", label: "Found Item", icon: "checkmark-circle-outline", color: categoryColors.found },
-                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
               ].map((c) => (
                 <TouchableOpacity
                   key={c.key}
@@ -388,9 +392,10 @@ export default function Forums() {
                       setIsHazardFormVisible(true);
                     } else if (c.key === "event") {
                       setIsEventFormVisible(true);
-                    } else if (c.key === "lost" || c.key === "found") {
-                      // Open Lost & Found modal (user can choose Lost or Found inside)
-                      setIsLostFoundVisible(true);
+                    } else if (c.key === "lost") {
+                      setIsLostItemVisible(true);
+                    } else if (c.key === "found") {
+                      setIsFoundItemVisible(true);
                     }
                   }}
                 >
@@ -406,24 +411,35 @@ export default function Forums() {
       </Modal>
 
       {/* Hazard form modal */}
-      <HazardForm
-        isVisible={isHazardFormVisible}
+      <FillHazardForm 
+        visible={isHazardFormVisible}
+        onSubmit={() => setIsHazardFormVisible(false)} 
         onClose={() => setIsHazardFormVisible(false)}
-        userId={userId ?? ""}
+        userId={userId ?? ""} 
       />
 
       {/* Event form modal */}
-      <EventForm
-        isVisible={isEventFormVisible}
+      <FillEventForm 
+        visible={isEventFormVisible}
+        onSubmit={() => setIsEventFormVisible(false)} 
         onClose={() => setIsEventFormVisible(false)}
-        userId={userId ?? ""}
+        userId={userId ?? ""} 
       />
 
-      {/* Lost & Found form modal */}
-      <LostAndFoundForm
-        isVisible={isLostFoundVisible}
-        onClose={() => setIsLostFoundVisible(false)}
-        userId={userId ?? ""}
+      {/* Lost Item form modal */}
+      <LostItemForm 
+        visible={isLostItemVisible}
+        onSubmit={() => setIsLostItemVisible(false)} 
+        onClose={() => setIsLostItemVisible(false)}
+        userId={userId ?? ""} 
+      />
+
+      {/* Found Item form modal */}
+      <FoundItemForm 
+        visible={isFoundItemVisible}
+        onSubmit={() => setIsFoundItemVisible(false)} 
+        onClose={() => setIsFoundItemVisible(false)}
+        userId={userId ?? ""} 
       />
 
       {/* Distance sheet */}
