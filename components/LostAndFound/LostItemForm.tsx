@@ -102,27 +102,26 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
     >
       <View style={modalStyles.centeredView}>
         <ThemedView style={modalStyles.modalView}>
-          <View style={modalStyles.header}>
-            <TouchableOpacity 
-              onPress={onClose}
-              style={modalStyles.closeButton}
-            >
-              <IconSymbol 
-                name="chevron.left" 
-                color={colorScheme === 'dark' ? '#fff' : '#000'}
-              />
-            </TouchableOpacity>
-            <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-              Report Lost Item
-            </ThemedText>
-            <View style={modalStyles.placeholder} />
-          </View>
-          
           <ScrollView 
             style={modalStyles.scrollView}
             contentContainerStyle={modalStyles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            <View style={modalStyles.header}>
+              <TouchableOpacity 
+                onPress={onClose}
+                style={modalStyles.closeButton}
+              >
+                <IconSymbol 
+                  name="chevron.left" 
+                  color={colorScheme === 'dark' ? '#fff' : '#000'}
+                />
+              </TouchableOpacity>
+              <ThemedText type="subtitle" style={modalStyles.headerTitle}>
+                Report Lost Item
+              </ThemedText>
+              <View style={modalStyles.placeholder} />
+            </View>
             {loadingLocation ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={theme.primaryBtnBg} />

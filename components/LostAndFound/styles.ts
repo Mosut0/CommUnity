@@ -149,7 +149,9 @@ export const modalStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    marginBottom: -10
+    marginBottom: -5,
+    marginTop: -15,
+    marginLeft: -25,
   },
   closeButton: {
     padding: 4
@@ -176,13 +178,10 @@ export const modalStyles = StyleSheet.create({
     alignItems: 'center'
   },
   headerTitle: {
-
     fontSize: 20,
-
     fontWeight: 'bold',
-
     textAlign: 'center',
-
+    marginLeft: 20,
   },
   optionButtonText: {
     fontSize: 18,
