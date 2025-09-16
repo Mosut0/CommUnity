@@ -13,7 +13,7 @@ import LostItemForm from '@/components/LostAndFound/LostItemForm';
 import FoundItemForm from '@/components/LostAndFound/FoundItemForm';
 import FillHazardForm from '@/components/Hazards/FillHazardForm';
 import FillEventForm from '@/components/Events/FillEventForm';
-import { modalStyles } from '@/components/Hazards/styles';
+
 import Slider from '@react-native-community/slider';
 
 export default function Home() {
@@ -599,7 +599,7 @@ export default function Home() {
             ],
           }}
         >
-          <MaterialIcons name={isFabExpanded ? 'close' : 'apps'} size={26} color={'#fff'} />
+          <MaterialIcons name={isFabExpanded ? 'close' : 'more-vert'} size={26} color={'#fff'} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -679,10 +679,10 @@ export default function Home() {
             <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
             <View style={styles.createGrid}>
               {[
+                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
                 { key: 'event', label: 'Event', icon: 'calendar-outline', color: FORUM_COLORS.event },
                 { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: FORUM_COLORS.lost },
                 { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: FORUM_COLORS.found },
-                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
               ].map(c => (
                 <TouchableOpacity
                   key={c.key}
@@ -713,152 +713,36 @@ export default function Home() {
 
       {/* Conditional rendering of different form modals based on selection */}
       {/* Lost Item Form Modal */}
-      {selectedForm === 'lost' && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setSelectedForm(null)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setSelectedForm(null)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={colorScheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Lost Item
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <LostItemForm onSubmit={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <LostItemForm 
+        visible={selectedForm === 'lost'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
       
       {/* Found Item Form Modal */}
-      {selectedForm === 'found' && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setSelectedForm(null)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setSelectedForm(null)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={colorScheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Found Item
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FoundItemForm onSubmit={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FoundItemForm 
+        visible={selectedForm === 'found'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
       
       {/* Hazard Form Modal */}
-      {selectedForm === 'hazard' && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setSelectedForm(null)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setSelectedForm(null)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={colorScheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Hazard
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FillHazardForm onSubmit={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FillHazardForm 
+        visible={selectedForm === 'hazard'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
       
       {/* Event Form Modal */}
-      {selectedForm === 'event' && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setSelectedForm(null)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setSelectedForm(null)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={colorScheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Create New Event
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FillEventForm onSubmit={() => setSelectedForm(null)} userId={session?.user?.id || ''} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FillEventForm 
+        visible={selectedForm === 'event'}
+        onSubmit={() => setSelectedForm(null)} 
+        onClose={() => setSelectedForm(null)}
+        userId={session?.user?.id || ''} 
+      />
     </View>
   );
 }

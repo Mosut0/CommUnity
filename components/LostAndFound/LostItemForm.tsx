@@ -1,20 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
-import { formStyles } from './styles';
+import { makeFormStyles, getTheme, modalStyles } from './styles';
 import { submitLostItem } from '@/services/lostAndFoundService';
 import ImagePicker from '@/components/ImagePicker';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 interface LostItemFormProps {
   onSubmit: () => void;
+  onClose: () => void;
   userId: string;
+  visible: boolean;
 }
 
-export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
+export default function LostItemForm({ onSubmit, onClose, userId, visible }: LostItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
+  const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
+  const styles = useMemo(() => makeFormStyles(theme), [theme]);
+  
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
   const [contactInfo, setContactInfo] = useState('');
@@ -85,97 +92,122 @@ export default function LostItemForm({ onSubmit, userId }: LostItemFormProps) {
     }
   };
 
-  // Show loading indicator while fetching location
-  if (loadingLocation) {
-    return (
-      <View style={formStyles.container}>
-        <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
-        <ThemedText>Fetching current location...</ThemedText>
-      </View>
-    );
-  }
-
-  // Render the form once location is available
+  // Render the modal wrapper
   return (
-    <View style={formStyles.container}>
-      {/* Item Name Input */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Item Name*</ThemedText>
-        <TextInput
-          style={[
-            formStyles.input,
-            { borderColor: Colors[colorScheme].icon, color: Colors[colorScheme].text }
-          ]}
-          value={itemName}
-          onChangeText={setItemName}
-          placeholder="What did you lose?"
-          placeholderTextColor={Colors[colorScheme].icon}
-        />
-      </View>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={modalStyles.centeredView}>
+        <ThemedView style={modalStyles.modalView}>
+          <View style={modalStyles.header}>
+            <TouchableOpacity 
+              onPress={onClose}
+              style={modalStyles.closeButton}
+            >
+              <IconSymbol 
+                name="chevron.left" 
+                color={colorScheme === 'dark' ? '#fff' : '#000'}
+              />
+            </TouchableOpacity>
+            <ThemedText type="subtitle" style={modalStyles.headerTitle}>
+              Report Lost Item
+            </ThemedText>
+            <View style={modalStyles.placeholder} />
+          </View>
+          
+          <ScrollView 
+            style={modalStyles.scrollView}
+            contentContainerStyle={modalStyles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {loadingLocation ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.primaryBtnBg} />
+                <ThemedText style={styles.loadingText}>Fetching current location...</ThemedText>
+              </View>
+            ) : (
+              <>
+                {/* Item Name Input */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Item Name*</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    value={itemName}
+                    onChangeText={setItemName}
+                    placeholder="What did you lose?"
+                    placeholderTextColor={theme.textSecondary}
+                  />
+                </View>
 
-      {/* Item Description Input */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Description*</ThemedText>
-        <TextInput
-          style={[
-            formStyles.textArea,
-            { borderColor: Colors[colorScheme].icon, color: Colors[colorScheme].text }
-          ]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Describe the item (color, brand, distinguishing features, etc.)"
-          placeholderTextColor={Colors[colorScheme].icon}
-          multiline
-          numberOfLines={4}
-        />
-      </View>
+                {/* Item Description Input */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Description*</ThemedText>
+                  <TextInput
+                    style={styles.textArea}
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder="Describe the item (color, brand, distinguishing features, etc.)"
+                    placeholderTextColor={theme.textSecondary}
+                    multiline
+                    numberOfLines={4}
+                  />
+                </View>
 
-      {/* Display current location for user reference */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Current Location:</ThemedText>
-        <ThemedText>
-          {currentCoordinates ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` : 'Not available'}
-        </ThemedText>
-      </View>
+                {/* Display current location for user reference */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Current Location</ThemedText>
+                  <View style={styles.locationDisplay}>
+                    <ThemedText style={styles.locationText}>
+                      {currentCoordinates 
+                        ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` 
+                        : 'Not available'
+                      }
+                    </ThemedText>
+                  </View>
+                </View>
 
-      {/* Contact Information Input */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Contact Information*</ThemedText>
-        <TextInput
-          style={[
-            formStyles.input,
-            { borderColor: Colors[colorScheme].icon, color: Colors[colorScheme].text }
-          ]}
-          value={contactInfo}
-          onChangeText={setContactInfo}
-          placeholder="How can someone contact you if found?"
-          placeholderTextColor={Colors[colorScheme].icon}
-        />
-      </View>
+                {/* Contact Information Input */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    value={contactInfo}
+                    onChangeText={setContactInfo}
+                    placeholder="How can someone contact you if found?"
+                    placeholderTextColor={theme.textSecondary}
+                  />
+                </View>
 
-      {/* Image Picker */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Add Photo (Optional)</ThemedText>
-        <ImagePicker 
-          onImageSelected={handleImageSelected} 
-          onImageRemoved={handleImageRemoved} 
-        />
-      </View>
+                {/* Image Picker */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Add Photo (Optional)</ThemedText>
+                  <ImagePicker 
+                    onImageSelected={handleImageSelected} 
+                    onImageRemoved={handleImageRemoved} 
+                  />
+                </View>
 
-      {/* Submit Button - disabled if required fields are empty */}
-      <TouchableOpacity
-        style={[
-          formStyles.submitButton,
-          { backgroundColor: Colors[colorScheme].tint },
-          (!itemName || !description || !contactInfo) && formStyles.disabledButton
-        ]}
-        onPress={handleSubmit}
-        disabled={!itemName || !description || !contactInfo}
-      >
-        <ThemedText style={formStyles.submitButtonText} darkColor="black" lightColor="#fff">
-          Submit Report
-        </ThemedText>
-      </TouchableOpacity>
-    </View>
+                {/* Submit Button - disabled if required fields are empty */}
+                <TouchableOpacity
+                  style={[
+                    styles.submitButton,
+                    (!itemName || !description || !contactInfo) && styles.disabledButton
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={!itemName || !description || !contactInfo}
+                >
+                  <ThemedText style={styles.submitButtonText}>
+                    Submit Report
+                  </ThemedText>
+                </TouchableOpacity>
+              </>
+            )}
+          </ScrollView>
+        </ThemedView>
+      </View>
+    </Modal>
   );
 }

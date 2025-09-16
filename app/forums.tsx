@@ -20,10 +20,7 @@ import FillHazardForm from "@/components/Hazards/FillHazardForm";
 import FillEventForm from "@/components/Events/FillEventForm";
 import LostItemForm from "@/components/LostAndFound/LostItemForm";
 import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
-import { modalStyles } from "@/components/Hazards/styles";
-import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 
 interface Report {
   reportid: number;
@@ -376,10 +373,10 @@ export default function Forums() {
             <Text style={styles.modalTitle}>Create new...</Text>
             <View style={styles.modalGrid}>
               {[
+                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
                 { key: "event", label: "Event", icon: "calendar-outline", color: categoryColors.event },
                 { key: "lost", label: "Lost Item", icon: "help-circle-outline", color: categoryColors.lost },
                 { key: "found", label: "Found Item", icon: "checkmark-circle-outline", color: categoryColors.found },
-                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
               ].map((c) => (
                 <TouchableOpacity
                   key={c.key}
@@ -414,152 +411,36 @@ export default function Forums() {
       </Modal>
 
       {/* Hazard form modal */}
-      {isHazardFormVisible && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setIsHazardFormVisible(false)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setIsHazardFormVisible(false)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={scheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Hazard
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FillHazardForm onSubmit={() => setIsHazardFormVisible(false)} userId={userId ?? ""} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FillHazardForm 
+        visible={isHazardFormVisible}
+        onSubmit={() => setIsHazardFormVisible(false)} 
+        onClose={() => setIsHazardFormVisible(false)}
+        userId={userId ?? ""} 
+      />
 
       {/* Event form modal */}
-      {isEventFormVisible && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setIsEventFormVisible(false)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setIsEventFormVisible(false)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={scheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Create New Event
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FillEventForm onSubmit={() => setIsEventFormVisible(false)} userId={userId ?? ""} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FillEventForm 
+        visible={isEventFormVisible}
+        onSubmit={() => setIsEventFormVisible(false)} 
+        onClose={() => setIsEventFormVisible(false)}
+        userId={userId ?? ""} 
+      />
 
       {/* Lost Item form modal */}
-      {isLostItemVisible && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setIsLostItemVisible(false)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setIsLostItemVisible(false)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={scheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Lost Item
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <LostItemForm onSubmit={() => setIsLostItemVisible(false)} userId={userId ?? ""} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <LostItemForm 
+        visible={isLostItemVisible}
+        onSubmit={() => setIsLostItemVisible(false)} 
+        onClose={() => setIsLostItemVisible(false)}
+        userId={userId ?? ""} 
+      />
 
       {/* Found Item form modal */}
-      {isFoundItemVisible && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setIsFoundItemVisible(false)}
-        >
-          <View style={modalStyles.centeredView}>
-            <ThemedView style={modalStyles.modalView}>
-              <View style={modalStyles.header}>
-                <TouchableOpacity 
-                  onPress={() => setIsFoundItemVisible(false)}
-                  style={modalStyles.closeButton}
-                >
-                  <IconSymbol 
-                    name="chevron.left" 
-                    color={scheme === 'dark' ? '#fff' : '#000'}
-                  />
-                </TouchableOpacity>
-                <ThemedText type="subtitle" style={modalStyles.headerTitle}>
-                  Report Found Item
-                </ThemedText>
-                <View style={modalStyles.placeholder} />
-              </View>
-              
-              <ScrollView 
-                style={modalStyles.scrollView}
-                contentContainerStyle={modalStyles.scrollContent}
-              >
-                <FoundItemForm onSubmit={() => setIsFoundItemVisible(false)} userId={userId ?? ""} />
-              </ScrollView>
-            </ThemedView>
-          </View>
-        </Modal>
-      )}
+      <FoundItemForm 
+        visible={isFoundItemVisible}
+        onSubmit={() => setIsFoundItemVisible(false)} 
+        onClose={() => setIsFoundItemVisible(false)}
+        userId={userId ?? ""} 
+      />
 
       {/* Distance sheet */}
       <Modal

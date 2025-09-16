@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView, Modal } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
-import { formStyles } from './styles';
+import { makeFormStyles, getTheme, modalStyles } from './styles';
 import { submitEvent } from '@/services/eventService';
 import ImagePicker from '@/components/ImagePicker';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 interface FillEventFormProps {
   onSubmit: () => void;
+  onClose: () => void;
   userId: string;
+  visible: boolean;
 }
 
-export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) {
+export default function FillEventForm({ onSubmit, onClose, userId, visible }: FillEventFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
+  const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
+  const styles = useMemo(() => makeFormStyles(theme), [theme]);
+  
   const [eventType, setEventType] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
@@ -128,127 +135,151 @@ export default function FillEventForm({ onSubmit, userId }: FillEventFormProps) 
     }
   };
 
-  // Show loading indicator while fetching location
-  if (loadingLocation) {
-    return (
-      <View style={formStyles.container}>
-        <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
-        <ThemedText>Fetching current location...</ThemedText>
-      </View>
-    );
-  }
-
-  // Render the form once location is available
+  // Render the modal wrapper
   return (
-    <View style={formStyles.container}>
-      {/* Event Type Input */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Event Type*</ThemedText>
-        <TextInput
-          style={[
-            formStyles.input,
-            { borderColor: Colors[colorScheme].icon, color: Colors[colorScheme].text }
-          ]}
-          value={eventType}
-          onChangeText={setEventType}
-          placeholder="What type of event? (Concert, Meeting, etc.)"
-          placeholderTextColor={Colors[colorScheme].icon}
-        />
-      </View>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={modalStyles.centeredView}>
+        <ThemedView style={modalStyles.modalView}>
+          <View style={modalStyles.header}>
+            <TouchableOpacity 
+              onPress={onClose}
+              style={modalStyles.closeButton}
+            >
+              <IconSymbol 
+                name="chevron.left" 
+                color={colorScheme === 'dark' ? '#fff' : '#000'}
+              />
+            </TouchableOpacity>
+            <ThemedText type="subtitle" style={modalStyles.headerTitle}>
+              Create New Event
+            </ThemedText>
+            <View style={modalStyles.placeholder} />
+          </View>
+          
+          <ScrollView 
+            style={modalStyles.scrollView}
+            contentContainerStyle={modalStyles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {loadingLocation ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.primaryBtnBg} />
+                <ThemedText style={styles.loadingText}>Fetching current location...</ThemedText>
+              </View>
+            ) : (
+              <>
+                {/* Event Type Input */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Event Type*</ThemedText>
+              <TextInput
+                style={styles.input}
+                value={eventType}
+                onChangeText={setEventType}
+                placeholder="What type of event? (Concert, Meeting, etc.)"
+                placeholderTextColor={theme.textSecondary}
+              />
+            </View>
 
-      {/* Event Description Input */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Description*</ThemedText>
-        <TextInput
-          style={[
-            formStyles.textArea,
-            { borderColor: Colors[colorScheme].icon, color: Colors[colorScheme].text }
-          ]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Describe the event"
-          placeholderTextColor={Colors[colorScheme].icon}
-          multiline
-          numberOfLines={4}
-        />
-      </View>
+            {/* Event Description Input */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Description*</ThemedText>
+              <TextInput
+                style={styles.textArea}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Describe the event"
+                placeholderTextColor={theme.textSecondary}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
 
-      {/* Date Selector with DateTimePicker */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Date*</ThemedText>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={[
-            formStyles.input,
-            { borderColor: Colors[colorScheme].icon, justifyContent: 'center' }
-          ]}
-        >
-          <ThemedText>{formatDate(date)}</ThemedText>
-        </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleDateChange}
-            minimumDate={new Date()}
-          />
-        )}
-      </View>
+            {/* Date and Time Selector Row */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Date & Time*</ThemedText>
+              <View style={styles.dateTimeRow}>
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(true)}
+                  style={styles.dateTimeButton}
+                >
+                  <ThemedText style={styles.dateTimeText}>{formatDate(date)}</ThemedText>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(true)}
+                  style={styles.dateTimeButton}
+                >
+                  <ThemedText style={time ? styles.dateTimeText : styles.dateTimePlaceholder}>
+                    {time || 'Select time'}
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+              
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handleDateChange}
+                  minimumDate={new Date()}
+                />
+              )}
+              
+              {showTimePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="time"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handleTimeChange}
+                />
+              )}
+            </View>
 
-      {/* Time Selector with DateTimePicker */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Time*</ThemedText>
-        <TouchableOpacity
-          onPress={() => setShowTimePicker(true)}
-          style={[
-            formStyles.input,
-            { borderColor: Colors[colorScheme].icon, justifyContent: 'center' }
-          ]}
-        >
-          <ThemedText>{time || 'Select time'}</ThemedText>
-        </TouchableOpacity>
-        {showTimePicker && (
-          <DateTimePicker
-            value={date}
-            mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleTimeChange}
-          />
-        )}
-      </View>
+            {/* Display the current location */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Current Location</ThemedText>
+              <View style={styles.locationDisplay}>
+                <ThemedText style={styles.locationText}>
+                  {currentCoordinates 
+                    ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` 
+                    : 'Not available'
+                  }
+                </ThemedText>
+              </View>
+            </View>
 
-      {/* Display the current location */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Current Location:</ThemedText>
-        <ThemedText>
-          {currentCoordinates ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` : 'Not available'}
-        </ThemedText>
-      </View>
+            {/* Image Picker */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Add Photo (Optional)</ThemedText>
+              <ImagePicker 
+                onImageSelected={handleImageSelected} 
+                onImageRemoved={handleImageRemoved} 
+              />
+            </View>
 
-      {/* Image Picker */}
-      <View style={formStyles.inputGroup}>
-        <ThemedText type="defaultSemiBold">Add Photo (Optional)</ThemedText>
-        <ImagePicker 
-          onImageSelected={handleImageSelected} 
-          onImageRemoved={handleImageRemoved} 
-        />
+                {/* Submit Button - disabled if required fields are empty */}
+                <TouchableOpacity
+                  style={[
+                    styles.submitButton,
+                    (!eventType || !description || !time) && styles.disabledButton
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={!eventType || !description || !time}
+                >
+                  <ThemedText style={styles.submitButtonText}>
+                    Submit Event
+                  </ThemedText>
+                </TouchableOpacity>
+              </>
+            )}
+          </ScrollView>
+        </ThemedView>
       </View>
-
-      {/* Submit Button - disabled if required fields are empty */}
-      <TouchableOpacity
-        style={[
-          formStyles.submitButton,
-          { backgroundColor: Colors[colorScheme].tint },
-          (!eventType || !description || !time) && formStyles.disabledButton
-        ]}
-        onPress={handleSubmit}
-        disabled={!eventType || !description || !time}
-      >
-        <ThemedText style={formStyles.submitButtonText} darkColor="black" lightColor="#fff">
-          Submit Event
-        </ThemedText>
-      </TouchableOpacity>
-    </View>
+    </Modal>
   );
 }
