@@ -154,6 +154,18 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                     numberOfLines={4}
                   />
                 </View>
+                
+                {/* Contact Information Input */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    value={contactInfo}
+                    onChangeText={setContactInfo}
+                    placeholder="How can someone contact you?"
+                    placeholderTextColor={theme.textSecondary}
+                  />
+                </View>
 
                 {/* Display current location for user reference */}
                 <View style={styles.inputGroup}>
@@ -166,18 +178,6 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                       }
                     </ThemedText>
                   </View>
-                </View>
-
-                {/* Contact Information Input */}
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    value={contactInfo}
-                    onChangeText={setContactInfo}
-                    placeholder="How can someone contact you if found?"
-                    placeholderTextColor={theme.textSecondary}
-                  />
                 </View>
 
                 {/* Image Picker */}

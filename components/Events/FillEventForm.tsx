@@ -179,7 +179,7 @@ export default function FillEventForm({ onSubmit, onClose, userId, visible }: Fi
                 style={styles.input}
                 value={eventType}
                 onChangeText={setEventType}
-                placeholder="What type of event? (Concert, Meeting, etc.)"
+                placeholder="What type of event?"
                 placeholderTextColor={theme.textSecondary}
               />
             </View>

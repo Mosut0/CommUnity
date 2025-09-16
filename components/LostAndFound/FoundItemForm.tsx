@@ -147,10 +147,22 @@ export default function FoundItemForm({ onSubmit, onClose, userId, visible }: Fo
                     style={styles.textArea}
                     value={description}
                     onChangeText={setDescription}
-                    placeholder="Describe the item (color, brand, distinguishing features, etc.)"
+                    placeholder="Describe the item"
                     placeholderTextColor={theme.textSecondary}
                     multiline
                     numberOfLines={4}
+                  />
+                </View>
+
+                {/* Contact Information Input */}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    value={contactInfo}
+                    onChangeText={setContactInfo}
+                    placeholder="How can the owner reach you?"
+                    placeholderTextColor={theme.textSecondary}
                   />
                 </View>
 
@@ -165,18 +177,6 @@ export default function FoundItemForm({ onSubmit, onClose, userId, visible }: Fo
                       }
                     </ThemedText>
                   </View>
-                </View>
-
-                {/* Contact Information Input */}
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    value={contactInfo}
-                    onChangeText={setContactInfo}
-                    placeholder="How can the owner reach you?"
-                    placeholderTextColor={theme.textSecondary}
-                  />
                 </View>
 
                 {/* Image Picker */}

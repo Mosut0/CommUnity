@@ -146,7 +146,7 @@ export default function FillHazardForm({ onSubmit, onClose, userId, visible }: F
                     style={styles.textArea}
                     value={description}
                     onChangeText={setDescription}
-                    placeholder="Describe the hazard (severity, shape, etc.)"
+                    placeholder="Describe the hazard"
                     placeholderTextColor={theme.textSecondary}
                     multiline
                     numberOfLines={4}
