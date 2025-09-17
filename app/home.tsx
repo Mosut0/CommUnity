@@ -106,6 +106,7 @@ export default function Home() {
   
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   // UI state management
   // Forums-style create sheet visibility
   const [isCreateVisible, setIsCreateVisible] = useState(false);
@@ -268,6 +269,7 @@ export default function Home() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setAuthReady(true);
       if (session) {
         // Fetch the user's distance radius from the database
         supabase.auth.getUser().then(({ data, error }) => {
@@ -284,8 +286,16 @@ export default function Home() {
     });
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setAuthReady(true);
     });
   }, []);
+
+  // Redirect away only after auth state is resolved to avoid false negatives
+  useEffect(() => {
+    if (authReady && !session) {
+      router.replace('/sign-in');
+    }
+  }, [authReady, session]);
 
   useEffect(() => {
     // Short delay to let the map initialize properly
@@ -331,7 +341,7 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setIsProfileModalVisible(false);
-    router.push('/'); // Redirect to the authentication page
+    router.replace('/sign-in'); // Replace stack so user cannot go back to Home
   };
 
   // Handle password change
