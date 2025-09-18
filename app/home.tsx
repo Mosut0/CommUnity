@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform, Text } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
-import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import LostItemForm from '@/components/LostAndFound/LostItemForm';
 import FoundItemForm from '@/components/LostAndFound/FoundItemForm';
 import FillHazardForm from '@/components/Hazards/FillHazardForm';
 import FillEventForm from '@/components/Events/FillEventForm';
 
 import Slider from '@react-native-community/slider';
+import { kmToMiles} from '@/utils/distance';
 
 export default function Home() {
   // Safe area insets (to avoid notch / dynamic island overlap)
@@ -151,17 +150,21 @@ export default function Home() {
   const [distanceRadius, setDistanceRadius] = useState(20);
   const [sliderValue, setSliderValue] = useState(20);
   const [isDistanceModalVisible, setIsDistanceModalVisible] = useState(false);
+  const [distanceUnit, setDistanceUnit] = useState<'km' | 'miles'>('km');
   const [isFabExpanded, setIsFabExpanded] = useState(false);
   const fabAnim = React.useRef(new Animated.Value(0)).current; // 0 collapsed, 1 expanded
   // Animated settings sheet
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
   const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
-  const [nextModal, setNextModal] = useState<null | 'password' | 'distance'>(null);
+  const [nextModal, setNextModal] = useState<null | 'password' | 'distance' | 'unit'>(null);
   // Animated password & distance sheets
   const [changePasswordMounted, setChangePasswordMounted] = useState(false);
   const [distanceMounted, setDistanceMounted] = useState(false);
+  const [unitMounted, setUnitMounted] = useState(false);
+  const [isUnitModalVisible, setIsUnitModalVisible] = useState(false);
   const passwordAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden 1 visible
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
+  const unitAnim = React.useRef(new Animated.Value(0)).current;
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
   // Keyboard handling so password sheet isn't covered
@@ -213,6 +216,8 @@ export default function Home() {
             setIsChangePasswordModalVisible(true);
           } else if (nextModal === 'distance') {
             openDistanceModal();
+          } else if (nextModal === 'unit') {
+            openUnitModal();
           }
           setNextModal(null);
         }
@@ -225,10 +230,25 @@ export default function Home() {
       const { data, error } = await supabase.auth.getUser();
       if (!error && data?.user) {
         const userMetadata = data.user.user_metadata;
-        setSliderValue(userMetadata?.distance_radius || 20);
+        const radiusKm = userMetadata?.distance_radius || 20;
+        const unit = userMetadata?.distance_unit || 'km';
+        setDistanceUnit(unit);
+        // Always store km in the slider, display conversion is handled in the UI
+        setSliderValue(radiusKm);
       }
     }
     setIsDistanceModalVisible(true);
+  };
+
+  const openUnitModal = async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        const userMetadata = data.user.user_metadata;
+        setDistanceUnit(userMetadata?.distance_unit || 'km');
+      }
+    }
+    setIsUnitModalVisible(true);
   };
 
   // Animate password modal
@@ -264,6 +284,19 @@ export default function Home() {
     }
   }, [isDistanceModalVisible, distanceMounted]);
 
+  // Animate unit modal
+  useEffect(() => {
+    if (isUnitModalVisible) {
+      setUnitMounted(true);
+      unitAnim.stopAnimation();
+      unitAnim.setValue(0);
+      Animated.timing(unitAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    } else if (unitMounted) {
+      Animated.timing(unitAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
+        .start(({ finished }) => { if (finished) setUnitMounted(false); });
+    }
+  }, [isUnitModalVisible, unitMounted]);
+
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -278,6 +311,7 @@ export default function Home() {
             console.log('Fetched user metadata:', userMetadata);
             setDistanceRadius(userMetadata.distance_radius || 20);
             setSliderValue(userMetadata.distance_radius || 20);
+            setDistanceUnit(userMetadata.distance_unit || 'km');
           }
         });
       }
@@ -321,10 +355,57 @@ export default function Home() {
       const { data, error } = await supabase.auth.getUser();
       if (!error && data && data.user) {
         const userMetadata = data.user.user_metadata;
-        setSliderValue(userMetadata.distance_radius || 20);
+        const radiusKm = userMetadata.distance_radius || 20;
+        const unit = userMetadata.distance_unit || 'km';
+        setDistanceUnit(unit);
+        // Always store km in the slider, display conversion is handled in the UI
+        setSliderValue(radiusKm);
       }
     }
     setIsDistanceModalVisible(!isDistanceModalVisible);
+  };
+
+  // Toggle the visibility of the unit modal and fetch current value
+  const toggleUnitModal = async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data && data.user) {
+        const userMetadata = data.user.user_metadata;
+        setDistanceUnit(userMetadata.distance_unit || 'km');
+      }
+    }
+    setIsUnitModalVisible(!isUnitModalVisible);
+  };
+
+  // Handle saving the new distance unit
+  const handleSaveUnit = async () => {
+    if (session) {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          distance_unit: distanceUnit,
+          user_metadata: {
+            distance_unit: distanceUnit,
+          },
+        }
+      });
+
+      if (error) {
+        Alert.alert('Error', 'Failed to update distance unit');
+        console.error('Failed to update distance unit:', error);
+      } else {
+        Alert.alert('Success', 'Distance unit updated successfully');
+        console.log('Updated distance unit to:', distanceUnit);
+
+        // Fetch updated user data after saving
+        const { data: updatedUser, error: fetchError } = await supabase.auth.getUser();
+        if (fetchError) {
+          console.error('Error fetching updated user:', fetchError);
+        } else {
+          console.log('Updated user metadata:', updatedUser?.user?.user_metadata);
+        }
+      }
+    }
+    setIsUnitModalVisible(false);
   };
 
   // Handle user sign out
@@ -488,6 +569,17 @@ export default function Home() {
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
               </TouchableOpacity>
+              <View style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]} />
+              <TouchableOpacity style={styles.sheetRow} onPress={() => { setNextModal('unit'); setIsProfileModalVisible(false); }}>
+                <View style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}>
+                  <MaterialIcons name="straighten" size={20} color={uiTheme.textSecondary} />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}>Distance Unit</ThemedText>
+                  <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Switch between km and miles</ThemedText>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
+              </TouchableOpacity>
             </View>
             <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}> 
               <TouchableOpacity style={styles.sheetRow} onPress={handleSignOut}>
@@ -564,7 +656,7 @@ export default function Home() {
             <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 12 }]}>Distance Radius</ThemedText>
             <Slider
               style={{ width: '100%', height: 40 }}
-              minimumValue={1}
+              minimumValue={2}
               maximumValue={100}
               step={1}
               value={sliderValue}
@@ -573,8 +665,66 @@ export default function Home() {
               maximumTrackTintColor={colorScheme==='dark' ? '#374151' : '#CBD5E1'}
               thumbTintColor={uiTheme.accent}
             />
-            <ThemedText style={{ color: uiTheme.textSecondary, marginBottom: 14 }}>{sliderValue} km</ThemedText>
+            <ThemedText style={{ color: uiTheme.textSecondary, marginBottom: 14 }}>
+              {distanceUnit === 'miles' 
+                ? `${Math.round(kmToMiles(sliderValue))} miles` 
+                : `${sliderValue} km`}
+            </ThemedText>
             <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={handleSaveDistance}>
+              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
+            </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+
+      {/* Change Distance Unit Modal */}
+      <Modal transparent animationType="none" visible={unitMounted} onRequestClose={toggleUnitModal}>
+        <Animated.View style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay, opacity: unitAnim }]}> 
+          <Pressable style={{ flex: 1 }} onPress={toggleUnitModal} />
+          <Animated.View
+            style={[styles.sheetInner, {
+              backgroundColor: uiTheme.cardBg,
+              borderColor: uiTheme.divider,
+              paddingBottom: 20 + insets.bottom,
+              borderTopWidth: 1,
+              transform: [{ translateY: unitAnim.interpolate({ inputRange: [0,1], outputRange: [60,0] }) }],
+              opacity: unitAnim,
+            }]}
+          >
+            <View style={styles.sheetHandleWrap}><View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} /></View>
+            <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 20 }]}>Distance Unit</ThemedText>
+            
+            <View style={styles.radioGroup}>
+              <TouchableOpacity 
+                style={styles.radioOption} 
+                onPress={() => setDistanceUnit('km')}
+              >
+                <View style={[styles.radioCircle, { borderColor: uiTheme.divider }]}>
+                  {distanceUnit === 'km' && (
+                    <View style={[styles.radioInner, { backgroundColor: uiTheme.accent }]} />
+                  )}
+                </View>
+                <ThemedText style={[styles.radioLabel, { color: uiTheme.textPrimary }]}>
+                  Kilometers (km)
+                </ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.radioOption} 
+                onPress={() => setDistanceUnit('miles')}
+              >
+                <View style={[styles.radioCircle, { borderColor: uiTheme.divider }]}>
+                  {distanceUnit === 'miles' && (
+                    <View style={[styles.radioInner, { backgroundColor: uiTheme.accent }]} />
+                  )}
+                </View>
+                <ThemedText style={[styles.radioLabel, { color: uiTheme.textPrimary }]}>
+                  Miles (mi)
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+            
+            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent, marginTop: 14 }]} onPress={handleSaveUnit}>
               <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
             </TouchableOpacity>
           </Animated.View>
@@ -1079,5 +1229,32 @@ const styles = StyleSheet.create({
   },
   createCellText: {
     fontWeight: '600',
+  },
+  radioGroup: {
+    gap: 2,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  radioLabel: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

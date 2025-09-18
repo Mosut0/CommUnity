@@ -297,7 +297,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
           if (status === "SUBSCRIBED") {
             console.log("Successfully subscribed to real-time updates");
           } else if (status === "CHANNEL_ERROR") {
-            console.error("Subscription error, retrying...");
+            console.log("Subscription error, retrying...");
             // Retry subscription after a delay
             setTimeout(() => {
               setupRealtimeSubscriptions();

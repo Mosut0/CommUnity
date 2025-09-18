@@ -11,13 +11,13 @@ import {
   Platform,
   Share,
   Image,
-  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
+import {getDistanceKm, formatDistance } from "@/utils/distance";
 
 interface DetailedReport {
   reportid: number;
@@ -88,6 +88,7 @@ export default function ReportDetails() {
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [distanceText, setDistanceText] = useState<string | null>(null);
+  const [distanceUnit, setDistanceUnit] = useState<'km' | 'miles'>('km');
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -107,6 +108,16 @@ export default function ReportDetails() {
   }, []);
 
   useEffect(() => {
+    // Load user's distance unit preference
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!error && data?.user) {
+        const userMetadata = data.user.user_metadata;
+        setDistanceUnit(userMetadata?.distance_unit || 'km');
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (reportId) {
       fetchReportDetails();
     }
@@ -122,11 +133,11 @@ export default function ReportDetails() {
           coords.latitude,
           coords.longitude
         );
-        const value = distance < 10 ? distance.toFixed(1) : Math.round(distance).toString();
-        setDistanceText(`${value} km away`);
+        const formattedDistance = formatDistance(distance, distanceUnit);
+        setDistanceText(formattedDistance);
       }
     }
-  }, [report, location]);
+  }, [report, location, distanceUnit]);
 
   const fetchReportDetails = async () => {
     try {
@@ -493,21 +504,6 @@ export default function ReportDetails() {
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-/* ---------- helpers ---------- */
-function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-function deg2rad(deg: number) {
-  return deg * (Math.PI / 180);
 }
 
 /* ---------- styles ---------- */

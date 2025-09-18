@@ -9,18 +9,17 @@ import {
   FlatList,
   useColorScheme,
   Alert,
-  ScrollView,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { getFormattedDistance, getDistanceKm, kmToMiles } from "@/utils/distance";
 import FillHazardForm from "@/components/Hazards/FillHazardForm";
 import FillEventForm from "@/components/Events/FillEventForm";
 import LostItemForm from "@/components/LostAndFound/LostItemForm";
 import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
-import { ThemedText } from "@/components/ThemedText";
 
 interface Report {
   reportid: number;
@@ -105,6 +104,7 @@ export default function Forums() {
 
   const [distanceRadius, setDistanceRadius] = useState<number>(20);
   const [pendingRadius, setPendingRadius] = useState<number>(20);
+  const [distanceUnit, setDistanceUnit] = useState<'km' | 'miles'>('km');
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -140,8 +140,10 @@ export default function Forums() {
         console.error("Error fetching distance radius:", error);
       } else if (data?.user) {
         const r = data.user.user_metadata?.distance_radius || 20;
+        const unit = data.user.user_metadata?.distance_unit || 'km';
         setDistanceRadius(r);
         setPendingRadius(r);
+        setDistanceUnit(unit);
         setUserId(data.user.id);
       }
     });
@@ -217,16 +219,15 @@ export default function Forums() {
       if (!location) return null;
       const c = parseLocation(locStr);
       if (!c) return null;
-      const d = getDistanceKm(
+      return getFormattedDistance(
         location.coords.latitude,
         location.coords.longitude,
         c.latitude,
-        c.longitude
+        c.longitude,
+        distanceUnit
       );
-      const value = d < 10 ? d.toFixed(1) : Math.round(d).toString();
-      return `${value} km away`;
     },
-    [location]
+    [location, distanceUnit]
   );
 
   const tabs = useMemo<(keyof typeof categoryDisplayNames)[]>(
@@ -311,12 +312,6 @@ export default function Forums() {
 
         <View style={styles.actionSpacer} />
 
-        {/* Distance */}
-        <TouchableOpacity style={styles.actionBtn} onPress={() => setIsDistanceVisible(true)}>
-          <Ionicons name="locate-outline" size={18} color={theme.textPrimary} />
-          <Text style={styles.actionText}>Distance</Text>
-        </TouchableOpacity>
-
         {/* New Item — right */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => setIsCreateVisible(true)}>
           <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
@@ -353,7 +348,11 @@ export default function Forums() {
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Ionicons name="search-outline" size={26} color={theme.textSecondary} />
-            <Text style={styles.emptyText}>No reports within {distanceRadius} km.</Text>
+            <Text style={styles.emptyText}>
+              No reports within {distanceUnit === 'miles' 
+                ? `${Math.round(kmToMiles(distanceRadius))} miles` 
+                : `${distanceRadius} km`}
+            </Text>
           </View>
         }
       />
@@ -491,21 +490,6 @@ export default function Forums() {
       </Modal>
     </SafeAreaView>
   );
-}
-
-/* ---------- helpers ---------- */
-function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-function deg2rad(deg: number) {
-  return deg * (Math.PI / 180);
 }
 
 /* ---------- styles (theme-aware) ---------- */
