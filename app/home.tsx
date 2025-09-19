@@ -14,22 +14,11 @@ import FillEventForm from '@/components/Events/FillEventForm';
 
 import Slider from '@react-native-community/slider';
 import { kmToMiles} from '@/utils/distance';
+import { MARKER_COLORS } from '@/constants/Markers';
 
 export default function Home() {
-  // Safe area insets (to avoid notch / dynamic island overlap)
   const insets = useSafeAreaInsets();
-  // Filter state for map pins
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
-  // Colors aligned with `app/forums.tsx` categoryColors
-  const FORUM_COLORS = {
-    event: '#7C3AED', // purple-600
-    lost:  '#EAB308', // yellow-500
-    found: '#22C55E', // green-500
-    safety:'#EF4444', // red-500
-  };
-  // Filter bar component (defined inside to use hooks/state correctly)
-  // Preserve horizontal scroll offset when tapping a filter so the selected option
-  // remains in the same visual position.
   const filterScrollRef = React.useRef<ScrollView | null>(null);
   const scrollOffsetRef = React.useRef<number>(0);
 
@@ -41,10 +30,7 @@ export default function Home() {
   };
 
   const handleFilterPress = (filterValue: 'all' | 'hazard' | 'event' | 'lost' | 'found') => {
-    // set selected filter immediately
     setSelectedFilter(filterValue);
-    // restore previous scroll offset instantly so the tapped item doesn't move
-    // Call several times synchronously and in next frames to beat any layout changes
     const offset = scrollOffsetRef.current;
     scrollToOffset(offset);
     requestAnimationFrame(() => scrollToOffset(offset));
@@ -74,28 +60,28 @@ export default function Home() {
         style={[styles.filterButton, selectedFilter === 'hazard' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('hazard')}
       >
-  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? FORUM_COLORS.safety : '#888'} />
+  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? MARKER_COLORS.safety : '#888'} />
         <ThemedText style={styles.filterText}>Hazards</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'event' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('event')}
       >
-  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? FORUM_COLORS.event : '#888'} />
+  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? MARKER_COLORS.event : '#888'} />
         <ThemedText style={styles.filterText}>Events</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'lost' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('lost')}
       >
-  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? FORUM_COLORS.lost : '#888'} />
+  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? MARKER_COLORS.lost : '#888'} />
         <ThemedText style={styles.filterText}>Lost</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'found' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('found')}
       >
-  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? FORUM_COLORS.found : '#888'} />
+  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? MARKER_COLORS.found : '#888'} />
         <ThemedText style={styles.filterText}>Found</ThemedText>
       </TouchableOpacity>
     </ScrollView>
@@ -829,10 +815,10 @@ export default function Home() {
             <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
             <View style={styles.createGrid}>
               {[
-                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: FORUM_COLORS.safety },
-                { key: 'event', label: 'Event', icon: 'calendar-outline', color: FORUM_COLORS.event },
-                { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: FORUM_COLORS.lost },
-                { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: FORUM_COLORS.found },
+                { key: 'safety', label: 'Hazard', icon: 'alert-circle-outline', color: MARKER_COLORS.safety },
+                { key: 'event', label: 'Event', icon: 'calendar-outline', color: MARKER_COLORS.event },
+                { key: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: MARKER_COLORS.lost },
+                { key: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: MARKER_COLORS.found },
               ].map(c => (
                 <TouchableOpacity
                   key={c.key}
