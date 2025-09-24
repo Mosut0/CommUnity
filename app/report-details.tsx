@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
 import {getDistanceKm, formatDistance } from "@/utils/distance";
+import { MARKER_COLORS } from "@/constants/Markers";
 
 interface DetailedReport {
   reportid: number;
@@ -68,13 +69,6 @@ const lightTheme: UiTheme = {
   primaryBtnBg: "#2563EB",
   primaryBtnText: "#FFFFFF",
   headerBg: "#FFFFFF",
-};
-
-const categoryColors: Record<string, string> = {
-  event: "#7C3AED",  // purple-600
-  lost:  "#EAB308",  // yellow-500
-  found: "#22C55E",  // green-500
-  safety:"#EF4444",  // red-500
 };
 
 export default function ReportDetails() {
@@ -209,13 +203,13 @@ export default function ReportDetails() {
   const getIconForCategory = (category: string) => {
     switch (category) {
       case "event":
-        return { name: "calendar-outline", color: categoryColors.event };
+        return { name: "calendar-outline", color: MARKER_COLORS.event };
       case "lost":
-        return { name: "help-circle-outline", color: categoryColors.lost };
+        return { name: "help-circle-outline", color: MARKER_COLORS.lost };
       case "found":
-        return { name: "checkmark-circle-outline", color: categoryColors.found };
+        return { name: "checkmark-circle-outline", color: MARKER_COLORS.found };
       case "safety":
-        return { name: "alert-circle-outline", color: categoryColors.safety };
+        return { name: "alert-circle-outline", color: MARKER_COLORS.safety };
       default:
         return { name: "information-circle-outline", color: "#60A5FA" };
     }
