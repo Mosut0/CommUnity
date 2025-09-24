@@ -10,6 +10,9 @@ module.exports = {
     setupFilesAfterEnv: ['./jest.setup.js'],
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/$1',
+        '^react-native-maps$': '<rootDir>/__mocks__/react-native-maps.js',
+        '^@expo/vector-icons$': '<rootDir>/__mocks__/@expo/vector-icons.js',
+        '^expo-font$': '<rootDir>/__mocks__/expo-font.js',
     },
     silent: true,
 };
