@@ -4,6 +4,7 @@ import { Marker, Callout, MapMarker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '../ThemedText';
 import { Report, getMarkerColor, getReportTitle, getIconProps } from './markerUtils';
+import { router } from 'expo-router';
 
 interface ReportMarkerProps {
   report: Report;
@@ -30,6 +31,13 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
 
   const handlePress = () => {
     onPress(report);
+  };
+
+  const handleDetailsPress = () => {
+    router.push({
+      pathname: "/forums/report/[id]",
+      params: { id: String(report.reportid) }
+    });
   };
 
   return (
@@ -63,7 +71,7 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
         />
       )}
       
-      <Callout tooltip>
+      <Callout tooltip onPress={handleDetailsPress}>
         <View
           style={[
             styles.callout,
@@ -84,6 +92,9 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
               Time: {new Date(report.time).toLocaleString()}
             </ThemedText>
           )}
+          <ThemedText style={{ marginTop: 8, color: markerColor, fontWeight: 'bold' }}>
+            Tap for details →
+          </ThemedText>
         </View>
       </Callout>
     </Marker>
