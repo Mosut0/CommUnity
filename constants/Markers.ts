@@ -12,10 +12,10 @@ export const MARKER_COLORS = {
 // Category display names mapping
 export const CATEGORY_DISPLAY_NAMES = {
   All: "All",
-  Events: "event",
-  Hazards: "safety", 
-  Lost: "lost",
-  Found: "found",
+  Events: "Events",
+  Hazards: "Hazards", 
+  Lost: "Lost",
+  Found: "Found",
 } as const;
 
 // Database category names (for filtering)

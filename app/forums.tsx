@@ -219,7 +219,7 @@ export default function Forums() {
   );
 
   const tabs = useMemo<(keyof typeof CATEGORY_DISPLAY_NAMES)[]>(
-    () => ["All", "Events", "Lost", "Found", "Hazards"],
+    () => ["All", "Hazards", "Events", "Lost", "Found"],
     []
   );
 
