@@ -46,9 +46,6 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
-        <Ionicons name="arrow-back" size={24} color={theme.textPrimary} />
-      </TouchableOpacity>
       <View style={styles.headerWrap}>
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join CommUnity to share and stay informed</Text>
@@ -113,7 +110,6 @@ export default function SignUpScreen() {
 
 const makeStyles = (t: UiTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: t.pageBg, padding: 20, justifyContent: 'center' },
-  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 8 },
   headerWrap: { marginBottom: 24 },
   title: { color: t.textPrimary, fontSize: 28, fontWeight: '800', marginBottom: 6 },
   subtitle: { color: t.textSecondary, fontSize: 14 },

@@ -422,7 +422,7 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setIsProfileModalVisible(false);
-    router.replace('/welcome'); // Replace stack so user cannot go back to Home
+    router.replace('/sign-in'); // Replace stack so user cannot go back to Home
   };
 
   // Handle password change

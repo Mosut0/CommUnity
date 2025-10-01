@@ -17,7 +17,7 @@ export default function App() {
       if (session) {
         router.push('/home')
       } else {
-        router.replace('/welcome')
+        router.replace('/sign-in')
       }
     })
 
@@ -27,7 +27,7 @@ export default function App() {
       if (session && session.user) {
         router.push('/home')  // Redirect to '/home'
       } else if (!session) {
-        router.replace('/welcome')
+        router.replace('/sign-in')
       }
     })
   }, [router])
