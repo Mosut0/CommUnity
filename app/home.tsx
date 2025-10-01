@@ -91,6 +91,7 @@ export default function Home() {
   
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   // UI state management
   // Forums-style create sheet visibility
   const [isCreateVisible, setIsCreateVisible] = useState(false);
@@ -287,6 +288,7 @@ export default function Home() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setAuthReady(true);
       if (session) {
         // Fetch the user's distance radius from the database
         supabase.auth.getUser().then(({ data, error }) => {
@@ -304,8 +306,16 @@ export default function Home() {
     });
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setAuthReady(true);
     });
   }, []);
+
+  // Redirect away only after auth state is resolved to avoid false negatives
+  useEffect(() => {
+    if (authReady && !session) {
+      router.replace('/sign-in');
+    }
+  }, [authReady, session]);
 
   useEffect(() => {
     // Short delay to let the map initialize properly
@@ -398,7 +408,7 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setIsProfileModalVisible(false);
-    router.push('/'); // Redirect to the authentication page
+    router.replace('/sign-in'); // Replace stack so user cannot go back to Home
   };
 
   // Handle password change
@@ -471,9 +481,18 @@ export default function Home() {
         <View style={styles.filterWrapper}>
           <FilterBar />
         </View>
-        <TouchableOpacity style={styles.profileIcon} onPress={toggleProfileModal}>
-          <View style={styles.profileIconCircle}>
-            <MaterialIcons name="account-circle" size={28} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+        <View style={[styles.topBarDivider, colorScheme === 'dark' ? styles.topBarDividerDark : styles.topBarDividerLight]} />
+        <TouchableOpacity
+          style={styles.profileIcon}
+          onPress={toggleProfileModal}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel="Open profile and settings"
+        >
+          <View style={[
+            styles.profileIconCircle,
+            colorScheme === 'dark' ? styles.profileIconCircleDark : styles.profileIconCircleLight,
+          ]}>
+            <MaterialIcons name="account-circle" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
           </View>
         </TouchableOpacity>
       </View>
@@ -951,12 +970,33 @@ const styles = StyleSheet.create({
   zIndex: 30,
   },
   profileIconCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 20,
-    backgroundColor: '#ccc',
+    width: 28,
+    height: 28,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  profileIconCircleLight: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  profileIconCircleDark: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  topBarDivider: {
+    width: 1,
+    height: 30,
+    marginHorizontal: 8,
+    alignSelf: 'center',
+  },
+  topBarDividerLight: {
+    backgroundColor: '#E2E8F0',
+  },
+  topBarDividerDark: {
+    backgroundColor: '#374151',
   },
   // Modal styles
   modalContainer: {
