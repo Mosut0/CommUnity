@@ -119,17 +119,17 @@ export default function Home() {
       };
     }
     return {
-      pageBg: '#F8FAFC',
-      cardBg: '#FFFFFF',
-      surface: '#F1F5F9',
+      pageBg: '#F5F3EE',
+      cardBg: '#FAF9F6',
+      surface: '#F0EDE5',
       textPrimary: '#0F172A',
       textSecondary: '#475569',
-      divider: '#E2E8F0',
+      divider: '#E5E2DB',
       overlay: 'rgba(0,0,0,0.25)',
       accent: '#2563EB',
       danger: '#DC2626',
-      chipBg: '#F1F5F9',
-      inputBg: '#FFFFFF',
+      chipBg: '#F0EDE5',
+      inputBg: '#FAF9F6',
     };
   }, [colorScheme]);
   const [forceRender, setForceRender] = useState(false);
@@ -754,7 +754,7 @@ export default function Home() {
             ],
           }}
         >
-          <MaterialIcons name={isFabExpanded ? 'close' : 'more-vert'} size={26} color={'#fff'} />
+          <MaterialIcons name={isFabExpanded ? 'close' : 'more-vert'} size={26} color={'#000000ff'} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -789,7 +789,7 @@ export default function Home() {
             accessibilityLabel="Open Forums"
             accessibilityRole="button"
           >
-            <MaterialIcons name="format-list-bulleted" size={22} color="#fff" />
+            <MaterialIcons name="format-list-bulleted" size={22} color="#000000ff" />
           </TouchableOpacity>
         </Animated.View>
         {/* First (middle) action */}
@@ -812,7 +812,7 @@ export default function Home() {
             accessibilityLabel="Create report"
             accessibilityRole="button"
           >
-            <MaterialIcons name="add" size={26} color="#fff" />
+            <MaterialIcons name="add" size={26} color="#000000ff" />
           </TouchableOpacity>
         </Animated.View>
       </Animated.View>
@@ -841,7 +841,7 @@ export default function Home() {
               ].map(c => (
                 <TouchableOpacity
                   key={c.key}
-                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F1F5F9' }]}
+                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F0EDE5' }]}
                   onPress={() => {
                     if (!session) {
                       Alert.alert('Not signed in', 'Please sign in to submit a report.');
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
   left: 8,
   right: 8,
   zIndex: 20,
-  backgroundColor: '#fff',
+  backgroundColor: '#FAF9F6',
   paddingVertical: 8,
   paddingHorizontal: 4,
   borderBottomWidth: 1,
@@ -951,10 +951,10 @@ const styles = StyleSheet.create({
   gap: 8,
   },
   filterBarLight: {
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F3EE',
   },
   filterBarDark: {
-    backgroundColor: '#222',
+    backgroundColor: '#0B1220',
   },
   // Inline variant for using inside the top bar (non-absolute)
   filterBarInline: {
@@ -1011,7 +1011,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalLight: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FAF9F6',
   },
   modalDark: {
     backgroundColor: '#333',
@@ -1045,10 +1045,10 @@ const styles = StyleSheet.create({
   zIndex: 70,
   },
   fabLight: {
-    backgroundColor: '#0A7EA4', // Primary color for light theme
+    backgroundColor: '#FAF9F6', // Primary color for light theme
   },
   fabDark: {
-    backgroundColor: '#1E1E1E', // Darker background for dark theme
+    backgroundColor: '#0B1220', // Darker background for dark theme
   },
   fabText: {
     fontSize: 24,
@@ -1090,10 +1090,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   topBarLight: {
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F3EE',
   },
   topBarDark: {
-    backgroundColor: '#222',
+    backgroundColor: '#0B1220',
   },
 
   // Wrapper to ensure filter is scrollable and doesn't overlap the profile icon
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   panelLight: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FAF9F6',
   },
   panelDark: {
     backgroundColor: '#333',
