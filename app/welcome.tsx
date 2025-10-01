@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -52,11 +54,17 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
   const theme = scheme === 'dark' ? darkTheme : lightTheme;
-  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const { height } = Dimensions.get('window');
+  const styles = useMemo(() => makeStyles(theme, height), [theme, height]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={styles.iconContainer}>
@@ -120,62 +128,70 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryBtnText}>I Already Have an Account</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-const makeStyles = (t: UiTheme) =>
-  StyleSheet.create({
+const makeStyles = (t: UiTheme, screenHeight: number) => {
+  const isSmallScreen = screenHeight < 700;
+  const isMediumScreen = screenHeight >= 700 && screenHeight < 800;
+  
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: t.pageBg,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: 20,
-      paddingTop: 40,
+      paddingTop: isSmallScreen ? 20 : 40,
       paddingBottom: 40,
     },
     headerSection: {
       alignItems: 'center',
-      marginBottom: 40,
+      marginBottom: isSmallScreen ? 24 : 40,
     },
     iconContainer: {
-      marginBottom: 20,
+      marginBottom: isSmallScreen ? 12 : 20,
     },
     title: {
       color: t.textPrimary,
-      fontSize: 32,
+      fontSize: isSmallScreen ? 26 : 32,
       fontWeight: '800',
       textAlign: 'center',
-      marginBottom: 12,
+      marginBottom: isSmallScreen ? 8 : 12,
     },
     subtitle: {
       color: t.textSecondary,
-      fontSize: 16,
+      fontSize: isSmallScreen ? 14 : 16,
       textAlign: 'center',
-      lineHeight: 24,
+      lineHeight: isSmallScreen ? 20 : 24,
       paddingHorizontal: 20,
     },
     featuresSection: {
-      flex: 1,
-      gap: 16,
-      marginBottom: 32,
+      gap: isSmallScreen ? 12 : 16,
+      marginBottom: isSmallScreen ? 24 : 32,
     },
     featureCard: {
       backgroundColor: t.cardBg,
-      borderRadius: 16,
-      padding: 20,
+      borderRadius: isSmallScreen ? 12 : 16,
+      padding: isSmallScreen ? 16 : 20,
       borderWidth: 1,
       borderColor: t.divider,
       flexDirection: 'row',
       alignItems: 'flex-start',
-      gap: 16,
+      gap: isSmallScreen ? 12 : 16,
     },
     featureIconWrap: {
-      width: 48,
-      height: 48,
+      width: isSmallScreen ? 40 : 48,
+      height: isSmallScreen ? 40 : 48,
       borderRadius: 12,
       backgroundColor: t.chipBg,
       alignItems: 'center',
@@ -183,14 +199,14 @@ const makeStyles = (t: UiTheme) =>
     },
     featureTitle: {
       color: t.textPrimary,
-      fontSize: 16,
+      fontSize: isSmallScreen ? 15 : 16,
       fontWeight: '700',
-      marginBottom: 6,
+      marginBottom: 4,
     },
     featureDesc: {
       color: t.textSecondary,
-      fontSize: 13,
-      lineHeight: 18,
+      fontSize: isSmallScreen ? 12 : 13,
+      lineHeight: isSmallScreen ? 16 : 18,
     },
     featureTextWrap: {
       flex: 1,
@@ -200,9 +216,9 @@ const makeStyles = (t: UiTheme) =>
     },
     primaryBtn: {
       backgroundColor: t.primaryBtnBg,
-      paddingVertical: 16,
+      paddingVertical: isSmallScreen ? 14 : 16,
       paddingHorizontal: 24,
-      borderRadius: 16,
+      borderRadius: isSmallScreen ? 12 : 16,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
@@ -210,21 +226,22 @@ const makeStyles = (t: UiTheme) =>
     },
     primaryBtnText: {
       color: t.primaryBtnText,
-      fontSize: 17,
+      fontSize: isSmallScreen ? 16 : 17,
       fontWeight: '700',
     },
     secondaryBtn: {
       backgroundColor: t.chipBg,
-      paddingVertical: 16,
+      paddingVertical: isSmallScreen ? 14 : 16,
       paddingHorizontal: 24,
-      borderRadius: 16,
+      borderRadius: isSmallScreen ? 12 : 16,
       borderWidth: 1,
       borderColor: t.divider,
       alignItems: 'center',
     },
     secondaryBtnText: {
       color: t.textPrimary,
-      fontSize: 17,
+      fontSize: isSmallScreen ? 16 : 17,
       fontWeight: '600',
     },
   });
+};
