@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, useColorScheme, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { resolveTheme, darkTheme, UiTheme } from '@/lib/uiTheme';
@@ -35,19 +35,10 @@ export default function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
         <Ionicons name="arrow-back" size={24} color={theme.textPrimary} />
       </TouchableOpacity>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
       <View style={styles.headerWrap}>
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to continue to CommUnity</Text>
@@ -95,14 +86,12 @@ export default function SignInScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const makeStyles = (t: UiTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: t.pageBg },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingTop: 100 },
+  container: { flex: 1, backgroundColor: t.pageBg, padding: 20, justifyContent: 'center' },
   backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 8 },
   headerWrap: { marginBottom: 24 },
   title: { color: t.textPrimary, fontSize: 28, fontWeight: '800', marginBottom: 6 },
