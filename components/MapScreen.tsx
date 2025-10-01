@@ -61,6 +61,18 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
     };
   }, []);
 
+  // When the filter changes, clear any selected report to prevent callout/ref races
+  useEffect(() => {
+    if (selectedReport) {
+      // best-effort hide of previous callout
+      const mr = markerRefs.current[selectedReport.reportid];
+      if (mr && (mr as any).hideCallout) {
+        try { (mr as any).hideCallout(); } catch {}
+      }
+    }
+    setSelectedReport(null);
+  }, [filter]);
+
   // Fetch user location
   useEffect(() => {
     let subscription: Location.LocationSubscription;
