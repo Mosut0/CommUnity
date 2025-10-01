@@ -36,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="forums" options={{ headerShown: false }} />
         <Stack.Screen name="report-details" options={{ headerShown: false }} />
         {/* Auth screens have no header and no back button */}
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
       </Stack>
