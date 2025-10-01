@@ -21,6 +21,7 @@ import FillEventForm from "@/components/Events/FillEventForm";
 import LostItemForm from "@/components/LostAndFound/LostItemForm";
 import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
 import { MARKER_COLORS, CATEGORY_DISPLAY_NAMES } from "@/constants/Markers";
+import { ReportCard } from "@/components/ReportCard";
 
 interface Report {
   reportid: number;
@@ -223,66 +224,13 @@ export default function Forums() {
     []
   );
 
-  const getIconForCategory = (category: string) => {
-    switch (category) {
-      case "event":
-        return { name: "calendar-outline", color: MARKER_COLORS.event };
-      case "lost":
-        return { name: "help-circle-outline", color: MARKER_COLORS.lost };
-      case "found":
-        return { name: "checkmark-circle-outline", color: MARKER_COLORS.found };
-      case "safety":
-        return { name: "alert-circle-outline", color: MARKER_COLORS.safety };
-      default:
-        return { name: "information-circle-outline", color: "#60A5FA" };
-    }
-  };
-
   const renderReport = ({ item }: { item: Report }) => {
-    const title = item.eventtype || item.itemtype || item.hazardtype || "Details";
-    const iconMeta = getIconForCategory(item.category);
     const distanceText = toKmString(item.location);
-
     return (
-      <TouchableOpacity 
-        activeOpacity={0.8} 
-        style={styles.card}
-        onPress={() => router.push({
-          pathname: "./report-details" as any,
-          params: { reportId: item.reportid }
-        })}
-      >
-        <View style={styles.cardLeft}>
-          <View style={[styles.iconBubble, { backgroundColor: iconMeta.color + "22" }]}>
-            <Ionicons name={iconMeta.name as any} size={22} color={iconMeta.color} />
-          </View>
-
-          <View style={styles.cardTextWrap}>
-            <Text numberOfLines={1} style={styles.cardTitle}>
-              {title}
-            </Text>
-            <Text numberOfLines={2} style={styles.cardSubtitle}>
-              {item.description || "No additional details provided."}
-            </Text>
-
-            <View style={styles.chipsRow}>
-              <View style={styles.chip}>
-                <Ionicons name="location-outline" size={14} color={theme.textSecondary} />
-                <Text style={styles.chipText}>{distanceText ?? "Nearby"}</Text>
-              </View>
-
-              <View style={styles.chip}>
-                <MaterialCommunityIcons name="tag-outline" size={14} color={theme.textSecondary} />
-                <Text style={styles.chipText}>
-                  {item.category?.charAt(0).toUpperCase() + item.category?.slice(1)}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
-      </TouchableOpacity>
+      <ReportCard 
+        report={item} 
+        distanceText={distanceText}
+      />
     );
   };
 
@@ -386,7 +334,7 @@ export default function Forums() {
                     }
                   }}
                 >
-                  <View style={[styles.iconBubbleLg, { backgroundColor: c.color + "22" }]}>
+                  <View style={[styles.iconBubble, { backgroundColor: c.color + "22" }]}>
                     <Ionicons name={c.icon as any} size={24} color={c.color} />
                   </View>
                   <Text style={styles.modalCellText}>{c.label}</Text>
@@ -520,37 +468,10 @@ const makeStyles = (t: UiTheme) =>
     listContent: { padding: 14, paddingBottom: 24 },
     separator: { height: 10 },
 
-    card: {
-      backgroundColor: t.cardBg,
-      borderRadius: 16,
-      padding: 14,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      borderWidth: 1,
-      borderColor: t.divider,
-    },
-    cardLeft: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
-    iconBubble: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-    iconBubbleLg: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
-    cardTextWrap: { flex: 1 },
-    cardTitle: { color: t.textPrimary, fontSize: 16, fontWeight: "700", marginBottom: 2 },
-    cardSubtitle: { color: t.textSecondary, fontSize: 13, lineHeight: 18 },
-
-    chipsRow: { flexDirection: "row", gap: 8, marginTop: 10 },
-    chip: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      backgroundColor: t.chipBg,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 999,
-    },
-    chipText: { color: t.textSecondary, fontSize: 12, fontWeight: "600" },
-
     emptyWrap: { alignItems: "center", paddingTop: 40, gap: 10 },
     emptyText: { color: t.textSecondary, fontSize: 14 },
+
+    iconBubble: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 
     modalOverlay: { flex: 1, justifyContent: "flex-end" },
     modalSheet: {
