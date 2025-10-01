@@ -614,7 +614,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
             markerPressTimeoutRef.current = setTimeout(() => {
               markerPressedRef.current = false;
               markerPressTimeoutRef.current = null;
-            }, 200) as unknown as number;
+            }, 200);
 
             // Toggle selection: if already selected, deselect; otherwise select and show callout
             setSelectedReport((prev) => {
