@@ -624,14 +624,14 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
                 setTimeout(() => {
                   const mr = markerRefs.current[report.reportid];
                   if (mr && mr.showCallout) {
-                    try { mr.showCallout(); } catch (e) {}
+                    try { mr.showCallout(); } catch (e) { console.error("Error calling showCallout on marker:", e); }
                   }
                 }, 0);
               } else {
                 // If deselecting via marker tap, hide its callout immediately
                 const mr = markerRefs.current[report.reportid];
                 if (mr && mr.hideCallout) {
-                  try { mr.hideCallout(); } catch (e) {}
+                  try { mr.hideCallout(); } catch (e) { console.error("Error calling hideCallout on marker:", e); }
                 }
               }
 
