@@ -20,6 +20,7 @@ import FillHazardForm from "@/components/Hazards/FillHazardForm";
 import FillEventForm from "@/components/Events/FillEventForm";
 import LostItemForm from "@/components/LostAndFound/LostItemForm";
 import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
+import { MARKER_COLORS, CATEGORY_DISPLAY_NAMES } from "@/constants/Markers";
 
 interface Report {
   reportid: number;
@@ -31,26 +32,13 @@ interface Report {
   hazardtype?: string;
 }
 
-const categoryDisplayNames: Record<string, string> = {
-  All: "All",
-  Event: "Events",
-  Lost: "Lost",
-  Found: "Found",
-  Safety: "Hazards",
-};
+// Use constants from the centralized constants file
 const dbNameByDisplay: Record<string, string> = {
   All: "all",
   Events: "event",
   Lost: "lost",
   Found: "found",
   Hazards: "safety",
-};
-
-const categoryColors: Record<string, string> = {
-  event: "#7C3AED", // purple-600
-  lost: "#EAB308", // yellow-500
-  found: "#22C55E", // green-500
-  safety: "#EF4444", // red-500
 };
 
 /* ---------- Theme tokens ---------- */
@@ -97,7 +85,7 @@ export default function Forums() {
   const theme = scheme === "dark" ? darkTheme : lightTheme;
   const styles = useMemo(() => makeStyles(theme), [theme]);
 
-  const [selectedTab, setSelectedTab] = useState<keyof typeof categoryDisplayNames>("All");
+  const [selectedTab, setSelectedTab] = useState<keyof typeof CATEGORY_DISPLAY_NAMES>("All");
   const [reports, setReports] = useState<Report[]>([]);
   const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [isDistanceVisible, setIsDistanceVisible] = useState(false);
@@ -164,7 +152,7 @@ export default function Forums() {
     `);
 
     if (selectedTab !== "All") {
-      query = query.eq("category", dbNameByDisplay[categoryDisplayNames[selectedTab]]);
+      query = query.eq("category", dbNameByDisplay[CATEGORY_DISPLAY_NAMES[selectedTab]]);
     }
 
     const { data, error } = await query;
@@ -230,21 +218,21 @@ export default function Forums() {
     [location, distanceUnit]
   );
 
-  const tabs = useMemo<(keyof typeof categoryDisplayNames)[]>(
-    () => ["All", "Event", "Lost", "Found", "Safety"],
+  const tabs = useMemo<(keyof typeof CATEGORY_DISPLAY_NAMES)[]>(
+    () => ["All", "Hazards", "Events", "Lost", "Found"],
     []
   );
 
   const getIconForCategory = (category: string) => {
     switch (category) {
       case "event":
-        return { name: "calendar-outline", color: categoryColors.event };
+        return { name: "calendar-outline", color: MARKER_COLORS.event };
       case "lost":
-        return { name: "help-circle-outline", color: categoryColors.lost };
+        return { name: "help-circle-outline", color: MARKER_COLORS.lost };
       case "found":
-        return { name: "checkmark-circle-outline", color: categoryColors.found };
+        return { name: "checkmark-circle-outline", color: MARKER_COLORS.found };
       case "safety":
-        return { name: "alert-circle-outline", color: categoryColors.safety };
+        return { name: "alert-circle-outline", color: MARKER_COLORS.safety };
       default:
         return { name: "information-circle-outline", color: "#60A5FA" };
     }
@@ -330,7 +318,7 @@ export default function Forums() {
               onPress={() => setSelectedTab(t)}
             >
               <Text style={[styles.tabText, active && styles.tabTextActive]}>
-                {categoryDisplayNames[t]}
+                {CATEGORY_DISPLAY_NAMES[t]}
               </Text>
             </TouchableOpacity>
           );
@@ -372,10 +360,10 @@ export default function Forums() {
             <Text style={styles.modalTitle}>Create new...</Text>
             <View style={styles.modalGrid}>
               {[
-                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: categoryColors.safety },
-                { key: "event", label: "Event", icon: "calendar-outline", color: categoryColors.event },
-                { key: "lost", label: "Lost Item", icon: "help-circle-outline", color: categoryColors.lost },
-                { key: "found", label: "Found Item", icon: "checkmark-circle-outline", color: categoryColors.found },
+                { key: "safety", label: "Hazard", icon: "alert-circle-outline", color: MARKER_COLORS.safety },
+                { key: "event", label: "Event", icon: "calendar-outline", color: MARKER_COLORS.event },
+                { key: "lost", label: "Lost Item", icon: "help-circle-outline", color: MARKER_COLORS.lost },
+                { key: "found", label: "Found Item", icon: "checkmark-circle-outline", color: MARKER_COLORS.found },
               ].map((c) => (
                 <TouchableOpacity
                   key={c.key}
