@@ -24,15 +24,15 @@ export const darkTheme: UiTheme = {
 };
 
 export const lightTheme: UiTheme = {
-  chipBg: '#F1F5F9',
-  cardBg: '#FFFFFF',
-  pageBg: '#F8FAFC',
+  chipBg: '#F0EDE5',
+  cardBg: '#FAF9F6',
+  pageBg: '#F5F3EE',
   textPrimary: '#0F172A',
   textSecondary: '#475569',
-  divider: '#E5E7EB',
+  divider: '#E5E2DB',
   overlay: 'rgba(0,0,0,0.25)',
   primaryBtnBg: '#2563EB',
-  primaryBtnText: '#FFFFFF',
+  primaryBtnText: '#FAF9F6',
 };
 
 export function resolveTheme(colorScheme: 'light' | 'dark' | null | undefined) {
