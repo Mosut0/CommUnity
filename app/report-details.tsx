@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -17,8 +17,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { supabase } from "@/lib/supabase";
-import {getDistanceKm, formatDistance } from "@/utils/distance";
+import { getDistanceKm, formatDistance } from "@/utils/distance";
 import { MARKER_COLORS } from "@/constants/Markers";
+import { Colors } from "@/constants/Colors";
+import type { ThemeName } from "@/constants/Colors";
 
 interface DetailedReport {
   reportid: number;
@@ -34,49 +36,15 @@ interface DetailedReport {
   imageurl?: string;
 }
 
-/* ---------- Theme tokens ---------- */
-type UiTheme = {
-  chipBg: string;
-  cardBg: string;
-  pageBg: string;
-  textPrimary: string;
-  textSecondary: string;
-  divider: string;
-  primaryBtnBg: string;
-  primaryBtnText: string;
-  headerBg: string;
-};
-
-const darkTheme: UiTheme = {
-  chipBg: "#1F2937",
-  cardBg: "#0F172A",
-  pageBg: "#0B1220",
-  textPrimary: "#E5E7EB",
-  textSecondary: "#9CA3AF",
-  divider: "#1F2A37",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FFFFFF",
-  headerBg: "#111827",
-};
-
-const lightTheme: UiTheme = {
-  chipBg: "#F0EDE5",
-  cardBg: "#FAF9F6",
-  pageBg: "#F5F3EE",
-  textPrimary: "#0F172A",
-  textSecondary: "#475569",
-  divider: "#E5E2DB",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FAF9F6",
-  headerBg: "#FAF9F6",
-};
+type ThemeColors = typeof Colors.light;
 
 export default function ReportDetails() {
   const router = useRouter();
   const { reportId } = useLocalSearchParams();
   const scheme = useColorScheme();
-  const theme = scheme === "dark" ? darkTheme : lightTheme;
-  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const themeName: ThemeName = scheme === "dark" ? "dark" : "light";
+  const uiTheme = Colors[themeName];
+  const styles = useMemo(() => makeStyles(uiTheme), [uiTheme]);
 
   const [report, setReport] = useState<DetailedReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +168,7 @@ export default function ReportDetails() {
     }
   };
 
-  const getIconForCategory = (category: string) => {
+  const getIconForCategory = useCallback((category: string) => {
     switch (category) {
       case "event":
         return { name: "calendar-outline", color: MARKER_COLORS.event };
@@ -211,9 +179,9 @@ export default function ReportDetails() {
       case "safety":
         return { name: "alert-circle-outline", color: MARKER_COLORS.safety };
       default:
-        return { name: "information-circle-outline", color: "#60A5FA" };
+        return { name: "information-circle-outline", color: uiTheme.accent };
     }
-  };
+  }, [uiTheme.accent]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -339,7 +307,7 @@ export default function ReportDetails() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={uiTheme.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Loading...</Text>
         </View>
@@ -355,7 +323,7 @@ export default function ReportDetails() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={uiTheme.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Error</Text>
         </View>
@@ -373,8 +341,8 @@ export default function ReportDetails() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={uiTheme.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Report Details</Text>
       </View>
@@ -436,7 +404,7 @@ export default function ReportDetails() {
                   </>
                 ) : (
                   <View style={styles.imageErrorContainer}>
-                    <Ionicons name="image-outline" size={48} color={theme.textSecondary} />
+                    <Ionicons name="image-outline" size={48} color={uiTheme.textSecondary} />
                     <Text style={styles.imageErrorText}>Image could not be loaded</Text>
                     {retryCount < 3 && (
                       <TouchableOpacity style={styles.debugButton} onPress={retryImageLoad}>
@@ -457,7 +425,7 @@ export default function ReportDetails() {
           {/* Event-specific details */}
           {report.category === "event" && report.eventtime && (
             <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={18} color={theme.textSecondary} />
+              <Ionicons name="calendar-outline" size={18} color={uiTheme.textSecondary} />
               <Text style={styles.detailLabel}>Event Time:</Text>
               <Text style={styles.detailValue}>{formatDate(report.eventtime)}</Text>
             </View>
@@ -465,14 +433,14 @@ export default function ReportDetails() {
 
           {/* Location details */}
           <View style={styles.detailRow}>
-            <Ionicons name="location-outline" size={18} color={theme.textSecondary} />
+            <Ionicons name="location-outline" size={18} color={uiTheme.textSecondary} />
             <Text style={styles.detailLabel}>Distance:</Text>
             <Text style={styles.detailValue}>{distanceText || "Unknown"}</Text>
           </View>
 
           {/* Created date */}
           <View style={styles.detailRow}>
-            <Ionicons name="time-outline" size={18} color={theme.textSecondary} />
+            <Ionicons name="time-outline" size={18} color={uiTheme.textSecondary} />
             <Text style={styles.detailLabel}>Posted:</Text>
             <Text style={styles.detailValue}>{formatDate(report.created_at)}</Text>
           </View>
@@ -481,17 +449,17 @@ export default function ReportDetails() {
         {/* Actions */}
         <View style={styles.actionsCard}>
           <TouchableOpacity style={styles.actionButton} onPress={handleViewOnMap}>
-            <Ionicons name="map-outline" size={20} color={theme.primaryBtnText} />
+            <Ionicons name="map-outline" size={20} color={uiTheme.primaryBtnText} />
             <Text style={styles.actionButtonText}>View on Map</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={openDirections}>
-            <Ionicons name="navigate-outline" size={20} color={theme.textPrimary} />
+            <Ionicons name="navigate-outline" size={20} color={uiTheme.textPrimary} />
             <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Get Directions</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={handleShare}>
-            <Ionicons name="share-outline" size={20} color={theme.textPrimary} />
+            <Ionicons name="share-outline" size={20} color={uiTheme.textPrimary} />
             <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Share</Text>
           </TouchableOpacity>
         </View>
@@ -501,7 +469,7 @@ export default function ReportDetails() {
 }
 
 /* ---------- styles ---------- */
-const makeStyles = (t: UiTheme) =>
+const makeStyles = (t: ThemeColors) =>
   StyleSheet.create({
     container: { 
       flex: 1, 
@@ -712,7 +680,7 @@ const makeStyles = (t: UiTheme) =>
       fontSize: 16,
     },
     errorText: {
-      color: "#EF4444",
+      color: t.errorText,
       fontSize: 16,
     },
   });

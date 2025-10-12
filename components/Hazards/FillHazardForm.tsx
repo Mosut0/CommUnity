@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
 import { makeFormStyles, getTheme, modalStyles } from './styles';
@@ -112,7 +111,7 @@ export default function FillHazardForm({ onSubmit, onClose, userId, visible }: F
               >
                 <IconSymbol 
                   name="chevron.left" 
-                  color={colorScheme === 'dark' ? '#fff' : '#000'}
+                  color={theme.textPrimary}
                 />
               </TouchableOpacity>
               <ThemedText type="subtitle" style={modalStyles.headerTitle}>

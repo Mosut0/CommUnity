@@ -15,6 +15,8 @@ import FillEventForm from '@/components/Events/FillEventForm';
 import Slider from '@react-native-community/slider';
 import { kmToMiles} from '@/utils/distance';
 import { MARKER_COLORS } from '@/constants/Markers';
+import { Colors, CommonColors } from '@/constants/Colors';
+import type { ThemeName } from '@/constants/Colors';
 
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -69,7 +71,7 @@ export default function Home() {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={[styles.filterContent]}
-      style={[styles.filterBarInline, colorScheme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
+      style={[styles.filterBarInline, theme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
       onScroll={(e) => {
         scrollOffsetRef.current = e.nativeEvent.contentOffset.x;
       }}
@@ -79,35 +81,35 @@ export default function Home() {
         style={[styles.filterButton, selectedFilter === 'all' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('all')}
       >
-  <Ionicons name="layers" size={22} color={selectedFilter === 'all' ? '#0A7EA4' : '#888'} />
+  <Ionicons name="layers" size={22} color={selectedFilter === 'all' ? uiTheme.accentAlt : uiTheme.filterIconInactive} />
         <ThemedText style={styles.filterText}>All</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'hazard' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('hazard')}
       >
-  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? MARKER_COLORS.safety : '#888'} />
+  <Ionicons name="alert-circle-outline" size={22} color={selectedFilter === 'hazard' ? MARKER_COLORS.safety : uiTheme.filterIconInactive} />
         <ThemedText style={styles.filterText}>Hazards</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'event' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('event')}
       >
-  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? MARKER_COLORS.event : '#888'} />
+  <Ionicons name="calendar-outline" size={22} color={selectedFilter === 'event' ? MARKER_COLORS.event : uiTheme.filterIconInactive} />
         <ThemedText style={styles.filterText}>Events</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'lost' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('lost')}
       >
-  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? MARKER_COLORS.lost : '#888'} />
+  <Ionicons name="help-circle-outline" size={20} color={selectedFilter === 'lost' ? MARKER_COLORS.lost : uiTheme.filterIconInactive} />
         <ThemedText style={styles.filterText}>Lost</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.filterButton, selectedFilter === 'found' && styles.filterButtonActive]}
         onPress={() => handleFilterPress('found')}
       >
-  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? MARKER_COLORS.found : '#888'} />
+  <Ionicons name="checkmark-circle-outline" size={20} color={selectedFilter === 'found' ? MARKER_COLORS.found : uiTheme.filterIconInactive} />
         <ThemedText style={styles.filterText}>Found</ThemedText>
       </TouchableOpacity>
     </ScrollView>
@@ -127,37 +129,8 @@ export default function Home() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const colorScheme = useColorScheme();
-  // Theme tokens mirroring forums page
-  const uiTheme = React.useMemo(() => {
-    if (colorScheme === 'dark') {
-      return {
-        pageBg: '#0B1220',
-        cardBg: '#0F172A',
-        surface: '#1F2937',
-        textPrimary: '#E5E7EB',
-        textSecondary: '#9CA3AF',
-        divider: '#1F2A37',
-        overlay: 'rgba(0,0,0,0.55)',
-        accent: '#2563EB',
-        danger: '#DC2626',
-        chipBg: '#1F2937',
-        inputBg: '#1F2937',
-      };
-    }
-    return {
-      pageBg: '#F5F3EE',
-      cardBg: '#FAF9F6',
-      surface: '#F0EDE5',
-      textPrimary: '#0F172A',
-      textSecondary: '#475569',
-      divider: '#E5E2DB',
-      overlay: 'rgba(0,0,0,0.25)',
-      accent: '#2563EB',
-      danger: '#DC2626',
-      chipBg: '#F0EDE5',
-      inputBg: '#FAF9F6',
-    };
-  }, [colorScheme]);
+  const theme: ThemeName = colorScheme === 'dark' ? 'dark' : 'light';
+  const uiTheme = Colors[theme];
   const [forceRender, setForceRender] = useState(false);
   const router = useRouter();
   const [distanceRadius, setDistanceRadius] = useState(20);
@@ -502,12 +475,12 @@ export default function Home() {
       <View style={[
         styles.topBar,
         { top: (insets?.top || 0) },
-        colorScheme === 'dark' ? styles.topBarDark : styles.topBarLight,
+        theme === 'dark' ? styles.topBarDark : styles.topBarLight,
       ]}>
         <View style={styles.filterWrapper}>
           <FilterBar />
         </View>
-        <View style={[styles.topBarDivider, colorScheme === 'dark' ? styles.topBarDividerDark : styles.topBarDividerLight]} />
+        <View style={[styles.topBarDivider, theme === 'dark' ? styles.topBarDividerDark : styles.topBarDividerLight]} />
         <TouchableOpacity
           style={styles.profileIcon}
           onPress={toggleProfileModal}
@@ -516,9 +489,9 @@ export default function Home() {
         >
           <View style={[
             styles.profileIconCircle,
-            colorScheme === 'dark' ? styles.profileIconCircleDark : styles.profileIconCircleLight,
+            theme === 'dark' ? styles.profileIconCircleDark : styles.profileIconCircleLight,
           ]}>
-            <MaterialIcons name="account-circle" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+            <MaterialIcons name="account-circle" size={24} color={uiTheme.textPrimary} />
           </View>
         </TouchableOpacity>
       </View>
@@ -663,7 +636,7 @@ export default function Home() {
               onChangeText={setNewPassword}
             />
             <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={handleChangePassword}>
-              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
+              <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
@@ -693,7 +666,7 @@ export default function Home() {
               value={sliderValue}
               onValueChange={setSliderValue}
               minimumTrackTintColor={uiTheme.accent}
-              maximumTrackTintColor={colorScheme==='dark' ? '#374151' : '#CBD5E1'}
+              maximumTrackTintColor={uiTheme.sliderTrackInactive}
               thumbTintColor={uiTheme.accent}
             />
             <ThemedText style={{ color: uiTheme.textSecondary, marginBottom: 14 }}>
@@ -702,7 +675,7 @@ export default function Home() {
                 : `${sliderValue} km`}
             </ThemedText>
             <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={handleSaveDistance}>
-              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
+              <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
@@ -756,7 +729,7 @@ export default function Home() {
             </View>
             
             <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent, marginTop: 14 }]} onPress={handleSaveUnit}>
-              <ThemedText style={[styles.primaryBtnText, { color: '#FFFFFF' }]}>Save</ThemedText>
+              <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
@@ -764,7 +737,7 @@ export default function Home() {
 
       {/* Speed Dial Root FAB */}
       <TouchableOpacity
-        style={[styles.fab, colorScheme === 'dark' ? styles.fabDark : styles.fabLight]}
+        style={[styles.fab, theme === 'dark' ? styles.fabDark : styles.fabLight]}
         onPress={() => {
           const next = !isFabExpanded;
             setIsFabExpanded(next);
@@ -783,7 +756,7 @@ export default function Home() {
           <MaterialIcons
             name={isFabExpanded ? 'close' : 'more-vert'}
             size={26}
-            color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
+            color={uiTheme.fabIcon}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -803,7 +776,7 @@ export default function Home() {
         <Animated.View
           style={[
             styles.speedDialButton,
-            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            theme === 'dark' ? styles.fabDark : styles.fabLight,
             {
               transform: [
                 { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -136] }) },
@@ -822,7 +795,7 @@ export default function Home() {
             <MaterialIcons
               name="format-list-bulleted"
               size={22}
-              color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
+              color={uiTheme.fabIcon}
             />
           </TouchableOpacity>
         </Animated.View>
@@ -830,7 +803,7 @@ export default function Home() {
         <Animated.View
           style={[
             styles.speedDialButton,
-            colorScheme === 'dark' ? styles.fabDark : styles.fabLight,
+            theme === 'dark' ? styles.fabDark : styles.fabLight,
             {
               transform: [
                 { translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -70] }) },
@@ -849,7 +822,7 @@ export default function Home() {
             <MaterialIcons
               name="add"
               size={26}
-              color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
+              color={uiTheme.fabIcon}
             />
           </TouchableOpacity>
         </Animated.View>
@@ -879,7 +852,7 @@ export default function Home() {
               ].map(c => (
                 <TouchableOpacity
                   key={c.key}
-                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F0EDE5' }]}
+                  style={[styles.createCell, { backgroundColor: uiTheme.chipBg }]}
                   onPress={() => {
                     if (!session) {
                       Alert.alert('Not signed in', 'Please sign in to submit a report.');
@@ -952,14 +925,14 @@ const styles = StyleSheet.create({
   left: 8,
   right: 8,
   zIndex: 20,
-  backgroundColor: '#FAF9F6',
+  backgroundColor: Colors.light.cardBg,
   paddingVertical: 8,
   paddingHorizontal: 4,
   borderBottomWidth: 1,
-  borderBottomColor: '#eee',
+  borderBottomColor: Colors.light.divider,
   borderRadius: 12,
   elevation: 6,
-  shadowColor: '#000',
+  shadowColor: CommonColors.shadow,
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.15,
   shadowRadius: 4,
@@ -973,7 +946,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   filterButtonActive: {
-    backgroundColor: 'rgba(10, 126, 164, 0.08)',
+    backgroundColor: Colors.light.filterButtonActiveBg,
   },
   filterText: {
     marginLeft: 4,
@@ -989,10 +962,10 @@ const styles = StyleSheet.create({
   gap: 8,
   },
   filterBarLight: {
-    backgroundColor: '#F5F3EE',
+    backgroundColor: Colors.light.pageBg,
   },
   filterBarDark: {
-    backgroundColor: '#0B1220',
+    backgroundColor: Colors.dark.pageBg,
   },
   // Inline variant for using inside the top bar (non-absolute)
   filterBarInline: {
@@ -1017,12 +990,12 @@ const styles = StyleSheet.create({
   profileIconCircleLight: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.light.profileBorder,
   },
   profileIconCircleDark: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: Colors.dark.profileBorder,
   },
   topBarDivider: {
     width: 1,
@@ -1031,10 +1004,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   topBarDividerLight: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: Colors.light.profileBorder,
   },
   topBarDividerDark: {
-    backgroundColor: '#374151',
+    backgroundColor: Colors.dark.profileBorder,
   },
   // Modal styles
   modalContainer: {
@@ -1049,17 +1022,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalLight: {
-    backgroundColor: '#FAF9F6',
+    backgroundColor: Colors.light.cardBg,
   },
   modalDark: {
-    backgroundColor: '#333',
+    backgroundColor: Colors.dark.surface,
   },
   modalButton: {
     padding: 15,
     width: '100%',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: Colors.light.divider,
   },
   input: {
     width: '100%',
@@ -1083,14 +1056,14 @@ const styles = StyleSheet.create({
   zIndex: 70,
   },
   fabLight: {
-    backgroundColor: '#FAF9F6', // Primary color for light theme
+    backgroundColor: Colors.light.fabBackground, // Primary color for light theme
   },
   fabDark: {
-    backgroundColor: '#0B1220', // Darker background for dark theme
+    backgroundColor: Colors.dark.fabBackground, // Darker background for dark theme
   },
   fabText: {
     fontSize: 24,
-    color: '#fff',
+    color: CommonColors.white,
   },
   fabOverlay: {
     position: 'absolute',
@@ -1122,16 +1095,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 12,
     elevation: 6,
-    shadowColor: '#000',
+    shadowColor: CommonColors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
   },
   topBarLight: {
-    backgroundColor: '#F5F3EE',
+    backgroundColor: Colors.light.pageBg,
   },
   topBarDark: {
-    backgroundColor: '#0B1220',
+    backgroundColor: Colors.dark.pageBg,
   },
 
   // Wrapper to ensure filter is scrollable and doesn't overlap the profile icon
@@ -1145,16 +1118,16 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   panelLight: {
-    backgroundColor: '#FAF9F6',
+    backgroundColor: Colors.light.cardBg,
   },
   panelDark: {
-    backgroundColor: '#333',
+    backgroundColor: Colors.dark.surface,
   },
 
   // Action button styles
   button: {
     padding: 15,
-    backgroundColor: 'rgba(10, 126, 164, 0.1)',
+    backgroundColor: Colors.light.filterButtonActiveBg,
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
