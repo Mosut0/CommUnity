@@ -683,10 +683,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   calloutLight: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FAF9F6",
   },
   calloutDark: {
-    backgroundColor: "#333",
+    backgroundColor: "#0B1220",
   },
   errorText: {
     color: "red",
@@ -697,7 +697,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     alignSelf: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "#0B1220",
     padding: 10,
     borderRadius: 20,
     opacity: 0.7,
@@ -715,9 +715,9 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   iconWrapperLight: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: '#FAF9F6',
   },
   iconWrapperDark: {
-    backgroundColor: 'rgba(34,34,34,0.95)',
+    backgroundColor: '#0B1220',
   },
 });

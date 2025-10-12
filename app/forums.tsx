@@ -67,15 +67,15 @@ const darkTheme: UiTheme = {
 };
 
 const lightTheme: UiTheme = {
-  chipBg: "#F1F5F9", // slate-100
-  cardBg: "#FFFFFF",
-  pageBg: "#F8FAFC", // slate-50
+  chipBg: "#F0EDE5", // warm off-white
+  cardBg: "#FAF9F6",
+  pageBg: "#F5F3EE", // warm off-white background
   textPrimary: "#0F172A", // slate-900
   textSecondary: "#475569", // slate-600
-  divider: "#E5E7EB",
+  divider: "#E5E2DB",
   overlay: "rgba(0,0,0,0.25)",
   primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FFFFFF",
+  primaryBtnText: "#FAF9F6",
 };
 
 export default function Forums() {
