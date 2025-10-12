@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, useColorScheme, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { resolveTheme, darkTheme, UiTheme } from '@/lib/uiTheme';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SignUpScreen() {
   const scheme = useColorScheme();
@@ -45,13 +46,28 @@ export default function SignUpScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
-      <View style={styles.headerWrap}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join CommUnity to share and stay informed</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={styles.container}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/welcome')}>
+            <Ionicons name="arrow-back" size={24} color={theme.textPrimary} />
+          </TouchableOpacity>
+          
+          <View style={styles.contentWrapper}>
+            <View style={styles.headerWrap}>
+              <Text style={styles.title}>Create Account</Text>
+              <Text style={styles.subtitle}>Join CommUnity to share and stay informed</Text>
+            </View>
 
-      <View style={styles.formCard}>
+            <View style={styles.formCard}>
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -103,13 +119,20 @@ export default function SignUpScreen() {
             <Text style={styles.linkText}>Sign in</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (t: UiTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: t.pageBg, padding: 20, justifyContent: 'center' },
+  safeArea: { flex: 1, backgroundColor: t.pageBg },
+  container: { flex: 1 },
+  scrollContent: { flexGrow: 1, padding: 20 },
+  backButton: { marginBottom: 10, padding: 8, alignSelf: 'flex-start' },
+  contentWrapper: { flex: 1, justifyContent: 'center', minHeight: 550 },
   headerWrap: { marginBottom: 24 },
   title: { color: t.textPrimary, fontSize: 28, fontWeight: '800', marginBottom: 6 },
   subtitle: { color: t.textSecondary, fontSize: 14 },

@@ -50,6 +50,9 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   const fetchTimeoutRef = useRef<number | null>(null);
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
+  // Track whether a marker was just pressed to avoid map onPress immediately clearing selection
+  const markerPressedRef = useRef<boolean>(false);
+  const markerPressTimeoutRef = useRef<number | null>(null);
 
   // Cleanup mounted ref on unmount
   useEffect(() => {
@@ -57,6 +60,18 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
       isMountedRef.current = false;
     };
   }, []);
+
+  // When the filter changes, clear any selected report to prevent callout/ref races
+  useEffect(() => {
+    if (selectedReport) {
+      // best-effort hide of previous callout
+      const mr = markerRefs.current[selectedReport.reportid];
+      if (mr && (mr as any).hideCallout) {
+        try { (mr as any).hideCallout(); } catch {}
+      }
+    }
+    setSelectedReport(null);
+  }, [filter]);
 
   // Fetch user location
   useEffect(() => {
@@ -321,6 +336,10 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
         clearTimeout(fetchTimeoutRef.current);
       }
       cleanup();
+      // clear any pending marker press timeout
+      if (markerPressTimeoutRef.current) {
+        clearTimeout(markerPressTimeoutRef.current);
+      }
     };
   }, [fetchReports, debouncedFetchReports]);
 
@@ -532,6 +551,23 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
         ref={mapRef}
         style={styles.map}
         initialRegion={region}
+        onPress={() => {
+          // If a marker was just pressed, ignore this map press (it comes immediately after marker press)
+          if (markerPressedRef.current) return;
+
+          // Immediately hide callout (if any) and clear selection to make the change instant
+          if (selectedReport) {
+            const mr = markerRefs.current[selectedReport.reportid];
+            if (mr && mr.hideCallout) {
+              try {
+                mr.hideCallout();
+              } catch (e) {
+                // ignore if hideCallout isn't supported on this platform
+              }
+            }
+          }
+          setSelectedReport(null);
+        }}
         showsUserLocation={true}
         followsUserLocation={false}
         showsCompass={false}
@@ -580,8 +616,39 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
           };
 
           const handlePress = () => {
-            // Toggle selection: if already selected, deselect
-            setSelectedReport((prev) => (prev?.reportid === report.reportid ? null : report));
+            // Mark that a marker was pressed so the map's onPress doesn't immediately clear selection
+            markerPressedRef.current = true;
+            // Clear any existing timeout
+            if (markerPressTimeoutRef.current) {
+              clearTimeout(markerPressTimeoutRef.current);
+            }
+            // Reset the markerPressed flag shortly after
+            markerPressTimeoutRef.current = setTimeout(() => {
+              markerPressedRef.current = false;
+              markerPressTimeoutRef.current = null;
+            }, 200);
+
+            // Toggle selection: if already selected, deselect; otherwise select and show callout
+            setSelectedReport((prev) => {
+              const next = prev?.reportid === report.reportid ? null : report;
+              // If selecting, show the callout for this marker
+              if (next) {
+                setTimeout(() => {
+                  const mr = markerRefs.current[report.reportid];
+                  if (mr && mr.showCallout) {
+                    try { mr.showCallout(); } catch (e) { console.error("Error calling showCallout on marker:", e); }
+                  }
+                }, 0);
+              } else {
+                // If deselecting via marker tap, hide its callout immediately
+                const mr = markerRefs.current[report.reportid];
+                if (mr && mr.hideCallout) {
+                  try { mr.hideCallout(); } catch (e) { console.error("Error calling hideCallout on marker:", e); }
+                }
+              }
+
+              return next;
+            });
           };
 
           const tracksViewChanges = !markerReadyRef.current.get(report.reportid);

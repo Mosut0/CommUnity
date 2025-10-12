@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { resolveTheme, darkTheme, UiTheme } from '@/lib/uiTheme';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SignInScreen() {
   const scheme = useColorScheme();
@@ -35,13 +36,22 @@ export default function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
-      <View style={styles.headerWrap}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue to CommUnity</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={styles.container}
+      >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/welcome')}>
+          <Ionicons name="arrow-back" size={24} color={theme.textPrimary} />
+        </TouchableOpacity>
+        
+        <View style={styles.contentWrapper}>
+          <View style={styles.headerWrap}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue to CommUnity</Text>
+          </View>
 
-      <View style={styles.formCard}>
+          <View style={styles.formCard}>
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -81,18 +91,23 @@ export default function SignInScreen() {
           <TouchableOpacity onPress={() => router.push('/sign-up')}>
             <Text style={styles.linkText}>Create one</Text>
           </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (t: UiTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: t.pageBg, padding: 20, justifyContent: 'center' },
+  safeArea: { flex: 1, backgroundColor: t.pageBg },
+  container: { flex: 1, padding: 20 },
+  backButton: { marginBottom: 10, padding: 8, alignSelf: 'flex-start' },
+  contentWrapper: { flex: 1, justifyContent: 'center' },
   headerWrap: { marginBottom: 24 },
   title: { color: t.textPrimary, fontSize: 28, fontWeight: '800', marginBottom: 6 },
   subtitle: { color: t.textSecondary, fontSize: 14 },
-  formCard: { backgroundColor: t.cardBg, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: t.divider },
+  formCard: { backgroundColor: t.cardBg, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: t.divider, marginBottom: 20 },
   fieldGroup: { marginBottom: 16 },
   label: { color: t.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' },
   input: { backgroundColor: t.chipBg, color: t.textPrimary, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, fontSize: 15, borderWidth: 1, borderColor: t === darkTheme ? '#374151' : t.divider, marginBottom: 4 },

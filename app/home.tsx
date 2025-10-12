@@ -18,7 +18,11 @@ import { MARKER_COLORS } from '@/constants/Markers';
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  // UI-selected filter (instant for button highlight)
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
+  // Debounced/applied filter used for the Map to reduce rapid mount/unmount thrash
+  const [appliedFilter, setAppliedFilter] = useState<'all' | 'hazard' | 'event' | 'lost' | 'found'>('all');
+  const filterDebounceRef = React.useRef<number | null>(null);
   const filterScrollRef = React.useRef<ScrollView | null>(null);
   const scrollOffsetRef = React.useRef<number>(0);
 
@@ -30,12 +34,34 @@ export default function Home() {
   };
 
   const handleFilterPress = (filterValue: 'all' | 'hazard' | 'event' | 'lost' | 'found') => {
+    // Update UI state immediately for responsiveness
     setSelectedFilter(filterValue);
+
+    // Keep filter bar scroll position stable
     const offset = scrollOffsetRef.current;
     scrollToOffset(offset);
     requestAnimationFrame(() => scrollToOffset(offset));
     setTimeout(() => scrollToOffset(offset), 0);
+
+    // Debounce applying the filter to the map to avoid rapid marker churn/crashes
+    if (filterDebounceRef.current) {
+      clearTimeout(filterDebounceRef.current as unknown as number);
+      filterDebounceRef.current = null;
+    }
+    filterDebounceRef.current = setTimeout(() => {
+      setAppliedFilter(filterValue);
+    }, 200) as unknown as number;
   };
+
+  // Cleanup any pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (filterDebounceRef.current) {
+        clearTimeout(filterDebounceRef.current as unknown as number);
+        filterDebounceRef.current = null;
+      }
+    };
+  }, []);
 
   const FilterBar = () => (
     <ScrollView
@@ -414,7 +440,7 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setIsProfileModalVisible(false);
-    router.replace('/sign-in'); // Replace stack so user cannot go back to Home
+    router.replace('/welcome'); // Replace stack so user cannot go back to Home
   };
 
   // Handle password change
@@ -507,7 +533,7 @@ export default function Home() {
       <MapScreen 
         distanceRadius={distanceRadius} 
         selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
-      filter={selectedFilter} />
+      filter={appliedFilter} />
 
       {/* Overlay to close speed dial when expanded */}
       {isFabExpanded && (
