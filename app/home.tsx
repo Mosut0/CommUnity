@@ -783,7 +783,7 @@ export default function Home() {
           <MaterialIcons
             name={isFabExpanded ? 'close' : 'more-vert'}
             size={26}
-            color={colorScheme === 'dark' ? '#ffffff' : '#000000ff'}
+            color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -822,7 +822,7 @@ export default function Home() {
             <MaterialIcons
               name="format-list-bulleted"
               size={22}
-              color={colorScheme === 'dark' ? '#ffffff' : '#000000ff'}
+              color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
             />
           </TouchableOpacity>
         </Animated.View>
@@ -849,7 +849,7 @@ export default function Home() {
             <MaterialIcons
               name="add"
               size={26}
-              color={colorScheme === 'dark' ? '#ffffff' : '#000000ff'}
+              color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
             />
           </TouchableOpacity>
         </Animated.View>
