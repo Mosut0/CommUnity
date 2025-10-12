@@ -122,12 +122,18 @@ export default function Home() {
       pageBg: '#F5F3EE',
       cardBg: '#FAF9F6',
       surface: '#F0EDE5',
+      pageBg: '#F5F3EE',
+      cardBg: '#FAF9F6',
+      surface: '#F0EDE5',
       textPrimary: '#0F172A',
       textSecondary: '#475569',
+      divider: '#E5E2DB',
       divider: '#E5E2DB',
       overlay: 'rgba(0,0,0,0.25)',
       accent: '#2563EB',
       danger: '#DC2626',
+      chipBg: '#F0EDE5',
+      inputBg: '#FAF9F6',
       chipBg: '#F0EDE5',
       inputBg: '#FAF9F6',
     };
@@ -854,6 +860,7 @@ export default function Home() {
                 <TouchableOpacity
                   key={c.key}
                   style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F0EDE5' }]}
+                  style={[styles.createCell, { backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#F0EDE5' }]}
                   onPress={() => {
                     if (!session) {
                       Alert.alert('Not signed in', 'Please sign in to submit a report.');
@@ -927,6 +934,7 @@ const styles = StyleSheet.create({
   right: 8,
   zIndex: 20,
   backgroundColor: '#FAF9F6',
+  backgroundColor: '#FAF9F6',
   paddingVertical: 8,
   paddingHorizontal: 4,
   borderBottomWidth: 1,
@@ -964,8 +972,10 @@ const styles = StyleSheet.create({
   },
   filterBarLight: {
     backgroundColor: '#F5F3EE',
+    backgroundColor: '#F5F3EE',
   },
   filterBarDark: {
+    backgroundColor: '#0B1220',
     backgroundColor: '#0B1220',
   },
   // Inline variant for using inside the top bar (non-absolute)
@@ -1024,6 +1034,7 @@ const styles = StyleSheet.create({
   },
   modalLight: {
     backgroundColor: '#FAF9F6',
+    backgroundColor: '#FAF9F6',
   },
   modalDark: {
     backgroundColor: '#333',
@@ -1058,8 +1069,10 @@ const styles = StyleSheet.create({
   },
   fabLight: {
     backgroundColor: '#FAF9F6', // Primary color for light theme
+    backgroundColor: '#FAF9F6', // Primary color for light theme
   },
   fabDark: {
+    backgroundColor: '#0B1220', // Darker background for dark theme
     backgroundColor: '#0B1220', // Darker background for dark theme
   },
   fabText: {
@@ -1103,8 +1116,10 @@ const styles = StyleSheet.create({
   },
   topBarLight: {
     backgroundColor: '#F5F3EE',
+    backgroundColor: '#F5F3EE',
   },
   topBarDark: {
+    backgroundColor: '#0B1220',
     backgroundColor: '#0B1220',
   },
 
@@ -1119,6 +1134,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   panelLight: {
+    backgroundColor: '#FAF9F6',
     backgroundColor: '#FAF9F6',
   },
   panelDark: {
