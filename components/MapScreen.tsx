@@ -1,10 +1,16 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import MapView, { Marker, Callout, Region, MapMarker } from "react-native-maps";
-import * as Location from "expo-location";
-import { supabase } from "@/lib/supabase";
-import { ThemedText } from "./ThemedText";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
+import { StyleSheet, View, Text } from 'react-native';
+import MapView, { Marker, Callout, Region, MapMarker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { supabase } from '@/lib/supabase';
+import { ThemedText } from './ThemedText';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 
 // Define the structure of a report
@@ -32,20 +38,26 @@ interface MapScreenProps {
 // Colors must match `app/forums.tsx` categoryColors
 const FORUM_COLORS = {
   event: '#7C3AED', // purple-600
-  lost:  '#EAB308', // yellow-500
+  lost: '#EAB308', // yellow-500
   found: '#22C55E', // green-500
-  safety:'#EF4444', // red-500
+  safety: '#EF4444', // red-500
 };
 
-export default function MapScreen({ distanceRadius, selectedReportId, filter = 'all' }: MapScreenProps) {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+export default function MapScreen({
+  distanceRadius,
+  selectedReportId,
+  filter = 'all',
+}: MapScreenProps) {
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   // track whether a marker's view has finished updating to disable tracksViewChanges
   const markerReadyRef = useRef<Map<number, boolean>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const colorScheme = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? 'light';
   const isMountedRef = useRef(true);
   const fetchTimeoutRef = useRef<number | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -67,7 +79,9 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
       // best-effort hide of previous callout
       const mr = markerRefs.current[selectedReport.reportid];
       if (mr && (mr as any).hideCallout) {
-        try { (mr as any).hideCallout(); } catch {}
+        try {
+          (mr as any).hideCallout();
+        } catch {}
       }
     }
     setSelectedReport(null);
@@ -81,8 +95,8 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
       try {
         // Request location permissions
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
           return;
         }
 
@@ -97,13 +111,13 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
             timeInterval: 1000, // update every second
             distanceInterval: 1, // update every meter
           },
-          (loc) => {
+          loc => {
             setLocation(loc);
           }
         );
       } catch (error) {
-        console.error("Error getting location:", error);
-        setErrorMsg("Failed to get location. Please try again.");
+        console.error('Error getting location:', error);
+        setErrorMsg('Failed to get location. Please try again.');
       }
     })();
 
@@ -118,25 +132,25 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   // Function to fetch all reports
   const fetchReports = useCallback(async () => {
     try {
-      console.log("Fetching reports...");
-      
+      console.log('Fetching reports...');
+
       // Create a timestamp to track this fetch request
       const fetchId = Date.now();
       console.log(`Starting fetch request ${fetchId}`);
 
       // First fetch basic report data
       const { data: reportsData, error: reportsError } = await supabase
-        .from("reports")
-        .select("*")
+        .from('reports')
+        .select('*')
         .order('createdat', { ascending: false }); // Order by newest first
 
       if (reportsError) {
-        console.error("Error fetching reports:", reportsError);
+        console.error('Error fetching reports:', reportsError);
         return;
       }
 
       if (!reportsData || reportsData.length === 0) {
-        console.log("No reports found");
+        console.log('No reports found');
         setReports([]);
         return;
       }
@@ -145,52 +159,65 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
 
       // For each report, fetch additional details based on category
       const enhancedReports = await Promise.all(
-        reportsData.map(async (report) => {
+        reportsData.map(async report => {
           try {
             let additionalData = {};
 
             switch (report.category) {
-              case "event":
+              case 'event':
                 const { data: eventData, error: eventError } = await supabase
-                  .from("events")
-                  .select("*")
-                  .eq("reportid", report.reportid)
+                  .from('events')
+                  .select('*')
+                  .eq('reportid', report.reportid)
                   .maybeSingle(); // Use maybeSingle instead of single to avoid errors
                 if (eventError) {
-                  console.warn(`Error fetching event data for report ${report.reportid}:`, eventError);
+                  console.warn(
+                    `Error fetching event data for report ${report.reportid}:`,
+                    eventError
+                  );
                 }
                 additionalData = eventData || {};
                 break;
-              case "safety":
+              case 'safety':
                 const { data: hazardData, error: hazardError } = await supabase
-                  .from("hazards")
-                  .select("*")
-                  .eq("reportid", report.reportid)
+                  .from('hazards')
+                  .select('*')
+                  .eq('reportid', report.reportid)
                   .maybeSingle();
                 if (hazardError) {
-                  console.warn(`Error fetching hazard data for report ${report.reportid}:`, hazardError);
+                  console.warn(
+                    `Error fetching hazard data for report ${report.reportid}:`,
+                    hazardError
+                  );
                 }
                 additionalData = hazardData || {};
                 break;
-              case "lost":
+              case 'lost':
                 const { data: lostItemData, error: lostError } = await supabase
-                  .from("lostitems")
-                  .select("*")
-                  .eq("reportid", report.reportid)
+                  .from('lostitems')
+                  .select('*')
+                  .eq('reportid', report.reportid)
                   .maybeSingle();
                 if (lostError) {
-                  console.warn(`Error fetching lost item data for report ${report.reportid}:`, lostError);
+                  console.warn(
+                    `Error fetching lost item data for report ${report.reportid}:`,
+                    lostError
+                  );
                 }
                 additionalData = lostItemData || {};
                 break;
-              case "found":
-                const { data: foundItemData, error: foundError } = await supabase
-                  .from("founditems")
-                  .select("*")
-                  .eq("reportid", report.reportid)
-                  .maybeSingle();
+              case 'found':
+                const { data: foundItemData, error: foundError } =
+                  await supabase
+                    .from('founditems')
+                    .select('*')
+                    .eq('reportid', report.reportid)
+                    .maybeSingle();
                 if (foundError) {
-                  console.warn(`Error fetching found item data for report ${report.reportid}:`, foundError);
+                  console.warn(
+                    `Error fetching found item data for report ${report.reportid}:`,
+                    foundError
+                  );
                 }
                 additionalData = foundItemData || {};
                 break;
@@ -198,21 +225,26 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
 
             return { ...report, ...additionalData };
           } catch (reportError) {
-            console.error(`Error processing report ${report.reportid}:`, reportError);
+            console.error(
+              `Error processing report ${report.reportid}:`,
+              reportError
+            );
             // Return the basic report data even if additional data fails
             return report;
           }
         })
       );
 
-      console.log(`Successfully processed ${enhancedReports.length} reports for fetch ${fetchId}`);
-      
+      console.log(
+        `Successfully processed ${enhancedReports.length} reports for fetch ${fetchId}`
+      );
+
       // Only update state if component is still mounted
       if (isMountedRef.current) {
         setReports(enhancedReports);
       }
     } catch (error) {
-      console.error("Error processing reports:", error);
+      console.error('Error processing reports:', error);
       // Don't clear existing reports on error, keep what we have
     }
   }, []);
@@ -223,7 +255,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
     if (fetchTimeoutRef.current) {
       clearTimeout(fetchTimeoutRef.current);
     }
-    
+
     // Set a new timeout
     fetchTimeoutRef.current = setTimeout(() => {
       if (isMountedRef.current) {
@@ -239,80 +271,80 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
 
     // Set up Supabase subscription for real-time updates
     const setupRealtimeSubscriptions = () => {
-      console.log("Setting up real-time subscriptions...");
-      
+      console.log('Setting up real-time subscriptions...');
+
       // Create a unique channel name to avoid conflicts
       const channelName = `reports-updates-${Date.now()}`;
-      
+
       // Subscribe to changes in the reports table and related tables
       const channel = supabase
         .channel(channelName)
         .on(
-          "postgres_changes",
+          'postgres_changes',
           {
-            event: "*",
-            schema: "public",
-            table: "reports",
+            event: '*',
+            schema: 'public',
+            table: 'reports',
           },
-          (payload) => {
-            console.log("Reports table changed:", payload);
+          payload => {
+            console.log('Reports table changed:', payload);
             debouncedFetchReports();
           }
         )
         .on(
-          "postgres_changes",
+          'postgres_changes',
           {
-            event: "*",
-            schema: "public",
-            table: "events",
+            event: '*',
+            schema: 'public',
+            table: 'events',
           },
-          (payload) => {
-            console.log("Events table changed:", payload);
+          payload => {
+            console.log('Events table changed:', payload);
             debouncedFetchReports();
           }
         )
         .on(
-          "postgres_changes",
+          'postgres_changes',
           {
-            event: "*",
-            schema: "public",
-            table: "hazards",
+            event: '*',
+            schema: 'public',
+            table: 'hazards',
           },
-          (payload) => {
-            console.log("Hazards table changed:", payload);
+          payload => {
+            console.log('Hazards table changed:', payload);
             debouncedFetchReports();
           }
         )
         .on(
-          "postgres_changes",
+          'postgres_changes',
           {
-            event: "*",
-            schema: "public",
-            table: "lostitems",
+            event: '*',
+            schema: 'public',
+            table: 'lostitems',
           },
-          (payload) => {
-            console.log("Lost items table changed:", payload);
+          payload => {
+            console.log('Lost items table changed:', payload);
             debouncedFetchReports();
           }
         )
         .on(
-          "postgres_changes",
+          'postgres_changes',
           {
-            event: "*",
-            schema: "public",
-            table: "founditems",
+            event: '*',
+            schema: 'public',
+            table: 'founditems',
           },
-          (payload) => {
-            console.log("Found items table changed:", payload);
+          payload => {
+            console.log('Found items table changed:', payload);
             debouncedFetchReports();
           }
         )
-        .subscribe((status) => {
-          console.log("Subscription status:", status);
-          if (status === "SUBSCRIBED") {
-            console.log("Successfully subscribed to real-time updates");
-          } else if (status === "CHANNEL_ERROR") {
-            console.log("Subscription error, retrying...");
+        .subscribe(status => {
+          console.log('Subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to real-time updates');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.log('Subscription error, retrying...');
             // Retry subscription after a delay
             setTimeout(() => {
               setupRealtimeSubscriptions();
@@ -322,7 +354,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
 
       // Return cleanup function
       return () => {
-        console.log("Cleaning up subscriptions...");
+        console.log('Cleaning up subscriptions...');
         supabase.removeChannel(channel);
       };
     };
@@ -346,20 +378,25 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   // Auto-select report when selectedReportId is provided
   useEffect(() => {
     if (selectedReportId && reports.length > 0) {
-      const reportToSelect = reports.find(report => report.reportid === selectedReportId);
+      const reportToSelect = reports.find(
+        report => report.reportid === selectedReportId
+      );
       if (reportToSelect) {
         setSelectedReport(reportToSelect);
-        
+
         // Focus the map on the selected report
         const coords = parseLocation(reportToSelect.location);
         if (coords && mapRef.current) {
-          mapRef.current.animateToRegion({
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            latitudeDelta: 0.005, // Smaller delta for closer zoom
-            longitudeDelta: 0.005,
-          }, 100);
-          
+          mapRef.current.animateToRegion(
+            {
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              latitudeDelta: 0.005, // Smaller delta for closer zoom
+              longitudeDelta: 0.005,
+            },
+            100
+          );
+
           // Show the callout for the selected marker after the animation
           setTimeout(() => {
             const markerRef = markerRefs.current[reportToSelect.reportid];
@@ -379,7 +416,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
     try {
       // Expected format: "(lat,lng)"
       const coordsStr = locationStr.substring(1, locationStr.length - 1).trim();
-      const parts = coordsStr.split(",").map(s => parseFloat(s.trim()));
+      const parts = coordsStr.split(',').map(s => parseFloat(s.trim()));
       if (parts.length < 2) return null;
       let [lat, lng] = parts;
 
@@ -396,13 +433,18 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
       }
 
       if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        console.warn('parseLocation: coordinates out of bounds for', locationStr, '->', { lat, lng });
+        console.warn(
+          'parseLocation: coordinates out of bounds for',
+          locationStr,
+          '->',
+          { lat, lng }
+        );
         return null;
       }
 
       return { latitude: lat, longitude: lng };
     } catch (error) {
-      console.error("Error parsing location:", error);
+      console.error('Error parsing location:', error);
       return null;
     }
   };
@@ -411,14 +453,21 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
     return deg * (Math.PI / 180);
   };
 
-  const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const getDistanceFromLatLonInKm = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
     let R = 6371; // Radius of the earth in km
     let dLat = deg2rad(lat2 - lat1);
     let dLon = deg2rad(lon2 - lon1);
     let a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     let d = R * c; // Distance in km
     return d;
@@ -434,25 +483,42 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   // Cluster reports that are within a proximity threshold (meters) to avoid stacking
   const clusters = useMemo(() => {
     const thresholdMeters = 2; // distance within which points are considered same cluster
-    const clusters: Array<{ center: { latitude: number; longitude: number }; members: Report[] }> = [];
+    const clusters: Array<{
+      center: { latitude: number; longitude: number };
+      members: Report[];
+    }> = [];
 
-    const pushToCluster = (r: Report, coords: { latitude: number; longitude: number }) => {
+    const pushToCluster = (
+      r: Report,
+      coords: { latitude: number; longitude: number }
+    ) => {
       for (const c of clusters) {
-        const d = getDistanceFromLatLonInKm(c.center.latitude, c.center.longitude, coords.latitude, coords.longitude) * 1000;
+        const d =
+          getDistanceFromLatLonInKm(
+            c.center.latitude,
+            c.center.longitude,
+            coords.latitude,
+            coords.longitude
+          ) * 1000;
         if (d <= thresholdMeters) {
           c.members.push(r);
           // optionally update cluster center (simple average)
-          const latSum = c.center.latitude * (c.members.length - 1) + coords.latitude;
-          const lngSum = c.center.longitude * (c.members.length - 1) + coords.longitude;
+          const latSum =
+            c.center.latitude * (c.members.length - 1) + coords.latitude;
+          const lngSum =
+            c.center.longitude * (c.members.length - 1) + coords.longitude;
           c.center.latitude = latSum / c.members.length;
           c.center.longitude = lngSum / c.members.length;
           return;
         }
       }
-      clusters.push({ center: { latitude: coords.latitude, longitude: coords.longitude }, members: [r] });
+      clusters.push({
+        center: { latitude: coords.latitude, longitude: coords.longitude },
+        members: [r],
+      });
     };
 
-    reports.forEach((r) => {
+    reports.forEach(r => {
       const c = parseLocation(r.location);
       if (!c) return;
       pushToCluster(r, c);
@@ -462,21 +528,31 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   }, [reports]);
 
   // Given a report and its parsed coords, return a possibly offset display coordinate so markers don't stack
-  const getDisplayCoords = (report: Report, coords: { latitude: number; longitude: number }) => {
+  const getDisplayCoords = (
+    report: Report,
+    coords: { latitude: number; longitude: number }
+  ) => {
     // find the cluster containing this report
-    const cluster = clusters.find((cl) => cl.members.some((m) => m.reportid === report.reportid));
+    const cluster = clusters.find(cl =>
+      cl.members.some(m => m.reportid === report.reportid)
+    );
     if (!cluster) return coords;
     const count = cluster.members.length;
     if (count <= 1) return coords;
 
-    const index = cluster.members.findIndex((m) => m.reportid === report.reportid);
+    const index = cluster.members.findIndex(
+      m => m.reportid === report.reportid
+    );
 
     // Increase radius with cluster size to reduce overlap for larger groups
     const baseRadius = 6;
     const radiusMeters = Math.min(baseRadius + count * 2, 40); // cap at 40m
 
     const angle = (2 * Math.PI * index) / count;
-    const { latDegree, lngDegree } = metersToDegreeOffset(cluster.center.latitude, radiusMeters);
+    const { latDegree, lngDegree } = metersToDegreeOffset(
+      cluster.center.latitude,
+      radiusMeters
+    );
 
     const adjustedLat = cluster.center.latitude + Math.cos(angle) * latDegree;
     const adjustedLng = cluster.center.longitude + Math.sin(angle) * lngDegree;
@@ -487,32 +563,32 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
   // Get appropriate marker color based on report category
   const getMarkerColor = (category: string): string => {
     switch (category) {
-      case "event":
+      case 'event':
         return FORUM_COLORS.event;
-      case "safety":
+      case 'safety':
         return FORUM_COLORS.safety;
-      case "lost":
+      case 'lost':
         return FORUM_COLORS.lost;
-      case "found":
+      case 'found':
         return FORUM_COLORS.found;
       default:
-        return "#9E9E9E"; // Gray
+        return '#9E9E9E'; // Gray
     }
   };
 
   // Generate title for the marker based on report type
   const getReportTitle = (report: Report): string => {
     switch (report.category) {
-      case "event":
-        return `Event: ${report.eventtype || ""}`;
-      case "safety":
-        return `Hazard: ${report.hazardtype || ""}`;
-      case "lost":
-        return `Lost: ${report.itemtype || ""}`;
-      case "found":
-        return `Found: ${report.itemtype || ""}`;
+      case 'event':
+        return `Event: ${report.eventtype || ''}`;
+      case 'safety':
+        return `Hazard: ${report.hazardtype || ''}`;
+      case 'lost':
+        return `Lost: ${report.itemtype || ''}`;
+      case 'found':
+        return `Found: ${report.itemtype || ''}`;
       default:
-        return "Report";
+        return 'Report';
     }
   };
 
@@ -573,7 +649,7 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
         showsCompass={false}
       >
         {/* Render markers for reports matching the selected filter */}
-        {reports.map((report) => {
+        {reports.map(report => {
           // Map the app filter to report.category values
           const matchesFilter = (() => {
             if (filter === 'all') return true;
@@ -603,15 +679,45 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
             // Use the same Ionicons names as `app/forums.tsx` for visual consistency
             switch (report.category) {
               case 'event':
-                return <Ionicons name="calendar-outline" size={20} color={getMarkerColor(report.category)} />;
+                return (
+                  <Ionicons
+                    name='calendar-outline'
+                    size={20}
+                    color={getMarkerColor(report.category)}
+                  />
+                );
               case 'safety':
-                return <Ionicons name="alert-circle-outline" size={20} color={getMarkerColor(report.category)} />;
+                return (
+                  <Ionicons
+                    name='alert-circle-outline'
+                    size={20}
+                    color={getMarkerColor(report.category)}
+                  />
+                );
               case 'lost':
-                return <Ionicons name="help-circle-outline" size={18} color={getMarkerColor(report.category)} />;
+                return (
+                  <Ionicons
+                    name='help-circle-outline'
+                    size={18}
+                    color={getMarkerColor(report.category)}
+                  />
+                );
               case 'found':
-                return <Ionicons name="checkmark-circle-outline" size={18} color={getMarkerColor(report.category)} />;
+                return (
+                  <Ionicons
+                    name='checkmark-circle-outline'
+                    size={18}
+                    color={getMarkerColor(report.category)}
+                  />
+                );
               default:
-                return <Ionicons name="information-circle-outline" size={18} color={getMarkerColor(report.category)} />;
+                return (
+                  <Ionicons
+                    name='information-circle-outline'
+                    size={18}
+                    color={getMarkerColor(report.category)}
+                  />
+                );
             }
           };
 
@@ -629,21 +735,29 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
             }, 200);
 
             // Toggle selection: if already selected, deselect; otherwise select and show callout
-            setSelectedReport((prev) => {
+            setSelectedReport(prev => {
               const next = prev?.reportid === report.reportid ? null : report;
               // If selecting, show the callout for this marker
               if (next) {
                 setTimeout(() => {
                   const mr = markerRefs.current[report.reportid];
                   if (mr && mr.showCallout) {
-                    try { mr.showCallout(); } catch (e) { console.error("Error calling showCallout on marker:", e); }
+                    try {
+                      mr.showCallout();
+                    } catch (e) {
+                      console.error('Error calling showCallout on marker:', e);
+                    }
                   }
                 }, 0);
               } else {
                 // If deselecting via marker tap, hide its callout immediately
                 const mr = markerRefs.current[report.reportid];
                 if (mr && mr.hideCallout) {
-                  try { mr.hideCallout(); } catch (e) { console.error("Error calling hideCallout on marker:", e); }
+                  try {
+                    mr.hideCallout();
+                  } catch (e) {
+                    console.error('Error calling hideCallout on marker:', e);
+                  }
                 }
               }
 
@@ -651,14 +765,18 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
             });
           };
 
-          const tracksViewChanges = !markerReadyRef.current.get(report.reportid);
+          const tracksViewChanges = !markerReadyRef.current.get(
+            report.reportid
+          );
 
           const displayCoords = getDisplayCoords(report, coords);
 
           return (
             <Marker
               key={report.reportid}
-              ref={(ref) => { markerRefs.current[report.reportid] = ref; }}
+              ref={ref => {
+                markerRefs.current[report.reportid] = ref;
+              }}
               coordinate={displayCoords}
               onPress={handlePress}
               anchor={{ x: 0.5, y: 0.5 }}
@@ -669,29 +787,63 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
                   styles.iconWrapper,
                   // If selected, use the marker's category color as background and a slight shadow
                   selectedReport?.reportid === report.reportid
-                    ? { backgroundColor: getMarkerColor(report.category), shadowColor: getMarkerColor(report.category), elevation: 4 }
-                    : colorScheme === 'dark' ? styles.iconWrapperDark : styles.iconWrapperLight,
+                    ? {
+                        backgroundColor: getMarkerColor(report.category),
+                        shadowColor: getMarkerColor(report.category),
+                        elevation: 4,
+                      }
+                    : colorScheme === 'dark'
+                      ? styles.iconWrapperDark
+                      : styles.iconWrapperLight,
                 ]}
               >
                 {/* If selected, render white icon for contrast */}
-                {selectedReport?.reportid === report.reportid ? (
-                  (() => {
-                    switch (report.category) {
-                      case 'event':
-                        return <Ionicons name="calendar-outline" size={20} color="#fff" />;
-                      case 'safety':
-                        return <Ionicons name="alert-circle-outline" size={20} color="#fff" />;
-                      case 'lost':
-                        return <Ionicons name="help-circle-outline" size={18} color="#fff" />;
-                      case 'found':
-                        return <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />;
-                      default:
-                        return <Ionicons name="information-circle-outline" size={18} color="#fff" />;
-                    }
-                  })()
-                ) : (
-                  IconForReport()
-                )}
+                {selectedReport?.reportid === report.reportid
+                  ? (() => {
+                      switch (report.category) {
+                        case 'event':
+                          return (
+                            <Ionicons
+                              name='calendar-outline'
+                              size={20}
+                              color='#fff'
+                            />
+                          );
+                        case 'safety':
+                          return (
+                            <Ionicons
+                              name='alert-circle-outline'
+                              size={20}
+                              color='#fff'
+                            />
+                          );
+                        case 'lost':
+                          return (
+                            <Ionicons
+                              name='help-circle-outline'
+                              size={18}
+                              color='#fff'
+                            />
+                          );
+                        case 'found':
+                          return (
+                            <Ionicons
+                              name='checkmark-circle-outline'
+                              size={18}
+                              color='#fff'
+                            />
+                          );
+                        default:
+                          return (
+                            <Ionicons
+                              name='information-circle-outline'
+                              size={18}
+                              color='#fff'
+                            />
+                          );
+                      }
+                    })()
+                  : IconForReport()}
               </View>
               {/* once rendered, mark ready to stop tracking view changes to stabilize marker */}
               {tracksViewChanges && (
@@ -706,12 +858,12 @@ export default function MapScreen({ distanceRadius, selectedReportId, filter = '
                 <View
                   style={[
                     styles.callout,
-                    colorScheme === "dark"
+                    colorScheme === 'dark'
                       ? styles.calloutDark
                       : styles.calloutLight,
                   ]}
                 >
-                  <ThemedText type="defaultSemiBold">
+                  <ThemedText type='defaultSemiBold'>
                     {getReportTitle(report)}
                   </ThemedText>
                   <ThemedText>{report.description}</ThemedText>
@@ -738,8 +890,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   centerContent: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   map: {
     flex: 1,
@@ -750,27 +902,27 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   calloutLight: {
-    backgroundColor: "#FAF9F6",
+    backgroundColor: '#FAF9F6',
   },
   calloutDark: {
-    backgroundColor: "#0B1220",
+    backgroundColor: '#0B1220',
   },
   errorText: {
-    color: "red",
-    textAlign: "center",
+    color: 'red',
+    textAlign: 'center',
     padding: 20,
   },
   loadingOverlay: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
-    alignSelf: "center",
-    backgroundColor: "#0B1220",
+    alignSelf: 'center',
+    backgroundColor: '#0B1220',
     padding: 10,
     borderRadius: 20,
     opacity: 0.7,
   },
   loadingText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 14,
   },
   iconWrapper: {

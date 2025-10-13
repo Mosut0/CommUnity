@@ -1,5 +1,13 @@
 import React from 'react';
-import { Modal, Pressable, Animated, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import {
+  Modal,
+  Pressable,
+  Animated,
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { MARKER_COLORS } from '@/constants/Markers';
@@ -16,11 +24,36 @@ type CreateSheetProps = {
   insetsBottom: number;
 };
 
-const ACTIONS: Array<{ action: CreateSheetAction; label: string; icon: React.ComponentProps<typeof Ionicons>['name']; color: string }> = [
-  { action: 'hazard', label: 'Hazard', icon: 'alert-circle-outline', color: MARKER_COLORS.safety },
-  { action: 'event', label: 'Event', icon: 'calendar-outline', color: MARKER_COLORS.event },
-  { action: 'lost', label: 'Lost Item', icon: 'help-circle-outline', color: MARKER_COLORS.lost },
-  { action: 'found', label: 'Found Item', icon: 'checkmark-circle-outline', color: MARKER_COLORS.found },
+const ACTIONS: Array<{
+  action: CreateSheetAction;
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  color: string;
+}> = [
+  {
+    action: 'hazard',
+    label: 'Hazard',
+    icon: 'alert-circle-outline',
+    color: MARKER_COLORS.safety,
+  },
+  {
+    action: 'event',
+    label: 'Event',
+    icon: 'calendar-outline',
+    color: MARKER_COLORS.event,
+  },
+  {
+    action: 'lost',
+    label: 'Lost Item',
+    icon: 'help-circle-outline',
+    color: MARKER_COLORS.lost,
+  },
+  {
+    action: 'found',
+    label: 'Found Item',
+    icon: 'checkmark-circle-outline',
+    color: MARKER_COLORS.found,
+  },
 ];
 
 export const CreateSheet: React.FC<CreateSheetProps> = ({
@@ -30,8 +63,16 @@ export const CreateSheet: React.FC<CreateSheetProps> = ({
   uiTheme,
   insetsBottom,
 }) => (
-  <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
-    <Pressable style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay }]} onPress={onRequestClose}>
+  <Modal
+    visible={visible}
+    transparent
+    animationType='fade'
+    onRequestClose={onRequestClose}
+  >
+    <Pressable
+      style={[styles.sheetOverlay, { backgroundColor: uiTheme.overlay }]}
+      onPress={onRequestClose}
+    >
       <Animated.View
         style={[
           styles.createSheet,
@@ -42,20 +83,31 @@ export const CreateSheet: React.FC<CreateSheetProps> = ({
           },
         ]}
       >
-        <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>Create new...</Text>
+        <Text style={[styles.createTitle, { color: uiTheme.textPrimary }]}>
+          Create new...
+        </Text>
         <View style={styles.createGrid}>
-          {ACTIONS.map((action) => (
+          {ACTIONS.map(action => (
             <TouchableOpacity
               key={action.action}
               style={[styles.createCell, { backgroundColor: uiTheme.chipBg }]}
               onPress={() => onSelectAction(action.action)}
               activeOpacity={0.85}
-              accessibilityRole="button"
+              accessibilityRole='button'
             >
-              <View style={[styles.iconBubbleLg, { backgroundColor: action.color + '22' }]}>
+              <View
+                style={[
+                  styles.iconBubbleLg,
+                  { backgroundColor: action.color + '22' },
+                ]}
+              >
                 <Ionicons name={action.icon} size={24} color={action.color} />
               </View>
-              <Text style={[styles.createCellText, { color: uiTheme.textPrimary }]}>{action.label}</Text>
+              <Text
+                style={[styles.createCellText, { color: uiTheme.textPrimary }]}
+              >
+                {action.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>

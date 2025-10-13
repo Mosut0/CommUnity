@@ -1,5 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Animated, StyleSheet, Pressable } from 'react-native';
+import {
+  TouchableOpacity,
+  Animated,
+  StyleSheet,
+  Pressable,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { Colors, type ThemeName } from '@/constants/Colors';
@@ -26,20 +31,37 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({
   theme,
 }) => (
   <>
-    {isExpanded && <Pressable style={styles.fabOverlay} onPress={onToggle} accessibilityLabel="Close actions overlay" />}
+    {isExpanded && (
+      <Pressable
+        style={styles.fabOverlay}
+        onPress={onToggle}
+        accessibilityLabel='Close actions overlay'
+      />
+    )}
 
     <TouchableOpacity
       style={[styles.fab, theme === 'dark' ? styles.fabDark : styles.fabLight]}
       onPress={onToggle}
       accessibilityLabel={isExpanded ? 'Close actions' : 'Open actions'}
-      accessibilityRole="button"
+      accessibilityRole='button'
     >
       <Animated.View
         style={{
-          transform: [{ rotate: animation.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] }) }],
+          transform: [
+            {
+              rotate: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0deg', '180deg'],
+              }),
+            },
+          ],
         }}
       >
-        <MaterialIcons name={isExpanded ? 'close' : 'more-vert'} size={26} color={uiTheme.fabIcon} />
+        <MaterialIcons
+          name={isExpanded ? 'close' : 'more-vert'}
+          size={26}
+          color={uiTheme.fabIcon}
+        />
       </Animated.View>
     </TouchableOpacity>
 
@@ -53,20 +75,37 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({
           theme === 'dark' ? styles.fabDark : styles.fabLight,
           {
             transform: [
-              { translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, -136] }) },
-              { scale: animation.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              {
+                translateY: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -136],
+                }),
+              },
+              {
+                scale: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.4, 1],
+                }),
+              },
             ],
-            opacity: animation.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            opacity: animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+            }),
           },
         ]}
       >
         <TouchableOpacity
           style={styles.speedDialTouchable}
           onPress={onPressForums}
-          accessibilityLabel="Open Forums"
-          accessibilityRole="button"
+          accessibilityLabel='Open Forums'
+          accessibilityRole='button'
         >
-          <MaterialIcons name="format-list-bulleted" size={22} color={uiTheme.fabIcon} />
+          <MaterialIcons
+            name='format-list-bulleted'
+            size={22}
+            color={uiTheme.fabIcon}
+          />
         </TouchableOpacity>
       </Animated.View>
 
@@ -76,20 +115,33 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({
           theme === 'dark' ? styles.fabDark : styles.fabLight,
           {
             transform: [
-              { translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, -70] }) },
-              { scale: animation.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+              {
+                translateY: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -70],
+                }),
+              },
+              {
+                scale: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.4, 1],
+                }),
+              },
             ],
-            opacity: animation.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
+            opacity: animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+            }),
           },
         ]}
       >
         <TouchableOpacity
           style={styles.speedDialTouchable}
           onPress={onPressCreate}
-          accessibilityLabel="Create report"
-          accessibilityRole="button"
+          accessibilityLabel='Create report'
+          accessibilityRole='button'
         >
-          <MaterialIcons name="add" size={26} color={uiTheme.fabIcon} />
+          <MaterialIcons name='add' size={26} color={uiTheme.fabIcon} />
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Image,
@@ -6,12 +6,12 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-} from "react-native";
-import * as ExpoImagePicker from "expo-image-picker";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { MaterialIcons } from "@expo/vector-icons";
+} from 'react-native';
+import * as ExpoImagePicker from 'expo-image-picker';
+import { ThemedText } from '@/components/ThemedText';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface ImagePickerProps {
   onImageSelected: (uri: string) => void;
@@ -29,7 +29,7 @@ export default function ImagePicker({
   onImageSelected,
   onImageRemoved,
 }: ImagePickerProps) {
-  const colorScheme = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? 'light';
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,11 +42,11 @@ export default function ImagePicker({
       permission = await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
     }
 
-    if (permission.status !== "granted") {
+    if (permission.status !== 'granted') {
       Alert.alert(
-        "Permission required",
+        'Permission required',
         `Please grant ${
-          forCamera ? "camera" : "photo library"
+          forCamera ? 'camera' : 'photo library'
         } access to use this feature`
       );
       return false;
@@ -76,7 +76,7 @@ export default function ImagePicker({
         onImageSelected(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to pick image");
+      Alert.alert('Error', 'Failed to pick image');
       console.error(error);
     } finally {
       setLoading(false);
@@ -104,7 +104,7 @@ export default function ImagePicker({
         onImageSelected(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to take photo");
+      Alert.alert('Error', 'Failed to take photo');
       console.error(error);
     } finally {
       setLoading(false);
@@ -121,10 +121,10 @@ export default function ImagePicker({
    * Provides options to take a photo, choose from library, or cancel
    */
   const showImageOptions = () => {
-    Alert.alert("Add Image", "Choose an option", [
-      { text: "Take Photo", onPress: takePhoto },
-      { text: "Choose from Library", onPress: pickImage },
-      { text: "Cancel", style: "cancel" },
+    Alert.alert('Add Image', 'Choose an option', [
+      { text: 'Take Photo', onPress: takePhoto },
+      { text: 'Choose from Library', onPress: pickImage },
+      { text: 'Cancel', style: 'cancel' },
     ]);
   };
 
@@ -133,14 +133,14 @@ export default function ImagePicker({
       {loading ? (
         // Loading state - show activity indicator while processing
         <View style={styles.imageContainer}>
-          <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
+          <ActivityIndicator size='large' color={Colors[colorScheme].tint} />
         </View>
       ) : image ? (
         // Image selected state - show the image with a remove option
         <View style={styles.imageContainer}>
           <Image source={{ uri: image }} style={styles.preview} />
           <TouchableOpacity style={styles.removeButton} onPress={removeImage}>
-            <MaterialIcons name="close" size={20} color="#FF3B30" />
+            <MaterialIcons name='close' size={20} color='#FF3B30' />
           </TouchableOpacity>
         </View>
       ) : (
@@ -161,41 +161,41 @@ export default function ImagePicker({
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
   },
   imageContainer: {
-    width: "100%",
+    width: '100%',
     height: 200,
     borderRadius: 8,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
   },
   preview: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   selectButton: {
-    width: "100%",
+    width: '100%',
     height: 50,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 8,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
   },
   removeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: "rgba(255,255,255,0.7)",
+    backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: 15,
     width: 30,
     height: 30,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

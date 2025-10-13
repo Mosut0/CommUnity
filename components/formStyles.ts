@@ -106,7 +106,7 @@ const baseFormStyles = (theme: ThemeColors): BaseFormStyles => ({
 
 export const makeFormStyles = <T extends StylesRecord = {}>(
   theme: ThemeColors,
-  overrides?: T,
+  overrides?: T
 ) =>
   StyleSheet.create({
     ...baseFormStyles(theme),

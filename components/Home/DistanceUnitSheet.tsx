@@ -1,5 +1,12 @@
 import React from 'react';
-import { Modal, Animated, Pressable, View, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  Animated,
+  Pressable,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, CommonColors, type ThemeName } from '@/constants/Colors';
@@ -29,7 +36,12 @@ export const DistanceUnitSheet: React.FC<DistanceUnitSheetProps> = ({
   onSelectUnit,
   onSubmit,
 }) => (
-  <Modal transparent animationType="none" visible={visible} onRequestClose={onRequestClose}>
+  <Modal
+    transparent
+    animationType='none'
+    visible={visible}
+    onRequestClose={onRequestClose}
+  >
     <Animated.View
       style={[
         styles.sheetOverlay,
@@ -48,36 +60,92 @@ export const DistanceUnitSheet: React.FC<DistanceUnitSheetProps> = ({
             borderColor: uiTheme.divider,
             paddingBottom: 20 + insetsBottom,
             borderTopWidth: 1,
-            transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [60, 0] }) }],
+            transform: [
+              {
+                translateY: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [60, 0],
+                }),
+              },
+            ],
             opacity: animation,
           },
         ]}
       >
         <View style={styles.sheetHandleWrap}>
-          <View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} />
+          <View
+            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
+          />
         </View>
-        <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 20 }]}>
+        <ThemedText
+          style={[
+            styles.sheetTitle,
+            { color: uiTheme.textPrimary, marginBottom: 20 },
+          ]}
+        >
           Distance Unit
         </ThemedText>
 
         <View style={styles.radioGroup}>
-          <TouchableOpacity style={styles.radioOption} onPress={() => onSelectUnit('km')}>
-            <View style={[styles.radioCircle, { borderColor: uiTheme.divider }]}>
-              {distanceUnit === 'km' && <View style={[styles.radioInner, { backgroundColor: uiTheme.accent }]} />}
+          <TouchableOpacity
+            style={styles.radioOption}
+            onPress={() => onSelectUnit('km')}
+          >
+            <View
+              style={[styles.radioCircle, { borderColor: uiTheme.divider }]}
+            >
+              {distanceUnit === 'km' && (
+                <View
+                  style={[
+                    styles.radioInner,
+                    { backgroundColor: uiTheme.accent },
+                  ]}
+                />
+              )}
             </View>
-            <ThemedText style={[styles.radioLabel, { color: uiTheme.textPrimary }]}>Kilometers (km)</ThemedText>
+            <ThemedText
+              style={[styles.radioLabel, { color: uiTheme.textPrimary }]}
+            >
+              Kilometers (km)
+            </ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.radioOption} onPress={() => onSelectUnit('miles')}>
-            <View style={[styles.radioCircle, { borderColor: uiTheme.divider }]}>
-              {distanceUnit === 'miles' && <View style={[styles.radioInner, { backgroundColor: uiTheme.accent }]} />}
+          <TouchableOpacity
+            style={styles.radioOption}
+            onPress={() => onSelectUnit('miles')}
+          >
+            <View
+              style={[styles.radioCircle, { borderColor: uiTheme.divider }]}
+            >
+              {distanceUnit === 'miles' && (
+                <View
+                  style={[
+                    styles.radioInner,
+                    { backgroundColor: uiTheme.accent },
+                  ]}
+                />
+              )}
             </View>
-            <ThemedText style={[styles.radioLabel, { color: uiTheme.textPrimary }]}>Miles (mi)</ThemedText>
+            <ThemedText
+              style={[styles.radioLabel, { color: uiTheme.textPrimary }]}
+            >
+              Miles (mi)
+            </ThemedText>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent, marginTop: 14 }]} onPress={onSubmit}>
-          <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
+        <TouchableOpacity
+          style={[
+            styles.primaryBtn,
+            { backgroundColor: uiTheme.accent, marginTop: 14 },
+          ]}
+          onPress={onSubmit}
+        >
+          <ThemedText
+            style={[styles.primaryBtnText, { color: CommonColors.white }]}
+          >
+            Save
+          </ThemedText>
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>

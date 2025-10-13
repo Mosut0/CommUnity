@@ -1,5 +1,13 @@
 import React from 'react';
-import { Modal, Animated, Pressable, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  Animated,
+  Pressable,
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, CommonColors, type ThemeName } from '@/constants/Colors';
@@ -33,7 +41,12 @@ export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
   onChangeNewPassword,
   onSubmit,
 }) => (
-  <Modal transparent animationType="none" visible={visible} onRequestClose={onRequestClose}>
+  <Modal
+    transparent
+    animationType='none'
+    visible={visible}
+    onRequestClose={onRequestClose}
+  >
     <Animated.View
       style={[
         styles.sheetOverlay,
@@ -52,44 +65,74 @@ export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
             borderColor: uiTheme.divider,
             paddingBottom: 20 + insetsBottom,
             borderTopWidth: 1,
-            transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [60, 0] }) }],
+            transform: [
+              {
+                translateY: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [60, 0],
+                }),
+              },
+            ],
             opacity: animation,
-            marginBottom: keyboardOffset > 0 ? keyboardOffset - insetsBottom : 0,
+            marginBottom:
+              keyboardOffset > 0 ? keyboardOffset - insetsBottom : 0,
           },
         ]}
       >
         <View style={styles.sheetHandleWrap}>
-          <View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} />
+          <View
+            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
+          />
         </View>
-        <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 12 }]}>
+        <ThemedText
+          style={[
+            styles.sheetTitle,
+            { color: uiTheme.textPrimary, marginBottom: 12 },
+          ]}
+        >
           Change Password
         </ThemedText>
         <TextInput
           style={[
             styles.input,
-            { backgroundColor: uiTheme.inputBg, color: uiTheme.textPrimary, borderColor: uiTheme.divider },
+            {
+              backgroundColor: uiTheme.inputBg,
+              color: uiTheme.textPrimary,
+              borderColor: uiTheme.divider,
+            },
           ]}
-          placeholder="Old Password"
+          placeholder='Old Password'
           placeholderTextColor={uiTheme.textSecondary}
           secureTextEntry
           value={oldPassword}
           onChangeText={onChangeOldPassword}
-          accessibilityLabel="Old password"
+          accessibilityLabel='Old password'
         />
         <TextInput
           style={[
             styles.input,
-            { backgroundColor: uiTheme.inputBg, color: uiTheme.textPrimary, borderColor: uiTheme.divider },
+            {
+              backgroundColor: uiTheme.inputBg,
+              color: uiTheme.textPrimary,
+              borderColor: uiTheme.divider,
+            },
           ]}
-          placeholder="New Password"
+          placeholder='New Password'
           placeholderTextColor={uiTheme.textSecondary}
           secureTextEntry
           value={newPassword}
           onChangeText={onChangeNewPassword}
-          accessibilityLabel="New password"
+          accessibilityLabel='New password'
         />
-        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={onSubmit}>
-          <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
+        <TouchableOpacity
+          style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]}
+          onPress={onSubmit}
+        >
+          <ThemedText
+            style={[styles.primaryBtnText, { color: CommonColors.white }]}
+          >
+            Save
+          </ThemedText>
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>

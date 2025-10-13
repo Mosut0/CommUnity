@@ -53,7 +53,7 @@ export async function submitLostItem(data: LostItemData, userId: string) {
         category: 'lost',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
-        imageurl: imageUrl
+        imageurl: imageUrl,
       })
       .select();
 
@@ -67,15 +67,13 @@ export async function submitLostItem(data: LostItemData, userId: string) {
     }
 
     const reportId = reportData[0].reportid;
-    
+
     // Insert lost item details into 'lostitems' table
-    const { error: lostItemError } = await supabase
-      .from('lostitems')
-      .insert({
-        reportid: reportId,
-        itemtype: data.itemName,
-        contactinfo: data.contactInfo,
-      });
+    const { error: lostItemError } = await supabase.from('lostitems').insert({
+      reportid: reportId,
+      itemtype: data.itemName,
+      contactinfo: data.contactInfo,
+    });
 
     if (lostItemError) {
       console.error('Lost item insert error:', lostItemError);
@@ -104,7 +102,7 @@ export async function submitFoundItem(data: FoundItemData, userId: string) {
         category: 'found',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
-        imageurl: imageUrl
+        imageurl: imageUrl,
       })
       .select();
 
@@ -118,15 +116,13 @@ export async function submitFoundItem(data: FoundItemData, userId: string) {
     }
 
     const reportId = reportData[0].reportid;
-    
+
     // Insert found item details into 'founditems' table
-    const { error: foundItemError } = await supabase
-      .from('founditems')
-      .insert({
-        reportid: reportId,
-        itemtype: data.itemName,
-        contactinfo: data.contactInfo,
-      });
+    const { error: foundItemError } = await supabase.from('founditems').insert({
+      reportid: reportId,
+      itemtype: data.itemName,
+      contactinfo: data.contactInfo,
+    });
 
     if (foundItemError) {
       console.error('Found item insert error:', foundItemError);

@@ -29,16 +29,23 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onScrollOffsetChange,
   scrollEnabled = true,
 }) => {
-  const renderFilterButton = (value: FilterValue, label: string, icon: React.ComponentProps<typeof Ionicons>['name'], color: string) => (
+  const renderFilterButton = (
+    value: FilterValue,
+    label: string,
+    icon: React.ComponentProps<typeof Ionicons>['name'],
+    color: string
+  ) => (
     <TouchableOpacity
       key={value}
       style={[
         styles.filterButton,
-        selectedFilter === value && { backgroundColor: uiTheme.filterButtonActiveBg },
+        selectedFilter === value && {
+          backgroundColor: uiTheme.filterButtonActiveBg,
+        },
       ]}
       onPress={() => onFilterPress(value)}
       disabled={!scrollEnabled}
-      accessibilityRole="button"
+      accessibilityRole='button'
       accessibilityState={{ selected: selectedFilter === value }}
     >
       <Ionicons
@@ -56,15 +63,38 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.filterContent}
-      style={[styles.filterBarInline, theme === 'dark' ? styles.filterBarDark : styles.filterBarLight]}
-      onScroll={(e) => onScrollOffsetChange(e.nativeEvent.contentOffset.x)}
+      style={[
+        styles.filterBarInline,
+        theme === 'dark' ? styles.filterBarDark : styles.filterBarLight,
+      ]}
+      onScroll={e => onScrollOffsetChange(e.nativeEvent.contentOffset.x)}
       scrollEventThrottle={16}
     >
       {renderFilterButton('all', 'All', 'layers', uiTheme.accentAlt)}
-      {renderFilterButton('hazard', 'Hazards', 'alert-circle-outline', MARKER_COLORS.safety)}
-      {renderFilterButton('event', 'Events', 'calendar-outline', MARKER_COLORS.event)}
-      {renderFilterButton('lost', 'Lost', 'help-circle-outline', MARKER_COLORS.lost)}
-      {renderFilterButton('found', 'Found', 'checkmark-circle-outline', MARKER_COLORS.found)}
+      {renderFilterButton(
+        'hazard',
+        'Hazards',
+        'alert-circle-outline',
+        MARKER_COLORS.safety
+      )}
+      {renderFilterButton(
+        'event',
+        'Events',
+        'calendar-outline',
+        MARKER_COLORS.event
+      )}
+      {renderFilterButton(
+        'lost',
+        'Lost',
+        'help-circle-outline',
+        MARKER_COLORS.lost
+      )}
+      {renderFilterButton(
+        'found',
+        'Found',
+        'checkmark-circle-outline',
+        MARKER_COLORS.found
+      )}
     </ScrollView>
   );
 };

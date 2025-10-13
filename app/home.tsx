@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Alert, useColorScheme, ScrollView, Animated, Easing, Keyboard, Platform } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  useColorScheme,
+  ScrollView,
+  Animated,
+  Easing,
+  Keyboard,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -71,7 +82,7 @@ export default function Home() {
 
   // Get URL parameters
   const { selectedReportId } = useLocalSearchParams();
-  
+
   // Authentication state management
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -80,7 +91,8 @@ export default function Home() {
   const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] = useState(false);
+  const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] =
+    useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const colorScheme = useColorScheme();
@@ -97,7 +109,9 @@ export default function Home() {
   // Animated settings sheet
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
   const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
-  const [nextModal, setNextModal] = useState<null | 'password' | 'distance' | 'unit'>(null);
+  const [nextModal, setNextModal] = useState<
+    null | 'password' | 'distance' | 'unit'
+  >(null);
   // Animated password & distance sheets
   const [changePasswordMounted, setChangePasswordMounted] = useState(false);
   const [distanceMounted, setDistanceMounted] = useState(false);
@@ -110,8 +124,10 @@ export default function Home() {
 
   // Keyboard handling so password sheet isn't covered
   useEffect(() => {
-    const showEvent = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow';
-    const hideEvent = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide';
+    const showEvent =
+      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow';
+    const hideEvent =
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide';
     const onShow = (e: any) => {
       const height = e?.endCoordinates?.height || 0;
       setKeyboardOffset(height);
@@ -119,7 +135,10 @@ export default function Home() {
     const onHide = () => setKeyboardOffset(0);
     const showSub = Keyboard.addListener(showEvent, onShow);
     const hideSub = Keyboard.addListener(hideEvent, onHide);
-    return () => { showSub.remove(); hideSub.remove(); };
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   const runFabAnimation = (to: number) => {
@@ -149,7 +168,9 @@ export default function Home() {
     router.push('/forums');
   };
 
-  const handleSelectCreateAction = (action: 'hazard' | 'event' | 'lost' | 'found') => {
+  const handleSelectCreateAction = (
+    action: 'hazard' | 'event' | 'lost' | 'found'
+  ) => {
     if (!session) {
       Alert.alert('Not signed in', 'Please sign in to submit a report.');
       return;
@@ -225,17 +246,26 @@ export default function Home() {
       setChangePasswordMounted(true);
       passwordAnim.stopAnimation();
       passwordAnim.setValue(0);
-      Animated.timing(passwordAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(passwordAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
     } else if (changePasswordMounted) {
-      Animated.timing(passwordAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
-        .start(({ finished }) => { 
-          if (finished) { 
-            setChangePasswordMounted(false); 
-            // Clear any unsaved input when the sheet fully closes
-            setOldPassword('');
-            setNewPassword('');
-          } 
-        });
+      Animated.timing(passwordAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setChangePasswordMounted(false);
+          // Clear any unsaved input when the sheet fully closes
+          setOldPassword('');
+          setNewPassword('');
+        }
+      });
     }
   }, [isChangePasswordModalVisible, changePasswordMounted]);
 
@@ -245,10 +275,21 @@ export default function Home() {
       setDistanceMounted(true);
       distanceAnim.stopAnimation();
       distanceAnim.setValue(0);
-      Animated.timing(distanceAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(distanceAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
     } else if (distanceMounted) {
-      Animated.timing(distanceAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
-        .start(({ finished }) => { if (finished) setDistanceMounted(false); });
+      Animated.timing(distanceAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setDistanceMounted(false);
+      });
     }
   }, [isDistanceModalVisible, distanceMounted]);
 
@@ -258,10 +299,21 @@ export default function Home() {
       setUnitMounted(true);
       unitAnim.stopAnimation();
       unitAnim.setValue(0);
-      Animated.timing(unitAnim, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(unitAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
     } else if (unitMounted) {
-      Animated.timing(unitAnim, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true })
-        .start(({ finished }) => { if (finished) setUnitMounted(false); });
+      Animated.timing(unitAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setUnitMounted(false);
+      });
     }
   }, [isUnitModalVisible, unitMounted]);
 
@@ -320,7 +372,6 @@ export default function Home() {
     setIsProfileModalVisible(!isProfileModalVisible);
   };
 
-
   // Toggle the visibility of the change password modal
   const toggleChangePasswordModal = () => {
     setIsChangePasswordModalVisible(!isChangePasswordModalVisible);
@@ -363,7 +414,7 @@ export default function Home() {
           user_metadata: {
             distance_unit: distanceUnit,
           },
-        }
+        },
       });
 
       if (error) {
@@ -374,11 +425,15 @@ export default function Home() {
         console.log('Updated distance unit to:', distanceUnit);
 
         // Fetch updated user data after saving
-        const { data: updatedUser, error: fetchError } = await supabase.auth.getUser();
+        const { data: updatedUser, error: fetchError } =
+          await supabase.auth.getUser();
         if (fetchError) {
           console.error('Error fetching updated user:', fetchError);
         } else {
-          console.log('Updated user metadata:', updatedUser?.user?.user_metadata);
+          console.log(
+            'Updated user metadata:',
+            updatedUser?.user?.user_metadata
+          );
         }
       }
     }
@@ -429,7 +484,7 @@ export default function Home() {
           user_metadata: {
             distance_radius: sliderValue,
           },
-        }
+        },
       });
 
       if (error) {
@@ -440,25 +495,33 @@ export default function Home() {
         console.log('Updated distance radius to:', sliderValue);
 
         // Fetch updated user data after saving
-        const { data: updatedUser, error: fetchError } = await supabase.auth.getUser();
+        const { data: updatedUser, error: fetchError } =
+          await supabase.auth.getUser();
         if (fetchError) {
           console.error('Error fetching updated user:', fetchError);
         } else {
-          console.log('Updated user metadata:', updatedUser?.user?.user_metadata);
-          setDistanceRadius(updatedUser?.user?.user_metadata?.distance_radius || 20);
+          console.log(
+            'Updated user metadata:',
+            updatedUser?.user?.user_metadata
+          );
+          setDistanceRadius(
+            updatedUser?.user?.user_metadata?.distance_radius || 20
+          );
         }
       }
     }
   };
 
-    return (
+  return (
     <View style={{ flex: 1 }}>
       {/* Top bar with scrollable FilterBar on the left and fixed Profile Icon on the right */}
-      <View style={[
-        styles.topBar,
-        { top: (insets?.top || 0) },
-        theme === 'dark' ? styles.topBarDark : styles.topBarLight,
-      ]}>
+      <View
+        style={[
+          styles.topBar,
+          { top: insets?.top || 0 },
+          theme === 'dark' ? styles.topBarDark : styles.topBarLight,
+        ]}
+      >
         <View style={styles.filterWrapper}>
           <FilterBar
             selectedFilter={selectedFilter}
@@ -466,32 +529,50 @@ export default function Home() {
             theme={theme}
             uiTheme={uiTheme}
             filterScrollRef={filterScrollRef}
-            onScrollOffsetChange={(offset) => {
+            onScrollOffsetChange={offset => {
               scrollOffsetRef.current = offset;
             }}
           />
         </View>
-        <View style={[styles.topBarDivider, theme === 'dark' ? styles.topBarDividerDark : styles.topBarDividerLight]} />
+        <View
+          style={[
+            styles.topBarDivider,
+            theme === 'dark'
+              ? styles.topBarDividerDark
+              : styles.topBarDividerLight,
+          ]}
+        />
         <TouchableOpacity
           style={styles.profileIcon}
           onPress={toggleProfileModal}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          accessibilityLabel="Open profile and settings"
+          accessibilityLabel='Open profile and settings'
         >
-          <View style={[
-            styles.profileIconCircle,
-            theme === 'dark' ? styles.profileIconCircleDark : styles.profileIconCircleLight,
-          ]}>
-            <MaterialIcons name="account-circle" size={24} color={uiTheme.textPrimary} />
+          <View
+            style={[
+              styles.profileIconCircle,
+              theme === 'dark'
+                ? styles.profileIconCircleDark
+                : styles.profileIconCircleLight,
+            ]}
+          >
+            <MaterialIcons
+              name='account-circle'
+              size={24}
+              color={uiTheme.textPrimary}
+            />
           </View>
         </TouchableOpacity>
       </View>
 
       {/* Map display showing the community data */}
-      <MapScreen 
-        distanceRadius={distanceRadius} 
-        selectedReportId={selectedReportId ? Number(selectedReportId) : undefined} 
-      filter={appliedFilter} />
+      <MapScreen
+        distanceRadius={distanceRadius}
+        selectedReportId={
+          selectedReportId ? Number(selectedReportId) : undefined
+        }
+        filter={appliedFilter}
+      />
 
       <ProfileSheet
         visible={profileSheetMounted}
@@ -571,35 +652,35 @@ export default function Home() {
 
       {/* Conditional rendering of different form modals based on selection */}
       {/* Lost Item Form Modal */}
-      <LostItemForm 
+      <LostItemForm
         visible={selectedForm === 'lost'}
-        onSubmit={() => setSelectedForm(null)} 
+        onSubmit={() => setSelectedForm(null)}
         onClose={() => setSelectedForm(null)}
-        userId={session?.user?.id || ''} 
+        userId={session?.user?.id || ''}
       />
-      
+
       {/* Found Item Form Modal */}
-      <FoundItemForm 
+      <FoundItemForm
         visible={selectedForm === 'found'}
-        onSubmit={() => setSelectedForm(null)} 
+        onSubmit={() => setSelectedForm(null)}
         onClose={() => setSelectedForm(null)}
-        userId={session?.user?.id || ''} 
+        userId={session?.user?.id || ''}
       />
-      
+
       {/* Hazard Form Modal */}
-      <FillHazardForm 
+      <FillHazardForm
         visible={selectedForm === 'hazard'}
-        onSubmit={() => setSelectedForm(null)} 
+        onSubmit={() => setSelectedForm(null)}
         onClose={() => setSelectedForm(null)}
-        userId={session?.user?.id || ''} 
+        userId={session?.user?.id || ''}
       />
-      
+
       {/* Event Form Modal */}
-      <FillEventForm 
+      <FillEventForm
         visible={selectedForm === 'event'}
-        onSubmit={() => setSelectedForm(null)} 
+        onSubmit={() => setSelectedForm(null)}
         onClose={() => setSelectedForm(null)}
-        userId={session?.user?.id || ''} 
+        userId={session?.user?.id || ''}
       />
     </View>
   );

@@ -1,5 +1,12 @@
 import React from 'react';
-import { Modal, Animated, Pressable, View, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  Animated,
+  Pressable,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -33,7 +40,12 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
   onSubmit,
   distanceUnit,
 }) => (
-  <Modal transparent animationType="none" visible={visible} onRequestClose={onRequestClose}>
+  <Modal
+    transparent
+    animationType='none'
+    visible={visible}
+    onRequestClose={onRequestClose}
+  >
     <Animated.View
       style={[
         styles.sheetOverlay,
@@ -52,15 +64,29 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
             borderColor: uiTheme.divider,
             paddingBottom: 20 + insetsBottom,
             borderTopWidth: 1,
-            transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [60, 0] }) }],
+            transform: [
+              {
+                translateY: animation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [60, 0],
+                }),
+              },
+            ],
             opacity: animation,
           },
         ]}
       >
         <View style={styles.sheetHandleWrap}>
-          <View style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]} />
+          <View
+            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
+          />
         </View>
-        <ThemedText style={[styles.sheetTitle, { color: uiTheme.textPrimary, marginBottom: 12 }]}>
+        <ThemedText
+          style={[
+            styles.sheetTitle,
+            { color: uiTheme.textPrimary, marginBottom: 12 },
+          ]}
+        >
           Distance Radius
         </ThemedText>
         <Slider
@@ -73,13 +99,24 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
           minimumTrackTintColor={uiTheme.accent}
           maximumTrackTintColor={uiTheme.sliderTrackInactive}
           thumbTintColor={uiTheme.accent}
-          accessibilityLabel="Select distance radius"
+          accessibilityLabel='Select distance radius'
         />
-        <ThemedText style={[styles.sliderValueText, { color: uiTheme.textSecondary }]}>
-          {distanceUnit === 'miles' ? `${Math.round(kmToMiles(sliderValue))} miles` : `${sliderValue} km`}
+        <ThemedText
+          style={[styles.sliderValueText, { color: uiTheme.textSecondary }]}
+        >
+          {distanceUnit === 'miles'
+            ? `${Math.round(kmToMiles(sliderValue))} miles`
+            : `${sliderValue} km`}
         </ThemedText>
-        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]} onPress={onSubmit}>
-          <ThemedText style={[styles.primaryBtnText, { color: CommonColors.white }]}>Save</ThemedText>
+        <TouchableOpacity
+          style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]}
+          onPress={onSubmit}
+        >
+          <ThemedText
+            style={[styles.primaryBtnText, { color: CommonColors.white }]}
+          >
+            Save
+          </ThemedText>
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>
