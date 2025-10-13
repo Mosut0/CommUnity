@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Modal } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+  Modal,
+} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
-import { makeFormStyles, getTheme, modalStyles } from './styles';
+import { makeFormStyles, getTheme, modalStyles } from '../formStyles';
 import { submitLostItem } from '@/services/lostAndFoundService';
 import ImagePicker from '@/components/ImagePicker';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -16,33 +24,46 @@ interface LostItemFormProps {
   visible: boolean;
 }
 
-export default function LostItemForm({ onSubmit, onClose, userId, visible }: LostItemFormProps) {
+export default function LostItemForm({
+  onSubmit,
+  onClose,
+  userId,
+  visible,
+}: LostItemFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
   const styles = useMemo(() => makeFormStyles(theme), [theme]);
-  
+
   const [itemName, setItemName] = useState('');
   const [description, setDescription] = useState('');
   const [contactInfo, setContactInfo] = useState('');
-  const [currentCoordinates, setCurrentCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [currentCoordinates, setCurrentCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     (async () => {
       // Request permission to access location
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Permission Denied", "Permission to access location was denied.");
+        Alert.alert(
+          'Permission Denied',
+          'Permission to access location was denied.'
+        );
         setLoadingLocation(false);
         return;
       }
       // Get current position
       let location = await Location.getCurrentPositionAsync({});
-            
+
       // Add small random offset to prevent exact overlaps (±2-3 meters)
-      const offsetLat = location.coords.latitude + (Math.random() - 0.5) * 0.00009;
-      const offsetLng = location.coords.longitude + (Math.random() - 0.5) * 0.00009;
+      const offsetLat =
+        location.coords.latitude + (Math.random() - 0.5) * 0.00009;
+      const offsetLng =
+        location.coords.longitude + (Math.random() - 0.5) * 0.00009;
 
       setCurrentCoordinates({
         lat: offsetLat,
@@ -52,79 +73,90 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
     })();
   }, []);
 
-    const handleImageSelected = (uri: string) => {
-      setImageUri(uri);
-    };
+  const handleImageSelected = (uri: string) => {
+    setImageUri(uri);
+  };
 
-    const handleImageRemoved = () => {
-      setImageUri(null);
-    };
+  const handleImageRemoved = () => {
+    setImageUri(null);
+  };
 
-    const handleSubmit = async () => {
+  const handleSubmit = async () => {
     onSubmit();
 
     if (!currentCoordinates) {
-      Alert.alert("Error", "Current location not available.");
+      Alert.alert('Error', 'Current location not available.');
       return;
     }
 
     try {
       // Format the location as "lat,lng"
       const locationStr = `${currentCoordinates.lat},${currentCoordinates.lng}`;
-      const result = await submitLostItem({
-        itemName,
-        description,
-        location: locationStr,
-        date: new Date(),
-        contactInfo,
-        imageUri: imageUri || undefined
-      }, userId);
-      
+      const result = await submitLostItem(
+        {
+          itemName,
+          description,
+          location: locationStr,
+          date: new Date(),
+          contactInfo,
+          imageUri: imageUri || undefined,
+        },
+        userId
+      );
+
       if (result.success) {
-        Alert.alert("Success", "Your lost item report has been submitted successfully.");
+        Alert.alert(
+          'Success',
+          'Your lost item report has been submitted successfully.'
+        );
       } else {
-        Alert.alert("Error", "There was an error submitting your report. Please try again.");
+        Alert.alert(
+          'Error',
+          'There was an error submitting your report. Please try again.'
+        );
       }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "There was an error submitting your report. Please try again.");
+      Alert.alert(
+        'Error',
+        'There was an error submitting your report. Please try again.'
+      );
     }
   };
 
   // Render the modal wrapper
   return (
     <Modal
-      animationType="slide"
+      animationType='slide'
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
     >
       <View style={modalStyles.centeredView}>
         <ThemedView style={modalStyles.modalView}>
-          <ScrollView 
+          <ScrollView
             style={modalStyles.scrollView}
             contentContainerStyle={modalStyles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
             <View style={modalStyles.header}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={onClose}
                 style={modalStyles.closeButton}
               >
-                <IconSymbol 
-                  name="chevron.left" 
-                  color={theme.textPrimary}
-                />
+                <IconSymbol name='chevron.left' color={theme.textPrimary} />
               </TouchableOpacity>
-              <ThemedText type="subtitle" style={modalStyles.headerTitle}>
+              <ThemedText type='subtitle' style={modalStyles.headerTitle}>
                 Report Lost Item
               </ThemedText>
               <View style={modalStyles.placeholder} />
             </View>
             {loadingLocation ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={theme.primaryBtnBg} />
-                <ThemedText style={styles.loadingText}>Fetching current location...</ThemedText>
+                <ActivityIndicator size='large' color={theme.primaryBtnBg} />
+                <ThemedText style={styles.loadingText}>
+                  Fetching current location...
+                </ThemedText>
               </View>
             ) : (
               <>
@@ -135,7 +167,7 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                     style={styles.input}
                     value={itemName}
                     onChangeText={setItemName}
-                    placeholder="What did you lose?"
+                    placeholder='What did you lose?'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>
@@ -147,21 +179,23 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                     style={styles.textArea}
                     value={description}
                     onChangeText={setDescription}
-                    placeholder="Describe the item (color, brand, distinguishing features, etc.)"
+                    placeholder='Describe the item (color, brand, distinguishing features, etc.)'
                     placeholderTextColor={theme.textSecondary}
                     multiline
                     numberOfLines={4}
                   />
                 </View>
-                
+
                 {/* Contact Information Input */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Contact Information*</ThemedText>
+                  <ThemedText style={styles.label}>
+                    Contact Information*
+                  </ThemedText>
                   <TextInput
                     style={styles.input}
                     value={contactInfo}
                     onChangeText={setContactInfo}
-                    placeholder="How can someone contact you?"
+                    placeholder='How can someone contact you?'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>
@@ -171,20 +205,21 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                   <ThemedText style={styles.label}>Current Location</ThemedText>
                   <View style={styles.locationDisplay}>
                     <ThemedText style={styles.locationText}>
-                      {currentCoordinates 
-                        ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}` 
-                        : 'Not available'
-                      }
+                      {currentCoordinates
+                        ? `${currentCoordinates.lat.toFixed(6)}, ${currentCoordinates.lng.toFixed(6)}`
+                        : 'Not available'}
                     </ThemedText>
                   </View>
                 </View>
 
                 {/* Image Picker */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Add Photo (Optional)</ThemedText>
-                  <ImagePicker 
-                    onImageSelected={handleImageSelected} 
-                    onImageRemoved={handleImageRemoved} 
+                  <ThemedText style={styles.label}>
+                    Add Photo (Optional)
+                  </ThemedText>
+                  <ImagePicker
+                    onImageSelected={handleImageSelected}
+                    onImageRemoved={handleImageRemoved}
                   />
                 </View>
 
@@ -192,7 +227,8 @@ export default function LostItemForm({ onSubmit, onClose, userId, visible }: Los
                 <TouchableOpacity
                   style={[
                     styles.submitButton,
-                    (!itemName || !description || !contactInfo) && styles.disabledButton
+                    (!itemName || !description || !contactInfo) &&
+                      styles.disabledButton,
                   ]}
                   onPress={handleSubmit}
                   disabled={!itemName || !description || !contactInfo}

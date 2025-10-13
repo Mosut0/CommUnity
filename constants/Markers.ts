@@ -2,37 +2,37 @@
 // These colors are used consistently across the app for visual consistency
 
 export const MARKER_COLORS = {
-  event: '#7C3AED',  // purple-600
-  lost:  '#EAB308',  // yellow-500
-  found: '#22C55E',  // green-500
+  event: '#7C3AED', // purple-600
+  lost: '#EAB308', // yellow-500
+  found: '#22C55E', // green-500
   safety: '#EF4444', // red-500
   default: '#9E9E9E', // gray-500
 } as const;
 
 // Category display names mapping
 export const CATEGORY_DISPLAY_NAMES = {
-  All: "All",
-  Events: "Events",
-  Hazards: "Hazards", 
-  Lost: "Lost",
-  Found: "Found",
+  All: 'All',
+  Events: 'Events',
+  Hazards: 'Hazards',
+  Lost: 'Lost',
+  Found: 'Found',
 } as const;
 
 // Database category names (for filtering)
 export const DB_CATEGORY_NAMES = {
-  event: "event",
-  safety: "safety",
-  lost: "lost", 
-  found: "found",
+  event: 'event',
+  safety: 'safety',
+  lost: 'lost',
+  found: 'found',
 } as const;
 
 // Icon names for each category (using Ionicons)
 export const CATEGORY_ICONS = {
-  event: "calendar-outline",
-  safety: "alert-circle-outline", 
-  lost: "help-circle-outline",
-  found: "checkmark-circle-outline",
-  default: "information-circle-outline",
+  event: 'calendar-outline',
+  safety: 'alert-circle-outline',
+  lost: 'help-circle-outline',
+  found: 'checkmark-circle-outline',
+  default: 'information-circle-outline',
 } as const;
 
 // Icon sizes for different contexts

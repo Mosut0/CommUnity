@@ -15,7 +15,7 @@ describe('Event Service', () => {
         location: '45.4215,-75.6972',
         date: new Date(),
         time: '14:00',
-        imageUri: 'image.jpg'
+        imageUri: 'image.jpg',
       },
       'user-123'
     );

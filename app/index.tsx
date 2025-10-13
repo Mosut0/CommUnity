@@ -1,36 +1,36 @@
-import 'react-native-url-polyfill/auto'
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { View, ActivityIndicator } from 'react-native'
-import { Session } from '@supabase/supabase-js'
-import { useRouter } from 'expo-router'
+import 'react-native-url-polyfill/auto';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { View, ActivityIndicator } from 'react-native';
+import { Session } from '@supabase/supabase-js';
+import { useRouter } from 'expo-router';
 
 export default function App() {
-  const [session, setSession] = useState<Session | null>(null)
-  const [authReady, setAuthReady] = useState(false)
-  const router = useRouter()
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setAuthReady(true)
+      setSession(session);
+      setAuthReady(true);
       if (session) {
-        router.push('/home')
+        router.push('/home');
       } else {
-        router.replace('/welcome')
+        router.replace('/welcome');
       }
-    })
+    });
 
     supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      setSession(session);
       // Redirect to Home if user is logged in
       if (session && session.user) {
-        router.push('/home')  // Redirect to '/home'
+        router.push('/home'); // Redirect to '/home'
       } else if (!session) {
-        router.replace('/welcome')
+        router.replace('/welcome');
       }
-    })
-  }, [router])
+    });
+  }, [router]);
 
   // If authenticated, user will get redirected to /home via listener. Otherwise show sign-in.
   if (!authReady) {
@@ -47,5 +47,5 @@ export default function App() {
       </View>
     );
   }
-  return <View style={{ flex: 1 }} />
+  return <View style={{ flex: 1 }} />;
 }

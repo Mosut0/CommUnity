@@ -44,7 +44,7 @@ export async function submitEvent(data: EventData, userId: string) {
         category: 'event',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
-        imageurl: imageUrl
+        imageurl: imageUrl,
       })
       .select();
 
@@ -58,22 +58,20 @@ export async function submitEvent(data: EventData, userId: string) {
     }
 
     const reportId = reportData[0].reportid;
-    
+
     // Combine date and time into a single Date object
     const eventDateTime = new Date(data.date);
     if (data.time) {
       const [hours, minutes] = data.time.split(':').map(Number);
       eventDateTime.setHours(hours, minutes);
     }
-    
+
     // Insert event details into 'events' table
-    const { error: eventError } = await supabase
-      .from('events')
-      .insert({
-        reportid: reportId,
-        eventtype: data.eventType,
-        time: eventDateTime.toISOString(),
-      });
+    const { error: eventError } = await supabase.from('events').insert({
+      reportid: reportId,
+      eventtype: data.eventType,
+      time: eventDateTime.toISOString(),
+    });
 
     if (eventError) {
       console.error('Event insert error:', eventError);

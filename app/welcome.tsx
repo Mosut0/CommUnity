@@ -1,6 +1,13 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Dimensions } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  Dimensions,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { resolveTheme, UiTheme } from '@/lib/uiTheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +16,6 @@ export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const theme = resolveTheme(scheme);
   const styles = useMemo(() => makeStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   return (
@@ -18,52 +24,77 @@ export default function WelcomeScreen() {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
-            <Ionicons name="people-circle" size={100} color={theme.primaryBtnBg} />
+            <Ionicons
+              name='people-circle'
+              size={100}
+              color={theme.primaryBtnBg}
+            />
           </View>
           <Text style={styles.appTitle}>CommUnity</Text>
           <Text style={styles.tagline}>Connect. Share. Stay Informed.</Text>
           <Text style={styles.description}>
-            Join your local community to report events, share important updates, and help keep everyone safe and connected.
+            Join your local community to report events, share important updates,
+            and help keep everyone safe and connected.
           </Text>
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actionSection}>
-          <TouchableOpacity 
-            style={styles.primaryBtn} 
+          <TouchableOpacity
+            style={styles.primaryBtn}
             onPress={() => router.push('/sign-up')}
             activeOpacity={0.8}
           >
             <Text style={styles.primaryBtnText}>Get Started</Text>
-            <Ionicons name="arrow-forward" size={20} color={theme.primaryBtnText} />
+            <Ionicons
+              name='arrow-forward'
+              size={20}
+              color={theme.primaryBtnText}
+            />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.secondaryBtn} 
+          <TouchableOpacity
+            style={styles.secondaryBtn}
             onPress={() => router.push('/sign-in')}
             activeOpacity={0.8}
           >
-            <Text style={styles.secondaryBtnText}>I Already Have an Account</Text>
+            <Text style={styles.secondaryBtnText}>
+              I Already Have an Account
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Features Section */}
         <View style={styles.featuresSection}>
           <View style={styles.featureItem}>
-            <View style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}>
-              <Ionicons name="map" size={24} color={theme.primaryBtnBg} />
+            <View
+              style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}
+            >
+              <Ionicons name='map' size={24} color={theme.primaryBtnBg} />
             </View>
             <Text style={styles.featureText}>Interactive Maps</Text>
           </View>
           <View style={styles.featureItem}>
-            <View style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}>
-              <Ionicons name="notifications" size={24} color={theme.primaryBtnBg} />
+            <View
+              style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}
+            >
+              <Ionicons
+                name='notifications'
+                size={24}
+                color={theme.primaryBtnBg}
+              />
             </View>
             <Text style={styles.featureText}>Real-time Updates</Text>
           </View>
           <View style={styles.featureItem}>
-            <View style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}>
-              <Ionicons name="shield-checkmark" size={24} color={theme.primaryBtnBg} />
+            <View
+              style={[styles.featureIcon, { backgroundColor: theme.chipBg }]}
+            >
+              <Ionicons
+                name='shield-checkmark'
+                size={24}
+                color={theme.primaryBtnBg}
+              />
             </View>
             <Text style={styles.featureText}>Safety Reports</Text>
           </View>
@@ -74,10 +105,9 @@ export default function WelcomeScreen() {
 }
 
 const makeStyles = (t: UiTheme) => {
-  const { width, height } = Dimensions.get('window');
+  const { height } = Dimensions.get('window');
   const isSmallScreen = height < 700;
-  const isMediumScreen = height >= 700 && height < 800;
-  
+
   return StyleSheet.create({
     container: {
       flex: 1,

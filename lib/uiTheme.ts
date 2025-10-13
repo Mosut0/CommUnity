@@ -6,6 +6,8 @@ export type UiTheme = typeof Colors.light;
 export const lightTheme: UiTheme = Colors.light;
 export const darkTheme: UiTheme = Colors.dark;
 
-export function resolveTheme(colorScheme: 'light' | 'dark' | null | undefined): UiTheme {
+export function resolveTheme(
+  colorScheme: 'light' | 'dark' | null | undefined
+): UiTheme {
   return colorScheme === 'dark' ? darkTheme : lightTheme;
 }

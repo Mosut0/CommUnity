@@ -2,7 +2,12 @@
  * Distance conversion utilities
  */
 
-export function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function getDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
   const R = 6371; // Earth's radius in kilometers
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
@@ -25,13 +30,19 @@ export function milesToKm(miles: number): number {
   return miles / 0.621371;
 }
 
-export function formatDistance(distanceKm: number, unit: 'km' | 'miles'): string {
+export function formatDistance(
+  distanceKm: number,
+  unit: 'km' | 'miles'
+): string {
   if (unit === 'miles') {
     const miles = kmToMiles(distanceKm);
     const value = miles < 10 ? miles.toFixed(1) : Math.round(miles).toString();
     return `${value} mi away`;
   } else {
-    const value = distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
+    const value =
+      distanceKm < 10
+        ? distanceKm.toFixed(1)
+        : Math.round(distanceKm).toString();
     return `${value} km away`;
   }
 }
@@ -40,10 +51,10 @@ export function formatDistance(distanceKm: number, unit: 'km' | 'miles'): string
  * Get formatted distance string between two coordinates
  */
 export function getFormattedDistance(
-  lat1: number, 
-  lon1: number, 
-  lat2: number, 
-  lon2: number, 
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
   unit: 'km' | 'miles'
 ): string {
   const distanceKm = getDistanceKm(lat1, lon1, lat2, lon2);
