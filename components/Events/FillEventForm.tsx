@@ -5,7 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
-import { makeFormStyles, getTheme, modalStyles } from './styles';
+import { makeFormStyles, getTheme, modalStyles } from '../formStyles';
 import { submitEvent } from '@/services/eventService';
 import ImagePicker from '@/components/ImagePicker';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -20,7 +20,34 @@ interface FillEventFormProps {
 export default function FillEventForm({ onSubmit, onClose, userId, visible }: FillEventFormProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
-  const styles = useMemo(() => makeFormStyles(theme), [theme]);
+  const styles = useMemo(
+    () =>
+      makeFormStyles(theme, {
+        dateTimeRow: {
+          flexDirection: 'row',
+          gap: 12,
+        },
+        dateTimeButton: {
+          flex: 1,
+          backgroundColor: theme.inputBg,
+          borderWidth: 1,
+          borderColor: theme.divider,
+          borderRadius: 12,
+          padding: 14,
+          minHeight: 50,
+          justifyContent: 'center',
+        },
+        dateTimeText: {
+          color: theme.textPrimary,
+          fontSize: 16,
+        },
+        dateTimePlaceholder: {
+          color: theme.textSecondary,
+          fontSize: 16,
+        },
+      }),
+    [theme],
+  );
   
   const [eventType, setEventType] = useState('');
   const [description, setDescription] = useState('');

@@ -4,7 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Location from 'expo-location';
-import { makeFormStyles, getTheme, modalStyles } from './styles';
+import { makeFormStyles, getTheme, modalStyles } from '../formStyles';
 import { submitFoundItem } from '@/services/lostAndFoundService';
 import ImagePicker from '@/components/ImagePicker';
 import { IconSymbol } from '@/components/ui/IconSymbol';
