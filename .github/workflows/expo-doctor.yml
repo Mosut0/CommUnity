@@ -37,5 +37,8 @@ jobs:
       - name: 📦 Setup Node + NPM + install deps
         uses: ./.github/actions/setup-node-npm-install
 
+      - name: 🎨 Check Code Formatting
+        run: npm run format:check
+
       - name: 🚑 Run Expo Doctor Checks
         run: npx expo-doctor@latest

@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --ci",
-    "lint": "expo lint",
+    "lint": "expo lint --max-warnings 0",
+    "lint:warnings": "expo lint",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
