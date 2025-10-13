@@ -43,6 +43,72 @@ const FORUM_COLORS = {
   safety: '#EF4444', // red-500
 };
 
+const deg2rad = (deg: number): number => deg * (Math.PI / 180);
+
+const getDistanceFromLatLonInKm = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
+const metersToDegreeOffset = (lat: number, meters: number) => {
+  const latDegree = meters / 111320; // approx meters per degree latitude
+  const lngDegree = meters / (111320 * Math.cos((lat * Math.PI) / 180));
+  return { latDegree, lngDegree };
+};
+
+const parseLocation = (
+  locationStr: string
+): { latitude: number; longitude: number } | null => {
+  try {
+    // Expected format: "(lat,lng)"
+    const coordsStr = locationStr.substring(1, locationStr.length - 1).trim();
+    const parts = coordsStr.split(',').map(s => parseFloat(s.trim()));
+    if (parts.length < 2) return null;
+    let [lat, lng] = parts;
+
+    if (isNaN(lat) || isNaN(lng)) {
+      return null;
+    }
+
+    // Basic validation: lat must be between -90 and 90, lng between -180 and 180.
+    // If values look swapped (e.g., lat outside [-90,90]), swap them.
+    if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
+      const tmp = lat;
+      lat = lng;
+      lng = tmp;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      console.warn(
+        'parseLocation: coordinates out of bounds for',
+        locationStr,
+        '->',
+        { lat, lng }
+      );
+      return null;
+    }
+
+    return { latitude: lat, longitude: lng };
+  } catch (error) {
+    console.error('Error parsing location:', error);
+    return null;
+  }
+};
+
 export default function MapScreen({
   distanceRadius,
   selectedReportId,
@@ -56,7 +122,6 @@ export default function MapScreen({
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   // track whether a marker's view has finished updating to disable tracksViewChanges
   const markerReadyRef = useRef<Map<number, boolean>>(new Map());
-  const [isLoading, setIsLoading] = useState(true);
   const colorScheme = useColorScheme() ?? 'light';
   const isMountedRef = useRef(true);
   const fetchTimeoutRef = useRef<number | null>(null);
@@ -75,16 +140,19 @@ export default function MapScreen({
 
   // When the filter changes, clear any selected report to prevent callout/ref races
   useEffect(() => {
-    if (selectedReport) {
-      // best-effort hide of previous callout
-      const mr = markerRefs.current[selectedReport.reportid];
-      if (mr && (mr as any).hideCallout) {
-        try {
-          (mr as any).hideCallout();
-        } catch {}
+    setSelectedReport(prevSelected => {
+      if (prevSelected) {
+        const mr = markerRefs.current[prevSelected.reportid];
+        if (mr && (mr as any).hideCallout) {
+          try {
+            (mr as any).hideCallout();
+          } catch {
+            // no-op: hideCallout may not be supported on all platforms
+          }
+        }
       }
-    }
-    setSelectedReport(null);
+      return null;
+    });
   }, [filter]);
 
   // Fetch user location
@@ -409,84 +477,13 @@ export default function MapScreen({
     }
   }, [selectedReportId, reports]);
 
-  // Parse location string from the database into latitude and longitude
-  const parseLocation = (
-    locationStr: string
-  ): { latitude: number; longitude: number } | null => {
-    try {
-      // Expected format: "(lat,lng)"
-      const coordsStr = locationStr.substring(1, locationStr.length - 1).trim();
-      const parts = coordsStr.split(',').map(s => parseFloat(s.trim()));
-      if (parts.length < 2) return null;
-      let [lat, lng] = parts;
-
-      if (isNaN(lat) || isNaN(lng)) {
-        return null;
-      }
-
-      // Basic validation: lat must be between -90 and 90, lng between -180 and 180.
-      // If values look swapped (e.g., lat outside [-90,90]), swap them.
-      if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
-        const tmp = lat;
-        lat = lng;
-        lng = tmp;
-      }
-
-      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        console.warn(
-          'parseLocation: coordinates out of bounds for',
-          locationStr,
-          '->',
-          { lat, lng }
-        );
-        return null;
-      }
-
-      return { latitude: lat, longitude: lng };
-    } catch (error) {
-      console.error('Error parsing location:', error);
-      return null;
-    }
-  };
-
-  const deg2rad = (deg: number): number => {
-    return deg * (Math.PI / 180);
-  };
-
-  const getDistanceFromLatLonInKm = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    let R = 6371; // Radius of the earth in km
-    let dLat = deg2rad(lat2 - lat1);
-    let dLon = deg2rad(lon2 - lon1);
-    let a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    let d = R * c; // Distance in km
-    return d;
-  };
-
-  // Convert a meter offset to approximate degrees latitude/longitude at given latitude
-  const metersToDegreeOffset = (lat: number, meters: number) => {
-    const latDegree = meters / 111320; // approx meters per degree latitude
-    const lngDegree = meters / (111320 * Math.cos((lat * Math.PI) / 180));
-    return { latDegree, lngDegree };
-  };
-
   // Cluster reports that are within a proximity threshold (meters) to avoid stacking
   const clusters = useMemo(() => {
     const thresholdMeters = 2; // distance within which points are considered same cluster
-    const clusters: Array<{
+    const clusters: {
       center: { latitude: number; longitude: number };
       members: Report[];
-    }> = [];
+    }[] = [];
 
     const pushToCluster = (
       r: Report,
@@ -637,7 +634,7 @@ export default function MapScreen({
             if (mr && mr.hideCallout) {
               try {
                 mr.hideCallout();
-              } catch (e) {
+              } catch {
                 // ignore if hideCallout isn't supported on this platform
               }
             }

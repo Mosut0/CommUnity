@@ -82,12 +82,6 @@ export default function ReportDetails() {
   }, []);
 
   useEffect(() => {
-    if (reportId) {
-      fetchReportDetails();
-    }
-  }, [reportId]);
-
-  useEffect(() => {
     if (report && location) {
       const coords = parseLocation(report.location);
       if (coords) {
@@ -103,7 +97,7 @@ export default function ReportDetails() {
     }
   }, [report, location, distanceUnit]);
 
-  const fetchReportDetails = async () => {
+  const fetchReportDetails = useCallback(async () => {
     try {
       setLoading(true);
       setImageError(false);
@@ -162,7 +156,13 @@ export default function ReportDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reportId, router]);
+
+  useEffect(() => {
+    if (reportId) {
+      fetchReportDetails();
+    }
+  }, [reportId, fetchReportDetails]);
 
   const parseLocation = (
     loc: string

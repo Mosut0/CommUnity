@@ -98,7 +98,7 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const theme: ThemeName = colorScheme === 'dark' ? 'dark' : 'light';
   const uiTheme = Colors[theme];
-  const [forceRender, setForceRender] = useState(false);
+  const [, setForceRender] = useState(false);
   const router = useRouter();
   const [distanceRadius, setDistanceRadius] = useState(20);
   const [sliderValue, setSliderValue] = useState(20);
@@ -179,6 +179,32 @@ export default function Home() {
     openForm(action);
   };
 
+  const openDistanceModal = React.useCallback(async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        const userMetadata = data.user.user_metadata;
+        const radiusKm = userMetadata?.distance_radius || 20;
+        const unit = userMetadata?.distance_unit || 'km';
+        setDistanceUnit(unit);
+        // Always store km in the slider, display conversion is handled in the UI
+        setSliderValue(radiusKm);
+      }
+    }
+    setIsDistanceModalVisible(true);
+  }, [session]);
+
+  const openUnitModal = React.useCallback(async () => {
+    if (session) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        const userMetadata = data.user.user_metadata;
+        setDistanceUnit(userMetadata?.distance_unit || 'km');
+      }
+    }
+    setIsUnitModalVisible(true);
+  }, [session]);
+
   // Animate settings sheet open/close
   useEffect(() => {
     if (isProfileModalVisible) {
@@ -212,33 +238,14 @@ export default function Home() {
         }
       });
     }
-  }, [isProfileModalVisible, profileSheetMounted, nextModal]);
-
-  const openDistanceModal = async () => {
-    if (session) {
-      const { data, error } = await supabase.auth.getUser();
-      if (!error && data?.user) {
-        const userMetadata = data.user.user_metadata;
-        const radiusKm = userMetadata?.distance_radius || 20;
-        const unit = userMetadata?.distance_unit || 'km';
-        setDistanceUnit(unit);
-        // Always store km in the slider, display conversion is handled in the UI
-        setSliderValue(radiusKm);
-      }
-    }
-    setIsDistanceModalVisible(true);
-  };
-
-  const openUnitModal = async () => {
-    if (session) {
-      const { data, error } = await supabase.auth.getUser();
-      if (!error && data?.user) {
-        const userMetadata = data.user.user_metadata;
-        setDistanceUnit(userMetadata?.distance_unit || 'km');
-      }
-    }
-    setIsUnitModalVisible(true);
-  };
+  }, [
+    isProfileModalVisible,
+    profileSheetMounted,
+    nextModal,
+    openDistanceModal,
+    openUnitModal,
+    settingsAnim,
+  ]);
 
   // Animate password modal
   useEffect(() => {
@@ -267,7 +274,7 @@ export default function Home() {
         }
       });
     }
-  }, [isChangePasswordModalVisible, changePasswordMounted]);
+  }, [isChangePasswordModalVisible, changePasswordMounted, passwordAnim]);
 
   // Animate distance modal
   useEffect(() => {
@@ -291,7 +298,7 @@ export default function Home() {
         if (finished) setDistanceMounted(false);
       });
     }
-  }, [isDistanceModalVisible, distanceMounted]);
+  }, [isDistanceModalVisible, distanceMounted, distanceAnim]);
 
   // Animate unit modal
   useEffect(() => {
@@ -315,7 +322,7 @@ export default function Home() {
         if (finished) setUnitMounted(false);
       });
     }
-  }, [isUnitModalVisible, unitMounted]);
+  }, [isUnitModalVisible, unitMounted, unitAnim]);
 
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
@@ -348,7 +355,7 @@ export default function Home() {
     if (authReady && !session) {
       router.replace('/sign-in');
     }
-  }, [authReady, session]);
+  }, [authReady, session, router]);
 
   useEffect(() => {
     // Short delay to let the map initialize properly

@@ -7,10 +7,7 @@ import {
   useColorScheme,
   Dimensions,
 } from 'react-native';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { resolveTheme, UiTheme } from '@/lib/uiTheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +16,6 @@ export default function WelcomeScreen() {
   const scheme = useColorScheme();
   const theme = resolveTheme(scheme);
   const styles = useMemo(() => makeStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   return (
@@ -109,9 +105,8 @@ export default function WelcomeScreen() {
 }
 
 const makeStyles = (t: UiTheme) => {
-  const { width, height } = Dimensions.get('window');
+  const { height } = Dimensions.get('window');
   const isSmallScreen = height < 700;
-  const isMediumScreen = height >= 700 && height < 800;
 
   return StyleSheet.create({
     container: {

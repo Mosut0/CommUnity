@@ -19,6 +19,11 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+const { Blob: NodeBlob } = require('buffer');
+
+const BlobCtor = global.Blob || NodeBlob;
+global.Blob = BlobCtor;
+
 // Provide a fetch mock that supports both .json() and .arrayBuffer()
 global.fetch = jest.fn((...args) =>
   Promise.resolve({
@@ -26,7 +31,7 @@ global.fetch = jest.fn((...args) =>
     // Provide both arrayBuffer and blob for tests that read files
     arrayBuffer: () => Promise.resolve(Uint8Array.from([1, 2, 3, 4]).buffer),
     blob: () =>
-      Promise.resolve(new Blob([Uint8Array.from([1, 2, 3, 4]).buffer])),
+      Promise.resolve(new BlobCtor([Uint8Array.from([1, 2, 3, 4]).buffer])),
   })
 );
 

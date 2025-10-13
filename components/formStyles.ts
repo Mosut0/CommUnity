@@ -104,7 +104,7 @@ const baseFormStyles = (theme: ThemeColors): BaseFormStyles => ({
   },
 });
 
-export const makeFormStyles = <T extends StylesRecord = {}>(
+export const makeFormStyles = <T extends StylesRecord = StylesRecord>(
   theme: ThemeColors,
   overrides?: T
 ) =>

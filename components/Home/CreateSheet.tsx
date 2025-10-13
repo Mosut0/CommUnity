@@ -24,12 +24,12 @@ type CreateSheetProps = {
   insetsBottom: number;
 };
 
-const ACTIONS: Array<{
+const ACTIONS: {
   action: CreateSheetAction;
   label: string;
   icon: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
-}> = [
+}[] = [
   {
     action: 'hazard',
     label: 'Hazard',

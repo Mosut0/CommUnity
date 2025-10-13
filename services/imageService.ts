@@ -16,7 +16,7 @@ export async function uploadImage(uri: string): Promise<string | null> {
     const filePath = `reports/${fileName}`;
 
     // Upload image to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('images')
       .upload(filePath, blob, {
         contentType: `image/${fileExt === 'jpg' ? 'jpeg' : fileExt}`,
