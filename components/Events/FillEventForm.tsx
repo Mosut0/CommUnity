@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, TextInput, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView, Modal } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
@@ -157,7 +156,7 @@ export default function FillEventForm({ onSubmit, onClose, userId, visible }: Fi
               >
                 <IconSymbol 
                   name="chevron.left" 
-                  color={colorScheme === 'dark' ? '#fff' : '#000'}
+                  color={theme.textPrimary}
                 />
               </TouchableOpacity>
               <ThemedText type="subtitle" style={modalStyles.headerTitle}>

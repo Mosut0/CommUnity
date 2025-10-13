@@ -2,14 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, useColorScheme, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { resolveTheme, darkTheme, UiTheme } from '@/lib/uiTheme';
+import { resolveTheme, UiTheme } from '@/lib/uiTheme';
+import type { ThemeName } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SignUpScreen() {
   const scheme = useColorScheme();
   const theme = resolveTheme(scheme);
-  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const themeName: ThemeName = scheme === 'dark' ? 'dark' : 'light';
+  const styles = useMemo(() => makeStyles(theme, themeName), [theme, themeName]);
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -127,7 +129,7 @@ export default function SignUpScreen() {
   );
 }
 
-const makeStyles = (t: UiTheme) => StyleSheet.create({
+const makeStyles = (t: UiTheme, themeName: ThemeName) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: t.pageBg },
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 20 },
@@ -139,7 +141,7 @@ const makeStyles = (t: UiTheme) => StyleSheet.create({
   formCard: { backgroundColor: t.cardBg, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: t.divider },
   fieldGroup: { marginBottom: 16 },
   label: { color: t.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' },
-  input: { backgroundColor: t.chipBg, color: t.textPrimary, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, fontSize: 15, borderWidth: 1, borderColor: t === darkTheme ? '#374151' : t.divider, marginBottom: 4 },
+  input: { backgroundColor: t.chipBg, color: t.textPrimary, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, fontSize: 15, borderWidth: 1, borderColor: themeName === 'dark' ? t.profileBorder : t.divider, marginBottom: 4 },
   passwordRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconBtn: { padding: 10 },
   primaryBtn: { backgroundColor: t.primaryBtnBg, paddingVertical: 14, borderRadius: 14, alignItems: 'center', marginTop: 4 },

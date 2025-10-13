@@ -1,43 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { Colors, CommonColors } from '@/constants/Colors';
+import type { ThemeName } from '@/constants/Colors';
 
-/* ---------- Theme tokens ---------- */
-type UiTheme = {
-  chipBg: string;
-  cardBg: string;
-  pageBg: string;
-  textPrimary: string;
-  textSecondary: string;
-  divider: string;
-  primaryBtnBg: string;
-  primaryBtnText: string;
-  inputBg: string;
-};
+type ThemeColors = typeof Colors.light;
 
-const darkTheme: UiTheme = {
-  chipBg: "#1F2937",
-  cardBg: "#0F172A",
-  pageBg: "#0B1220",
-  textPrimary: "#E5E7EB",
-  textSecondary: "#9CA3AF",
-  divider: "#1F2A37",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FFFFFF",
-  inputBg: "#1F2937",
-};
-
-const lightTheme: UiTheme = {
-  chipBg: "#F0EDE5",
-  cardBg: "#FAF9F6",
-  pageBg: "#F5F3EE",
-  textPrimary: "#0F172A",
-  textSecondary: "#475569",
-  divider: "#E5E2DB",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FAF9F6",
-  inputBg: "#FAF9F6",
-};
-
-export const makeFormStyles = (theme: UiTheme) =>
+export const makeFormStyles = (theme: ThemeColors) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -119,8 +86,8 @@ export const makeFormStyles = (theme: UiTheme) =>
     },
   });
 
-export const getTheme = (colorScheme: 'light' | 'dark') => 
-  colorScheme === 'dark' ? darkTheme : lightTheme;
+export const getTheme = (colorScheme: ThemeName): ThemeColors =>
+  Colors[colorScheme];
 
 export const modalStyles = StyleSheet.create({
   centeredView: {
@@ -134,7 +101,7 @@ export const modalStyles = StyleSheet.create({
     maxHeight: '80%',
     borderRadius: 20,
     padding: 0,
-    shadowColor: '#000',
+    shadowColor: CommonColors.shadow,
     shadowOffset: {
       width: 0,
       height: 2

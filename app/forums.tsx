@@ -21,6 +21,8 @@ import FillEventForm from "@/components/Events/FillEventForm";
 import LostItemForm from "@/components/LostAndFound/LostItemForm";
 import FoundItemForm from "@/components/LostAndFound/FoundItemForm";
 import { MARKER_COLORS, CATEGORY_DISPLAY_NAMES } from "@/constants/Markers";
+import { Colors } from "@/constants/Colors";
+import type { ThemeName } from "@/constants/Colors";
 
 interface Report {
   reportid: number;
@@ -41,49 +43,15 @@ const dbNameByDisplay: Record<string, string> = {
   Hazards: "safety",
 };
 
-/* ---------- Theme tokens ---------- */
-type UiTheme = {
-  chipBg: string;
-  cardBg: string;
-  pageBg: string;
-  textPrimary: string;
-  textSecondary: string;
-  divider: string;
-  overlay: string;
-  primaryBtnBg: string;
-  primaryBtnText: string;
-};
-
-const darkTheme: UiTheme = {
-  chipBg: "#1F2937",
-  cardBg: "#0F172A",
-  pageBg: "#0B1220",
-  textPrimary: "#E5E7EB",
-  textSecondary: "#9CA3AF",
-  divider: "#1F2A37",
-  overlay: "rgba(0,0,0,0.6)",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FFFFFF",
-};
-
-const lightTheme: UiTheme = {
-  chipBg: "#F0EDE5", // warm off-white
-  cardBg: "#FAF9F6",
-  pageBg: "#F5F3EE", // warm off-white background
-  textPrimary: "#0F172A", // slate-900
-  textSecondary: "#475569", // slate-600
-  divider: "#E5E2DB",
-  overlay: "rgba(0,0,0,0.25)",
-  primaryBtnBg: "#2563EB",
-  primaryBtnText: "#FAF9F6",
-};
+type ThemeColors = typeof Colors.light;
 
 export default function Forums() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
-  const theme = scheme === "dark" ? darkTheme : lightTheme;
-  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const themeName: ThemeName = scheme === "dark" ? "dark" : "light";
+  const uiTheme = Colors[themeName];
+  const styles = useMemo(() => makeStyles(uiTheme), [uiTheme]);
 
   const [selectedTab, setSelectedTab] = useState<keyof typeof CATEGORY_DISPLAY_NAMES>("All");
   const [reports, setReports] = useState<Report[]>([]);
@@ -223,7 +191,7 @@ export default function Forums() {
     []
   );
 
-  const getIconForCategory = (category: string) => {
+  const getIconForCategory = useCallback((category: string) => {
     switch (category) {
       case "event":
         return { name: "calendar-outline", color: MARKER_COLORS.event };
@@ -234,9 +202,9 @@ export default function Forums() {
       case "safety":
         return { name: "alert-circle-outline", color: MARKER_COLORS.safety };
       default:
-        return { name: "information-circle-outline", color: "#60A5FA" };
+        return { name: "information-circle-outline", color: uiTheme.accent };
     }
-  };
+  }, [uiTheme.accent]);
 
   const renderReport = ({ item }: { item: Report }) => {
     const title = item.eventtype || item.itemtype || item.hazardtype || "Details";
@@ -267,12 +235,12 @@ export default function Forums() {
 
             <View style={styles.chipsRow}>
               <View style={styles.chip}>
-                <Ionicons name="location-outline" size={14} color={theme.textSecondary} />
+                <Ionicons name="location-outline" size={14} color={uiTheme.textSecondary} />
                 <Text style={styles.chipText}>{distanceText ?? "Nearby"}</Text>
               </View>
 
               <View style={styles.chip}>
-                <MaterialCommunityIcons name="tag-outline" size={14} color={theme.textSecondary} />
+                <MaterialCommunityIcons name="tag-outline" size={14} color={uiTheme.textSecondary} />
                 <Text style={styles.chipText}>
                   {item.category?.charAt(0).toUpperCase() + item.category?.slice(1)}
                 </Text>
@@ -281,7 +249,7 @@ export default function Forums() {
           </View>
         </View>
 
-        <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+        <Ionicons name="chevron-forward" size={20} color={uiTheme.textSecondary} />
       </TouchableOpacity>
     );
   };
@@ -294,7 +262,7 @@ export default function Forums() {
       <View style={styles.actionsRow}>
         {/* Map (acts as Back) — left */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
-          <Ionicons name="map-outline" size={18} color={theme.textPrimary} />
+          <Ionicons name="map-outline" size={18} color={uiTheme.textPrimary} />
           <Text style={styles.actionText}>Map</Text>
         </TouchableOpacity>
 
@@ -302,7 +270,7 @@ export default function Forums() {
 
         {/* New Item — right */}
         <TouchableOpacity style={styles.actionBtn} onPress={() => setIsCreateVisible(true)}>
-          <Ionicons name="add-circle-outline" size={18} color={theme.textPrimary} />
+          <Ionicons name="add-circle-outline" size={18} color={uiTheme.textPrimary} />
           <Text style={styles.actionText}>New Item</Text>
         </TouchableOpacity>
       </View>
@@ -335,7 +303,7 @@ export default function Forums() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
-            <Ionicons name="search-outline" size={26} color={theme.textSecondary} />
+            <Ionicons name="search-outline" size={26} color={uiTheme.textSecondary} />
             <Text style={styles.emptyText}>
               No reports within {distanceUnit === 'miles' 
                 ? `${Math.round(kmToMiles(distanceRadius))} miles` 
@@ -353,7 +321,7 @@ export default function Forums() {
         onRequestClose={() => setIsCreateVisible(false)}
       >
         <Pressable
-          style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}
+          style={[styles.modalOverlay, { backgroundColor: uiTheme.overlay }]}
           onPress={() => setIsCreateVisible(false)}
         >
           <View style={[styles.modalSheet, { paddingBottom: 16 + insets.bottom }]}>
@@ -437,7 +405,7 @@ export default function Forums() {
         onRequestClose={() => setIsDistanceVisible(false)}
       >
         <Pressable
-          style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}
+          style={[styles.modalOverlay, { backgroundColor: uiTheme.overlay }]}
           onPress={() => setIsDistanceVisible(false)}
         >
           <View style={[styles.modalSheet, { paddingBottom: 16 + insets.bottom }]}>
@@ -481,7 +449,7 @@ export default function Forums() {
 }
 
 /* ---------- styles (theme-aware) ---------- */
-const makeStyles = (t: UiTheme) =>
+const makeStyles = (t: ThemeColors) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: t.pageBg },
 
@@ -512,7 +480,7 @@ const makeStyles = (t: UiTheme) =>
       backgroundColor: t.chipBg,
     },
     tabActive: {
-      backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0",
+      backgroundColor: t.profileBorder,
     },
     tabText: { color: t.textSecondary, fontSize: 13, fontWeight: "600" },
     tabTextActive: { color: t.textPrimary },
@@ -569,7 +537,7 @@ const makeStyles = (t: UiTheme) =>
     /* Distance sheet */
     distanceRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 16 },
     distanceChip: { backgroundColor: t.chipBg, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
-    distanceChipActive: { backgroundColor: t === darkTheme ? "#374151" : "#E2E8F0" },
+    distanceChipActive: { backgroundColor: t.profileBorder },
     distanceChipText: { color: t.textSecondary, fontWeight: "700" },
     distanceChipTextActive: { color: t.textPrimary },
     distanceFooter: { flexDirection: "row", alignItems: "center" },
@@ -577,5 +545,5 @@ const makeStyles = (t: UiTheme) =>
     primaryBtn: { backgroundColor: t.primaryBtnBg, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 },
     primaryBtnText: { color: t.primaryBtnText, fontWeight: "700" },
 
-    errorText: { color: t === darkTheme ? "#FCA5A5" : "#B91C1C", paddingHorizontal: 14, paddingBottom: 6 },
+    errorText: { color: t.errorText, paddingHorizontal: 14, paddingBottom: 6 },
   });
