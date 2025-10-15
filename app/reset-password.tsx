@@ -41,12 +41,18 @@ export default function ResetPasswordScreen() {
     }
 
     if (password.length < 6) {
-      Alert.alert('Password too short', 'Password must be at least 6 characters.');
+      Alert.alert(
+        'Password too short',
+        'Password must be at least 6 characters.'
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Passwords do not match', 'Please make sure both passwords are the same.');
+      Alert.alert(
+        'Passwords do not match',
+        'Please make sure both passwords are the same.'
+      );
       return;
     }
 
@@ -59,18 +65,14 @@ export default function ResetPasswordScreen() {
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        Alert.alert(
-          'Success',
-          'Your password has been reset successfully!',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.replace('/home'),
-            },
-          ]
-        );
+        Alert.alert('Success', 'Your password has been reset successfully!', [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/home'),
+          },
+        ]);
       }
-    } catch (err: any) {
+    } catch {
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -86,7 +88,11 @@ export default function ResetPasswordScreen() {
         <View style={styles.contentWrapper}>
           <View style={styles.headerWrap}>
             <View style={styles.iconContainer}>
-              <Ionicons name="lock-closed" size={48} color={theme.primaryBtnBg} />
+              <Ionicons
+                name='lock-closed'
+                size={48}
+                color={theme.primaryBtnBg}
+              />
             </View>
             <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>
@@ -137,7 +143,9 @@ export default function ResetPasswordScreen() {
                   style={styles.iconBtn}
                 >
                   <Ionicons
-                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                    name={
+                      showConfirmPassword ? 'eye-off-outline' : 'eye-outline'
+                    }
                     size={20}
                     color={theme.textSecondary}
                   />
@@ -190,8 +198,8 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
       fontWeight: '800',
       marginBottom: 6,
     },
-    subtitle: { 
-      color: t.textSecondary, 
+    subtitle: {
+      color: t.textSecondary,
       fontSize: 14,
       textAlign: 'center',
     },
@@ -238,11 +246,10 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
       fontSize: 16,
     },
     divider: { height: 1, backgroundColor: t.divider, marginVertical: 20 },
-    linkText: { 
-      color: t.primaryBtnBg, 
+    linkText: {
+      color: t.primaryBtnBg,
       fontWeight: '600',
       textAlign: 'center',
       fontSize: 14,
     },
   });
-

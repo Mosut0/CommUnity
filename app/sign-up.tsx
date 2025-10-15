@@ -49,8 +49,8 @@ export default function SignUpScreen() {
       const {
         data: { session },
         error,
-      } = await supabase.auth.signUp({ 
-        email, 
+      } = await supabase.auth.signUp({
+        email,
         password,
         options: {
           emailRedirectTo: 'myapp://sign-in',

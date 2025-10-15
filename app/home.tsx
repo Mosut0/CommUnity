@@ -117,7 +117,6 @@ export default function Home() {
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
   const unitAnim = React.useRef(new Animated.Value(0)).current;
 
-
   const runFabAnimation = (to: number) => {
     Animated.timing(fabAnim, {
       toValue: to,
@@ -229,7 +228,6 @@ export default function Home() {
     openUnitModal,
     settingsAnim,
   ]);
-
 
   // Animate email modal
   useEffect(() => {

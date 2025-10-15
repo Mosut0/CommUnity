@@ -78,22 +78,23 @@ export default function RootLayout() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const handleDeepLink = async (url: string) => {
     // Extract the access_token and refresh_token from the URL
     // Supabase sends them in the URL fragment or query params
     const urlObj = new URL(url);
     const hash = urlObj.hash || urlObj.search;
-    
+
     // Check if this contains authentication tokens
     if (hash.includes('access_token')) {
       // Extract tokens from the URL
-      const params = new URLSearchParams(hash.replace('#', '').replace('?', ''));
+      const params = new URLSearchParams(
+        hash.replace('#', '').replace('?', '')
+      );
       const access_token = params.get('access_token');
       const refresh_token = params.get('refresh_token');
-      const type = params.get('type');
-      
+
       if (access_token) {
         // Set the session with the tokens from the URL
         await supabase.auth.setSession({

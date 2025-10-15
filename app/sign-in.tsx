@@ -77,7 +77,7 @@ export default function SignInScreen() {
           "We've sent you a password reset link. Please check your email inbox."
         );
       }
-    } catch (err: any) {
+    } catch {
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);

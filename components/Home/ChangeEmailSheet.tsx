@@ -94,11 +94,9 @@ export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
         >
           We'll send a confirmation link to your new email address
         </ThemedText>
-        
+
         <View style={styles.fieldGroup}>
-          <ThemedText
-            style={[styles.label, { color: uiTheme.textSecondary }]}
-          >
+          <ThemedText style={[styles.label, { color: uiTheme.textSecondary }]}>
             Current Email
           </ThemedText>
           <View
@@ -110,16 +108,16 @@ export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
               },
             ]}
           >
-            <ThemedText style={[styles.currentEmail, { color: uiTheme.textSecondary }]}>
+            <ThemedText
+              style={[styles.currentEmail, { color: uiTheme.textSecondary }]}
+            >
               {currentEmail}
             </ThemedText>
           </View>
         </View>
 
         <View style={styles.fieldGroup}>
-          <ThemedText
-            style={[styles.label, { color: uiTheme.textSecondary }]}
-          >
+          <ThemedText style={[styles.label, { color: uiTheme.textSecondary }]}>
             New Email
           </ThemedText>
           <TextInput
@@ -226,4 +224,3 @@ const styles = StyleSheet.create({
 });
 
 ChangeEmailSheet.displayName = 'ChangeEmailSheet';
-
