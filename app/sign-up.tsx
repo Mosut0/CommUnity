@@ -49,14 +49,20 @@ export default function SignUpScreen() {
       const {
         data: { session },
         error,
-      } = await supabase.auth.signUp({ email, password });
+      } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: 'myapp://sign-in',
+        },
+      });
       if (error) {
         Alert.alert('Sign up failed', error.message);
       } else {
         if (!session) {
           Alert.alert(
             'Verify your email',
-            'We have sent a verification link to your inbox. Please verify then sign in.'
+            'We have sent a verification link to your inbox. Please verify to continue.'
           );
           router.replace('/sign-in');
         } else {

@@ -8,8 +8,6 @@ import {
   ScrollView,
   Animated,
   Easing,
-  Keyboard,
-  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
@@ -26,7 +24,7 @@ import { Colors, CommonColors } from '@/constants/Colors';
 import type { ThemeName } from '@/constants/Colors';
 import { FilterBar } from '@/components/Home/FilterBar';
 import { ProfileSheet } from '@/components/Home/ProfileSheet';
-import { ChangePasswordSheet } from '@/components/Home/ChangePasswordSheet';
+import { ChangeEmailSheet } from '@/components/Home/ChangeEmailSheet';
 import { DistanceSheet } from '@/components/Home/DistanceSheet';
 import { DistanceUnitSheet } from '@/components/Home/DistanceUnitSheet';
 import { CreateSheet } from '@/components/Home/CreateSheet';
@@ -91,10 +89,6 @@ export default function Home() {
   const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] =
-    useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const colorScheme = useColorScheme();
   const theme: ThemeName = colorScheme === 'dark' ? 'dark' : 'light';
   const uiTheme = Colors[theme];
@@ -110,36 +104,18 @@ export default function Home() {
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
   const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
   const [nextModal, setNextModal] = useState<
-    null | 'password' | 'distance' | 'unit'
+    null | 'email' | 'distance' | 'unit'
   >(null);
-  // Animated password & distance sheets
-  const [changePasswordMounted, setChangePasswordMounted] = useState(false);
+  // Animated email & distance sheets
+  const [emailMounted, setEmailMounted] = useState(false);
+  const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
   const [distanceMounted, setDistanceMounted] = useState(false);
   const [unitMounted, setUnitMounted] = useState(false);
   const [isUnitModalVisible, setIsUnitModalVisible] = useState(false);
-  const passwordAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden 1 visible
+  const emailAnim = React.useRef(new Animated.Value(0)).current;
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
   const unitAnim = React.useRef(new Animated.Value(0)).current;
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-
-  // Keyboard handling so password sheet isn't covered
-  useEffect(() => {
-    const showEvent =
-      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow';
-    const hideEvent =
-      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide';
-    const onShow = (e: any) => {
-      const height = e?.endCoordinates?.height || 0;
-      setKeyboardOffset(height);
-    };
-    const onHide = () => setKeyboardOffset(0);
-    const showSub = Keyboard.addListener(showEvent, onShow);
-    const hideSub = Keyboard.addListener(hideEvent, onHide);
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
 
   const runFabAnimation = (to: number) => {
     Animated.timing(fabAnim, {
@@ -178,6 +154,11 @@ export default function Home() {
     setIsCreateVisible(false);
     openForm(action);
   };
+
+  const openEmailModal = React.useCallback(() => {
+    setNewEmail('');
+    setIsEmailModalVisible(true);
+  }, []);
 
   const openDistanceModal = React.useCallback(async () => {
     if (session) {
@@ -227,8 +208,8 @@ export default function Home() {
       }).start(({ finished }) => {
         if (finished) {
           setProfileSheetMounted(false);
-          if (nextModal === 'password') {
-            setIsChangePasswordModalVisible(true);
+          if (nextModal === 'email') {
+            openEmailModal();
           } else if (nextModal === 'distance') {
             openDistanceModal();
           } else if (nextModal === 'unit') {
@@ -242,39 +223,38 @@ export default function Home() {
     isProfileModalVisible,
     profileSheetMounted,
     nextModal,
+    openEmailModal,
     openDistanceModal,
     openUnitModal,
     settingsAnim,
   ]);
 
-  // Animate password modal
+  // Animate email modal
   useEffect(() => {
-    if (isChangePasswordModalVisible) {
-      setChangePasswordMounted(true);
-      passwordAnim.stopAnimation();
-      passwordAnim.setValue(0);
-      Animated.timing(passwordAnim, {
+    if (isEmailModalVisible) {
+      setEmailMounted(true);
+      emailAnim.stopAnimation();
+      emailAnim.setValue(0);
+      Animated.timing(emailAnim, {
         toValue: 1,
         duration: 240,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
-    } else if (changePasswordMounted) {
-      Animated.timing(passwordAnim, {
+    } else if (emailMounted) {
+      Animated.timing(emailAnim, {
         toValue: 0,
         duration: 180,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) {
-          setChangePasswordMounted(false);
-          // Clear any unsaved input when the sheet fully closes
-          setOldPassword('');
-          setNewPassword('');
+          setEmailMounted(false);
+          setNewEmail('');
         }
       });
     }
-  }, [isChangePasswordModalVisible, changePasswordMounted, passwordAnim]);
+  }, [isEmailModalVisible, emailMounted, emailAnim]);
 
   // Animate distance modal
   useEffect(() => {
@@ -379,9 +359,9 @@ export default function Home() {
     setIsProfileModalVisible(!isProfileModalVisible);
   };
 
-  // Toggle the visibility of the change password modal
-  const toggleChangePasswordModal = () => {
-    setIsChangePasswordModalVisible(!isChangePasswordModalVisible);
+  // Toggle the visibility of the email modal
+  const toggleEmailModal = () => {
+    setIsEmailModalVisible(!isEmailModalVisible);
   };
 
   // Toggle the visibility of the change distance modal and fetch current value
@@ -454,31 +434,71 @@ export default function Home() {
     router.replace('/welcome'); // Replace stack so user cannot go back to Home
   };
 
-  // Handle password change
+  // Handle password change request
   const handleChangePassword = async () => {
-    // Re-authenticate the user with the old password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: session?.user?.email || '',
-      password: oldPassword,
-    });
-
-    if (signInError) {
-      Alert.alert('Error', 'Old password is incorrect');
+    if (!session?.user?.email) {
+      Alert.alert('Error', 'No email found for this account');
       return;
     }
 
-    // Update the password to the new password
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      session.user.email,
+      {
+        redirectTo: 'myapp://reset-password',
+      }
+    );
 
-    if (updateError) {
-      Alert.alert('Error', updateError.message);
+    if (error) {
+      Alert.alert('Error', error.message);
     } else {
-      Alert.alert('Success', 'Password updated successfully');
-      setOldPassword('');
-      setNewPassword('');
-      setIsChangePasswordModalVisible(false);
+      Alert.alert(
+        'Check Your Email',
+        "We've sent you a password reset link. Please check your email inbox.",
+        [{ text: 'OK', onPress: () => setIsProfileModalVisible(false) }]
+      );
+    }
+  };
+
+  // Handle email change request
+  const handleChangeEmail = async () => {
+    if (!newEmail) {
+      Alert.alert('Error', 'Please enter a new email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (newEmail === session?.user?.email) {
+      Alert.alert('Error', 'This is already your current email address');
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser(
+      { email: newEmail },
+      { emailRedirectTo: 'myapp://home' }
+    );
+
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert(
+        'Check Your Email',
+        `We've sent a confirmation link to ${newEmail}. Please check your inbox to complete the email change.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setIsEmailModalVisible(false);
+              setNewEmail('');
+            },
+          },
+        ]
+      );
     }
   };
 
@@ -585,10 +605,11 @@ export default function Home() {
         visible={profileSheetMounted}
         animation={settingsAnim}
         onRequestClose={toggleProfileModal}
-        onPressChangePassword={() => {
-          setNextModal('password');
+        onPressChangeEmail={() => {
+          setNextModal('email');
           setIsProfileModalVisible(false);
         }}
+        onPressChangePassword={handleChangePassword}
         onPressChangeDistance={() => {
           setNextModal('distance');
           setIsProfileModalVisible(false);
@@ -602,18 +623,16 @@ export default function Home() {
         uiTheme={uiTheme}
       />
 
-      <ChangePasswordSheet
-        visible={changePasswordMounted}
-        animation={passwordAnim}
-        onRequestClose={toggleChangePasswordModal}
+      <ChangeEmailSheet
+        visible={emailMounted}
+        animation={emailAnim}
+        onRequestClose={toggleEmailModal}
         insetsBottom={insets.bottom}
-        keyboardOffset={keyboardOffset}
         uiTheme={uiTheme}
-        oldPassword={oldPassword}
-        newPassword={newPassword}
-        onChangeOldPassword={setOldPassword}
-        onChangeNewPassword={setNewPassword}
-        onSubmit={handleChangePassword}
+        currentEmail={session?.user?.email || ''}
+        newEmail={newEmail}
+        onChangeNewEmail={setNewEmail}
+        onSubmit={handleChangeEmail}
       />
 
       <DistanceSheet
