@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Animated,
@@ -18,6 +18,7 @@ type ProfileSheetProps = {
   visible: boolean;
   animation: Animated.Value;
   onRequestClose: () => void;
+  onPressChangeEmail: () => void;
   onPressChangePassword: () => void;
   onPressChangeDistance: () => void;
   onPressChangeUnit: () => void;
@@ -30,6 +31,7 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
   visible,
   animation,
   onRequestClose,
+  onPressChangeEmail,
   onPressChangePassword,
   onPressChangeDistance,
   onPressChangeUnit,
@@ -37,6 +39,14 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
   insetsBottom,
   uiTheme,
 }) => {
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
+
+  // Reset to main menu when sheet closes
+  useEffect(() => {
+    if (!visible) {
+      setShowAccountSettings(false);
+    }
+  }, [visible]);
   return (
     <Modal
       transparent
@@ -83,51 +93,66 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
             />
           </View>
           <View style={styles.sheetHeaderRow}>
+            {showAccountSettings && (
+              <TouchableOpacity
+                onPress={() => setShowAccountSettings(false)}
+                style={styles.backButton}
+              >
+                <MaterialIcons
+                  name='arrow-back'
+                  size={24}
+                  color={uiTheme.textPrimary}
+                />
+              </TouchableOpacity>
+            )}
             <ThemedText
               style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
             >
-              Settings
+              {showAccountSettings ? 'Account Settings' : 'Settings'}
             </ThemedText>
           </View>
 
-          <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}>
-            <TouchableOpacity
-              style={styles.sheetRow}
-              onPress={onPressChangePassword}
-            >
-              <View
-                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+          {!showAccountSettings ? (
+            // Main Menu
+            <>
+            <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}>
+              <TouchableOpacity
+                style={styles.sheetRow}
+                onPress={() => setShowAccountSettings(true)}
               >
+                <View
+                  style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+                >
+                  <MaterialIcons
+                    name='person-outline'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText
+                    style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                  >
+                    Account Settings
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.sheetRowSubtitle,
+                      { color: uiTheme.textSecondary },
+                    ]}
+                  >
+                    Email, password & security
+                  </ThemedText>
+                </View>
                 <MaterialIcons
-                  name='lock-outline'
+                  name='chevron-right'
                   size={20}
                   color={uiTheme.textSecondary}
                 />
-              </View>
-              <View style={styles.sheetRowTextWrap}>
-                <ThemedText
-                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
-                >
-                  Change Password
-                </ThemedText>
-                <ThemedText
-                  style={[
-                    styles.sheetRowSubtitle,
-                    { color: uiTheme.textSecondary },
-                  ]}
-                >
-                  Update your account password
-                </ThemedText>
-              </View>
-              <MaterialIcons
-                name='chevron-right'
-                size={20}
-                color={uiTheme.textSecondary}
+              </TouchableOpacity>
+              <View
+                style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
               />
-            </TouchableOpacity>
-            <View
-              style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
-            />
             <TouchableOpacity
               style={styles.sheetRow}
               onPress={onPressChangeDistance}
@@ -230,6 +255,83 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
               />
             </TouchableOpacity>
           </View>
+          </>
+          ) : (
+            // Account Settings Submenu
+            <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}>
+              <TouchableOpacity
+                style={styles.sheetRow}
+                onPress={onPressChangeEmail}
+              >
+                <View
+                  style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+                >
+                  <MaterialIcons
+                    name='email'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText
+                    style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                  >
+                    Change Email
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.sheetRowSubtitle,
+                      { color: uiTheme.textSecondary },
+                    ]}
+                  >
+                    Update your email address
+                  </ThemedText>
+                </View>
+                <MaterialIcons
+                  name='chevron-right'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </TouchableOpacity>
+              <View
+                style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
+              />
+              <TouchableOpacity
+                style={styles.sheetRow}
+                onPress={onPressChangePassword}
+              >
+                <View
+                  style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+                >
+                  <MaterialIcons
+                    name='lock-outline'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText
+                    style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                  >
+                    Change Password
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.sheetRowSubtitle,
+                      { color: uiTheme.textSecondary },
+                    ]}
+                  >
+                    Update your account password
+                  </ThemedText>
+                </View>
+                <MaterialIcons
+                  name='chevron-right'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </Animated.View>
       </Animated.View>
     </Modal>
@@ -266,9 +368,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginBottom: 4,
   },
+  backButton: {
+    padding: 4,
+    marginRight: 8,
+  },
   sheetTitle: {
     fontSize: 16,
     fontWeight: '700',
+    flex: 1,
   },
   sheetSection: {
     borderWidth: 1,

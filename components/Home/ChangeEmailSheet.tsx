@@ -14,31 +14,27 @@ import { Colors, CommonColors, type ThemeName } from '@/constants/Colors';
 
 type ThemeConfig = (typeof Colors)[ThemeName];
 
-type ChangePasswordSheetProps = {
+type ChangeEmailSheetProps = {
   visible: boolean;
   animation: Animated.Value;
   onRequestClose: () => void;
   insetsBottom: number;
-  keyboardOffset: number;
   uiTheme: ThemeConfig;
-  oldPassword: string;
-  newPassword: string;
-  onChangeOldPassword: (value: string) => void;
-  onChangeNewPassword: (value: string) => void;
+  currentEmail: string;
+  newEmail: string;
+  onChangeNewEmail: (value: string) => void;
   onSubmit: () => void;
 };
 
-export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
+export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
   visible,
   animation,
   onRequestClose,
   insetsBottom,
-  keyboardOffset,
   uiTheme,
-  oldPassword,
-  newPassword,
-  onChangeOldPassword,
-  onChangeNewPassword,
+  currentEmail,
+  newEmail,
+  onChangeNewEmail,
   onSubmit,
 }) => (
   <Modal
@@ -74,8 +70,6 @@ export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
               },
             ],
             opacity: animation,
-            marginBottom:
-              keyboardOffset > 0 ? keyboardOffset - insetsBottom : 0,
           },
         ]}
       >
@@ -87,43 +81,66 @@ export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
         <ThemedText
           style={[
             styles.sheetTitle,
-            { color: uiTheme.textPrimary, marginBottom: 12 },
+            { color: uiTheme.textPrimary, marginBottom: 8 },
           ]}
         >
-          Change Password
+          Change Email
         </ThemedText>
-        <TextInput
+        <ThemedText
           style={[
-            styles.input,
-            {
-              backgroundColor: uiTheme.inputBg,
-              color: uiTheme.textPrimary,
-              borderColor: uiTheme.divider,
-            },
+            styles.subtitle,
+            { color: uiTheme.textSecondary, marginBottom: 20 },
           ]}
-          placeholder='Old Password'
-          placeholderTextColor={uiTheme.textSecondary}
-          secureTextEntry
-          value={oldPassword}
-          onChangeText={onChangeOldPassword}
-          accessibilityLabel='Old password'
-        />
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: uiTheme.inputBg,
-              color: uiTheme.textPrimary,
-              borderColor: uiTheme.divider,
-            },
-          ]}
-          placeholder='New Password'
-          placeholderTextColor={uiTheme.textSecondary}
-          secureTextEntry
-          value={newPassword}
-          onChangeText={onChangeNewPassword}
-          accessibilityLabel='New password'
-        />
+        >
+          We'll send a confirmation link to your new email address
+        </ThemedText>
+        
+        <View style={styles.fieldGroup}>
+          <ThemedText
+            style={[styles.label, { color: uiTheme.textSecondary }]}
+          >
+            Current Email
+          </ThemedText>
+          <View
+            style={[
+              styles.currentEmailBox,
+              {
+                backgroundColor: uiTheme.chipBg,
+                borderColor: uiTheme.divider,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.currentEmail, { color: uiTheme.textSecondary }]}>
+              {currentEmail}
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <ThemedText
+            style={[styles.label, { color: uiTheme.textSecondary }]}
+          >
+            New Email
+          </ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: uiTheme.inputBg,
+                color: uiTheme.textPrimary,
+                borderColor: uiTheme.divider,
+              },
+            ]}
+            placeholder='you@example.com'
+            placeholderTextColor={uiTheme.textSecondary}
+            keyboardType='email-address'
+            autoCapitalize='none'
+            value={newEmail}
+            onChangeText={onChangeNewEmail}
+            accessibilityLabel='New email address'
+          />
+        </View>
+
         <TouchableOpacity
           style={[styles.primaryBtn, { backgroundColor: uiTheme.accent }]}
           onPress={onSubmit}
@@ -131,7 +148,7 @@ export const ChangePasswordSheet: React.FC<ChangePasswordSheetProps> = ({
           <ThemedText
             style={[styles.primaryBtnText, { color: CommonColors.white }]}
           >
-            Save
+            Send Confirmation Email
           </ThemedText>
         </TouchableOpacity>
       </Animated.View>
@@ -163,15 +180,38 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   sheetTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  currentEmailBox: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  currentEmail: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   input: {
     width: '100%',
-    padding: 10,
-    marginVertical: 10,
+    padding: 12,
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
+    fontSize: 15,
   },
   primaryBtn: {
     marginTop: 4,
@@ -185,4 +225,5 @@ const styles = StyleSheet.create({
   },
 });
 
-ChangePasswordSheet.displayName = 'ChangePasswordSheet';
+ChangeEmailSheet.displayName = 'ChangeEmailSheet';
+

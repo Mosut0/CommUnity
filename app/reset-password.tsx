@@ -18,7 +18,7 @@ import type { ThemeName } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function SignInScreen() {
+export default function ResetPasswordScreen() {
   const scheme = useColorScheme();
   const theme = resolveTheme(scheme);
   const themeName: ThemeName = scheme === 'dark' ? 'dark' : 'light';
@@ -28,53 +28,46 @@ export default function SignInScreen() {
   );
   const router = useRouter();
 
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignIn = async () => {
-    if (!email || !password) {
-      Alert.alert('Missing info', 'Please enter both email and password.');
+  const handleResetPassword = async () => {
+    if (!password || !confirmPassword) {
+      Alert.alert('Missing info', 'Please enter your new password.');
       return;
     }
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        Alert.alert('Sign in failed', error.message);
-      } else {
-        router.replace('/home');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      Alert.alert(
-        'Email Required',
-        'Please enter your email address to reset your password.'
-      );
+    if (password.length < 6) {
+      Alert.alert('Password too short', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Passwords do not match', 'Please make sure both passwords are the same.');
       return;
     }
 
     try {
       setLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'myapp://reset-password',
+      const { error } = await supabase.auth.updateUser({
+        password: password,
       });
 
       if (error) {
         Alert.alert('Error', error.message);
       } else {
         Alert.alert(
-          'Check Your Email',
-          "We've sent you a password reset link. Please check your email inbox."
+          'Success',
+          'Your password has been reset successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => router.replace('/home'),
+            },
+          ]
         );
       }
     } catch (err: any) {
@@ -90,43 +83,28 @@ export default function SignInScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push('/welcome')}
-        >
-          <Ionicons name='arrow-back' size={24} color={theme.textPrimary} />
-        </TouchableOpacity>
-
         <View style={styles.contentWrapper}>
           <View style={styles.headerWrap}>
-            <Text style={styles.title}>Welcome Back</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="lock-closed" size={48} color={theme.primaryBtnBg} />
+            </View>
+            <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>
-              Sign in to continue to CommUnity
+              Please enter your new password below
             </Text>
           </View>
 
           <View style={styles.formCard}>
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                autoCapitalize='none'
-                keyboardType='email-address'
-                value={email}
-                onChangeText={setEmail}
-                placeholder='you@example.com'
-                placeholderTextColor={theme.textSecondary + '99'}
-                style={styles.input}
-              />
-            </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>New Password</Text>
               <View style={styles.passwordRow}>
                 <TextInput
                   value={password}
                   onChangeText={setPassword}
-                  placeholder='••••••••'
+                  placeholder='Enter new password'
                   placeholderTextColor={theme.textSecondary + '99'}
                   secureTextEntry={!showPassword}
+                  autoCapitalize='none'
                   style={[styles.input, { flex: 1, marginBottom: 0 }]}
                 />
                 <TouchableOpacity
@@ -140,35 +118,50 @@ export default function SignInScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={handleForgotPassword}
-                disabled={loading}
-                style={styles.forgotPasswordBtn}
-              >
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </TouchableOpacity>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <View style={styles.passwordRow}>
+                <TextInput
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder='Confirm new password'
+                  placeholderTextColor={theme.textSecondary + '99'}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize='none'
+                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(s => !s)}
+                  style={styles.iconBtn}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
               style={styles.primaryBtn}
-              onPress={handleSignIn}
+              onPress={handleResetPassword}
               disabled={loading}
               activeOpacity={0.8}
             >
               {loading ? (
                 <ActivityIndicator color={theme.primaryBtnText} />
               ) : (
-                <Text style={styles.primaryBtnText}>Sign In</Text>
+                <Text style={styles.primaryBtnText}>Reset Password</Text>
               )}
             </TouchableOpacity>
 
             <View style={styles.divider} />
-            <View style={styles.switchRow}>
-              <Text style={styles.switchText}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => router.push('/sign-up')}>
-                <Text style={styles.linkText}>Create one</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={() => router.push('/sign-in')}>
+              <Text style={styles.linkText}>Back to Sign In</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -180,16 +173,28 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
   StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: t.pageBg },
     container: { flex: 1, padding: 20 },
-    backButton: { marginBottom: 10, padding: 8, alignSelf: 'flex-start' },
     contentWrapper: { flex: 1, justifyContent: 'center' },
-    headerWrap: { marginBottom: 24 },
+    headerWrap: { marginBottom: 24, alignItems: 'center' },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: t.primaryBtnBg + '15',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
     title: {
       color: t.textPrimary,
       fontSize: 28,
       fontWeight: '800',
       marginBottom: 6,
     },
-    subtitle: { color: t.textSecondary, fontSize: 14 },
+    subtitle: { 
+      color: t.textSecondary, 
+      fontSize: 14,
+      textAlign: 'center',
+    },
     formCard: {
       backgroundColor: t.cardBg,
       borderRadius: 20,
@@ -206,16 +211,6 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
       letterSpacing: 0.5,
       marginBottom: 6,
       textTransform: 'uppercase',
-    },
-    forgotPasswordBtn: {
-      alignSelf: 'flex-start' as const,
-      marginTop: 8,
-      padding: 4,
-    },
-    forgotText: {
-      color: t.primaryBtnBg,
-      fontSize: 12,
-      fontWeight: '600',
     },
     input: {
       backgroundColor: t.chipBg,
@@ -243,12 +238,11 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
       fontSize: 16,
     },
     divider: { height: 1, backgroundColor: t.divider, marginVertical: 20 },
-    switchRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: 6,
+    linkText: { 
+      color: t.primaryBtnBg, 
+      fontWeight: '600',
+      textAlign: 'center',
+      fontSize: 14,
     },
-    switchText: { color: t.textSecondary, fontSize: 13 },
-    linkText: { color: t.primaryBtnBg, fontWeight: '600' },
   });
+
