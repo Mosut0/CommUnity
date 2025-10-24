@@ -64,3 +64,86 @@ jest.mock('@expo/vector-icons', () => ({
   MaterialIcons: 'MaterialIcons',
   MaterialCommunityIcons: 'MaterialCommunityIcons',
 }));
+
+// Mock react-native-maps
+jest.mock('react-native-maps', () => ({
+  MapView: 'MapView',
+  Marker: 'Marker',
+  PROVIDER_GOOGLE: 'PROVIDER_GOOGLE',
+}));
+
+// Mock expo-location
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getCurrentPositionAsync: jest.fn(() => Promise.resolve({
+    coords: { latitude: 45.4215, longitude: -75.6972 }
+  })),
+}));
+
+// Mock expo-image-picker
+jest.mock('expo-image-picker', () => ({
+  requestMediaLibraryPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  launchImageLibraryAsync: jest.fn(() => Promise.resolve({
+    canceled: false,
+    assets: [{ uri: 'file://test-image.jpg' }]
+  })),
+}));
+
+// Mock expo-haptics
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(),
+}));
+
+// Mock react-native-paper
+jest.mock('react-native-paper', () => ({
+  Provider: ({ children }) => children,
+  Button: 'Button',
+  TextInput: 'TextInput',
+  Card: 'Card',
+  Surface: 'Surface',
+  useTheme: () => ({
+    colors: {
+      primary: '#007AFF',
+      background: '#FFFFFF',
+      surface: '#FFFFFF',
+      text: '#000000',
+    },
+  }),
+}));
+
+// Mock react-native-gesture-handler
+jest.mock('react-native-gesture-handler', () => ({
+  TouchableOpacity: 'TouchableOpacity',
+  PanGestureHandler: 'PanGestureHandler',
+  State: { BEGAN: 0, ACTIVE: 1, END: 2 },
+}));
+
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => ({
+  default: {
+    Value: jest.fn(),
+    event: jest.fn(),
+    add: jest.fn(),
+    eq: jest.fn(),
+    set: jest.fn(),
+    cond: jest.fn(),
+    interpolate: jest.fn(),
+    View: 'View',
+    Extrapolate: { CLAMP: 'clamp' },
+  },
+  Easing: {
+    inOut: jest.fn(),
+  },
+}));
+
+// Mock react-native-webview
+jest.mock('react-native-webview', () => ({
+  WebView: 'WebView',
+}));
+
+// Mock uuid
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mock-uuid-123'),
+}));
