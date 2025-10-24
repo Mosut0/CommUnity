@@ -1,33 +1,44 @@
-describe('Welcome flow', () => {
+describe('Authentication Flow Integration', () => {
   beforeEach(async () => {
     await device.reloadReactNative();
   });
 
-  it('navigates between welcome, sign-up, and sign-in screens', async () => {
+  it('completes a basic authentication navigation cycle', async () => {
+    // Start at welcome screen
     await waitFor(element(by.id('welcome-screen')))
       .toBeVisible()
       .withTimeout(15000);
     await expect(element(by.text('CommUnity'))).toBeVisible();
-    await expect(element(by.id('welcome-get-started'))).toBeVisible();
-    await element(by.id('welcome-get-started')).tap();
 
+    // Welcome → Sign Up
+    await element(by.id('welcome-get-started')).tap();
     await waitFor(element(by.id('sign-up-screen')))
       .toBeVisible()
       .withTimeout(10000);
-    await element(by.id('sign-up-back')).tap();
 
-    await waitFor(element(by.id('welcome-screen')))
-      .toBeVisible()
-      .withTimeout(10000);
-    await element(by.id('welcome-sign-in')).tap();
-
+    // Sign Up → Sign In
+    await element(by.id('sign-up-to-sign-in')).tap();
     await waitFor(element(by.id('sign-in-screen')))
       .toBeVisible()
       .withTimeout(10000);
-    await element(by.id('sign-in-back')).tap();
 
+    // Sign In → Forgot Password
+    await element(by.id('forgot-password-btn')).tap();
+    await waitFor(element(by.id('reset-password-screen')))
+      .toBeVisible()
+      .withTimeout(10000);
+
+    // Reset Password → Sign In
+    await element(by.id('reset-password-back')).tap();
+    await waitFor(element(by.id('sign-in-screen')))
+      .toBeVisible()
+      .withTimeout(10000);
+
+    // Sign In → Welcome
+    await element(by.id('sign-in-back')).tap();
     await waitFor(element(by.id('welcome-screen')))
       .toBeVisible()
       .withTimeout(10000);
   });
 });
+

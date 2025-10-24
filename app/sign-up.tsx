@@ -170,7 +170,7 @@ export default function SignUpScreen() {
               <View style={styles.divider} />
               <View style={styles.switchRow}>
                 <Text style={styles.switchText}>Already have an account?</Text>
-                <TouchableOpacity onPress={() => router.push('/sign-in')}>
+                <TouchableOpacity testID='sign-up-to-sign-in' onPress={() => router.push('/sign-in')}>
                   <Text style={styles.linkText}>Sign in</Text>
                 </TouchableOpacity>
               </View>
