@@ -41,4 +41,3 @@ describe('Authentication Flow Integration', () => {
       .withTimeout(10000);
   });
 });
-

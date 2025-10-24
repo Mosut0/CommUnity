@@ -80,7 +80,11 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView testID='reset-password-screen' style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='reset-password-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -93,7 +97,7 @@ export default function ResetPasswordScreen() {
           >
             <Ionicons name='arrow-back' size={24} color={theme.textPrimary} />
           </TouchableOpacity>
-          
+
           <View style={styles.headerWrap}>
             <View style={styles.iconContainer}>
               <Ionicons
