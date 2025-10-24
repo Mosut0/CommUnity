@@ -75,7 +75,11 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='sign-up-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -87,6 +91,7 @@ export default function SignUpScreen() {
           bounces={false}
         >
           <TouchableOpacity
+            testID='sign-up-back'
             style={styles.backButton}
             onPress={() => router.push('/welcome')}
           >
@@ -165,7 +170,10 @@ export default function SignUpScreen() {
               <View style={styles.divider} />
               <View style={styles.switchRow}>
                 <Text style={styles.switchText}>Already have an account?</Text>
-                <TouchableOpacity onPress={() => router.push('/sign-in')}>
+                <TouchableOpacity
+                  testID='sign-up-to-sign-in'
+                  onPress={() => router.push('/sign-in')}
+                >
                   <Text style={styles.linkText}>Sign in</Text>
                 </TouchableOpacity>
               </View>

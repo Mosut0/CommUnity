@@ -80,12 +80,24 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='reset-password-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <View style={styles.contentWrapper}>
+          <TouchableOpacity
+            testID='reset-password-back'
+            style={styles.backButton}
+            onPress={() => router.push('/sign-in')}
+          >
+            <Ionicons name='arrow-back' size={24} color={theme.textPrimary} />
+          </TouchableOpacity>
+
           <View style={styles.headerWrap}>
             <View style={styles.iconContainer}>
               <Ionicons
@@ -181,6 +193,7 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
   StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: t.pageBg },
     container: { flex: 1, padding: 20 },
+    backButton: { marginBottom: 10, padding: 8, alignSelf: 'flex-start' },
     contentWrapper: { flex: 1, justifyContent: 'center' },
     headerWrap: { marginBottom: 24, alignItems: 'center' },
     iconContainer: {

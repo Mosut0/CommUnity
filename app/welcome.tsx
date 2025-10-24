@@ -19,7 +19,11 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='welcome-screen'
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       <View style={styles.content}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
@@ -44,6 +48,7 @@ export default function WelcomeScreen() {
             style={styles.primaryBtn}
             onPress={() => router.push('/sign-up')}
             activeOpacity={0.8}
+            testID='welcome-get-started'
           >
             <Text style={styles.primaryBtnText}>Get Started</Text>
             <Ionicons
@@ -57,6 +62,7 @@ export default function WelcomeScreen() {
             style={styles.secondaryBtn}
             onPress={() => router.push('/sign-in')}
             activeOpacity={0.8}
+            testID='welcome-sign-in'
           >
             <Text style={styles.secondaryBtnText}>
               I Already Have an Account

@@ -85,12 +85,17 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='sign-in-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <TouchableOpacity
+          testID='sign-in-back'
           style={styles.backButton}
           onPress={() => router.push('/welcome')}
         >
@@ -141,6 +146,7 @@ export default function SignInScreen() {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
+                testID='forgot-password-btn'
                 onPress={handleForgotPassword}
                 disabled={loading}
                 style={styles.forgotPasswordBtn}
@@ -165,7 +171,10 @@ export default function SignInScreen() {
             <View style={styles.divider} />
             <View style={styles.switchRow}>
               <Text style={styles.switchText}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => router.push('/sign-up')}>
+              <TouchableOpacity
+                testID='sign-in-to-sign-up'
+                onPress={() => router.push('/sign-up')}
+              >
                 <Text style={styles.linkText}>Create one</Text>
               </TouchableOpacity>
             </View>
