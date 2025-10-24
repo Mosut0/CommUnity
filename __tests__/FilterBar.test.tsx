@@ -31,10 +31,8 @@ describe('FilterBar', () => {
   });
 
   it('renders correctly', () => {
-    const { getByText } = render(
-      <FilterBar {...defaultProps} />
-    );
-    
+    const { getByText } = render(<FilterBar {...defaultProps} />);
+
     expect(getByText('All')).toBeTruthy();
     expect(getByText('Events')).toBeTruthy();
     expect(getByText('Hazards')).toBeTruthy();
@@ -43,29 +41,27 @@ describe('FilterBar', () => {
   });
 
   it('handles filter press', () => {
-    const { getByText } = render(
-      <FilterBar {...defaultProps} />
-    );
-    
+    const { getByText } = render(<FilterBar {...defaultProps} />);
+
     const eventsButton = getByText('Events');
     fireEvent.press(eventsButton);
-    
+
     expect(mockOnFilterPress).toHaveBeenCalledWith('event');
   });
 
   it('shows selected filter', () => {
     const { getByText } = render(
-      <FilterBar {...defaultProps} selectedFilter="event" />
+      <FilterBar {...defaultProps} selectedFilter='event' />
     );
-    
+
     expect(getByText('Events')).toBeTruthy();
   });
 
   it('works with dark theme', () => {
     const { getByText } = render(
-      <FilterBar {...defaultProps} theme="dark" uiTheme={Colors.dark} />
+      <FilterBar {...defaultProps} theme='dark' uiTheme={Colors.dark} />
     );
-    
+
     expect(getByText('All')).toBeTruthy();
   });
 
@@ -73,16 +69,14 @@ describe('FilterBar', () => {
     const { getByText } = render(
       <FilterBar {...defaultProps} scrollEnabled={false} />
     );
-    
+
     // Should render correctly even when scroll is disabled
     expect(getByText('All')).toBeTruthy();
   });
 
   it('renders all filter options', () => {
-    const { getByText } = render(
-      <FilterBar {...defaultProps} />
-    );
-    
+    const { getByText } = render(<FilterBar {...defaultProps} />);
+
     expect(getByText('All')).toBeTruthy();
     expect(getByText('Events')).toBeTruthy();
     expect(getByText('Hazards')).toBeTruthy();

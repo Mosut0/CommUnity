@@ -23,26 +23,26 @@ describe('Collapsible', () => {
 
   it('renders correctly with title', () => {
     const { getByText } = render(
-      <Collapsible title="Test Title">
-        <Collapsible>Content</Collapsible>
+      <Collapsible title='Test Title'>
+        <Collapsible title='Nested'>Content</Collapsible>
       </Collapsible>
     );
-    
+
     expect(getByText('Test Title')).toBeTruthy();
   });
 
   it('toggles open/closed state when pressed', () => {
     const { getByText } = render(
-      <Collapsible title="Test Title">
+      <Collapsible title='Test Title'>
         <div>Content</div>
       </Collapsible>
     );
-    
+
     const toggleButton = getByText('Test Title');
-    
+
     // Test that the component renders
     expect(toggleButton).toBeTruthy();
-    
+
     // Test that pressing toggles the state (we can't easily test the content visibility due to React Native testing limitations)
     fireEvent.press(toggleButton);
     expect(toggleButton).toBeTruthy();
@@ -50,16 +50,16 @@ describe('Collapsible', () => {
 
   it('renders children when open', () => {
     const { getByText } = render(
-      <Collapsible title="Test Title">
+      <Collapsible title='Test Title'>
         <div>Child Content</div>
       </Collapsible>
     );
-    
+
     const toggleButton = getByText('Test Title');
-    
+
     // Test that the component renders
     expect(toggleButton).toBeTruthy();
-    
+
     // Test that pressing works
     fireEvent.press(toggleButton);
     expect(toggleButton).toBeTruthy();
@@ -67,13 +67,13 @@ describe('Collapsible', () => {
 
   it('works with dark theme', () => {
     (useColorScheme as jest.Mock).mockReturnValue('dark');
-    
+
     const { getByText } = render(
-      <Collapsible title="Test Title">
-        <Collapsible>Content</Collapsible>
+      <Collapsible title='Test Title'>
+        <Collapsible title='Nested'>Content</Collapsible>
       </Collapsible>
     );
-    
+
     expect(getByText('Test Title')).toBeTruthy();
   });
 });

@@ -22,7 +22,7 @@ describe('Markers Constants', () => {
 
     it('should have valid hex color values', () => {
       const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
-      
+
       Object.values(MARKER_COLORS).forEach(color => {
         expect(color).toMatch(hexColorRegex);
       });

@@ -1,12 +1,17 @@
-import { submitLostItem, submitFoundItem } from '../services/lostAndFoundService';
+import {
+  submitLostItem,
+  submitFoundItem,
+} from '../services/lostAndFoundService';
 
 // Mock the entire @supabase/supabase-js module
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: jest.fn(() => ({
       insert: jest.fn(() => ({
-        select: jest.fn(() => Promise.resolve({ data: [{ reportid: 1 }], error: null }))
-      }))
+        select: jest.fn(() =>
+          Promise.resolve({ data: [{ reportid: 1 }], error: null })
+        ),
+      })),
     })),
   })),
 }));
@@ -31,45 +36,51 @@ describe('Lost and Found Service', () => {
 
   it('should handle lost item submission', () => {
     const lostItemData = {
-      itemType: 'test',
+      itemName: 'Test Item',
       description: 'Test lost item',
       location: '45.4215, -75.6972',
+      date: new Date(),
+      contactInfo: 'test@example.com',
       imageUri: undefined,
     };
 
-    expect(() => submitLostItem(lostItemData)).not.toThrow();
+    expect(() => submitLostItem(lostItemData, 'test-callback')).not.toThrow();
   });
 
   it('should handle found item submission', () => {
     const foundItemData = {
-      itemType: 'test',
+      itemName: 'Test Item',
       description: 'Test found item',
       location: '45.4215, -75.6972',
+      contactInfo: 'test@example.com',
       imageUri: undefined,
     };
 
-    expect(() => submitFoundItem(foundItemData)).not.toThrow();
+    expect(() => submitFoundItem(foundItemData, 'test-callback')).not.toThrow();
   });
 
   it('should handle invalid location for lost item', () => {
     const lostItemData = {
-      itemType: 'test',
+      itemName: 'Test Item',
       description: 'Test lost item',
       location: 'invalid location',
+      date: new Date(),
+      contactInfo: 'test@example.com',
       imageUri: undefined,
     };
 
-    expect(() => submitLostItem(lostItemData)).not.toThrow();
+    expect(() => submitLostItem(lostItemData, 'test-callback')).not.toThrow();
   });
 
   it('should handle invalid location for found item', () => {
     const foundItemData = {
-      itemType: 'test',
+      itemName: 'Test Item',
       description: 'Test found item',
       location: 'invalid location',
+      contactInfo: 'test@example.com',
       imageUri: undefined,
     };
 
-    expect(() => submitFoundItem(foundItemData)).not.toThrow();
+    expect(() => submitFoundItem(foundItemData, 'test-callback')).not.toThrow();
   });
 });

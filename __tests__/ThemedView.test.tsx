@@ -17,7 +17,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">Test content</ThemedView>
+      <ThemedView testID='themed-view'>Test content</ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -27,7 +27,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FF0000');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">Test content</ThemedView>
+      <ThemedView testID='themed-view'>Test content</ThemedView>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -40,7 +40,9 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByTestId } = render(
-      <ThemedView lightColor="#FF0000" testID="themed-view">Test content</ThemedView>
+      <ThemedView lightColor='#FF0000' testID='themed-view'>
+        Test content
+      </ThemedView>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -53,7 +55,9 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByTestId } = render(
-      <ThemedView darkColor="#0000FF" testID="themed-view">Test content</ThemedView>
+      <ThemedView darkColor='#0000FF' testID='themed-view'>
+        Test content
+      </ThemedView>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -66,7 +70,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByTestId } = render(
-      <ThemedView lightColor="#FF0000" darkColor="#0000FF" testID="themed-view">
+      <ThemedView lightColor='#FF0000' darkColor='#0000FF' testID='themed-view'>
         Test content
       </ThemedView>
     );
@@ -81,9 +85,9 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView 
-        testID="themed-view" 
-        accessibilityLabel="Test accessibility"
+      <ThemedView
+        testID='themed-view'
+        accessibilityLabel='Test accessibility'
         accessible={true}
       >
         Test content
@@ -100,7 +104,9 @@ describe('ThemedView', () => {
     const customStyle = { padding: 20, margin: 10 };
 
     const { getByTestId } = render(
-      <ThemedView style={customStyle} testID="themed-view">Test content</ThemedView>
+      <ThemedView style={customStyle} testID='themed-view'>
+        Test content
+      </ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -110,8 +116,8 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">
-        <ThemedView testID="nested-view">Nested content</ThemedView>
+      <ThemedView testID='themed-view'>
+        <ThemedView testID='nested-view'>Nested content</ThemedView>
       </ThemedView>
     );
 
@@ -122,7 +128,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view"></ThemedView>
+      <ThemedView testID='themed-view'></ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -132,7 +138,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">{null}</ThemedView>
+      <ThemedView testID='themed-view'>{null}</ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -142,7 +148,7 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">{undefined}</ThemedView>
+      <ThemedView testID='themed-view'>{undefined}</ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -152,9 +158,9 @@ describe('ThemedView', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FFFFFF');
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">
-        <ThemedView testID="child1">Child 1</ThemedView>
-        <ThemedView testID="child2">Child 2</ThemedView>
+      <ThemedView testID='themed-view'>
+        <ThemedView testID='child1'>Child 1</ThemedView>
+        <ThemedView testID='child2'>Child 2</ThemedView>
       </ThemedView>
     );
 
@@ -169,7 +175,9 @@ describe('ThemedView', () => {
     const style2 = { margin: 5 };
 
     const { getByTestId } = render(
-      <ThemedView style={[style1, style2]} testID="themed-view">Test content</ThemedView>
+      <ThemedView style={[style1, style2]} testID='themed-view'>
+        Test content
+      </ThemedView>
     );
 
     expect(getByTestId('themed-view')).toBeTruthy();
@@ -181,8 +189,10 @@ describe('ThemedView', () => {
     const showContent = true;
 
     const { getByTestId } = render(
-      <ThemedView testID="themed-view">
-        {showContent && <ThemedView testID="conditional">Conditional content</ThemedView>}
+      <ThemedView testID='themed-view'>
+        {showContent && (
+          <ThemedView testID='conditional'>Conditional content</ThemedView>
+        )}
       </ThemedView>
     );
 

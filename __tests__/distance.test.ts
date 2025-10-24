@@ -40,17 +40,17 @@ describe('Distance Utils', () => {
       expect(distance2).toBeCloseTo(20015, 0);
     });
 
-     it('should handle negative coordinates', () => {
-       const lat1 = -45.4215;
-       const lon1 = -75.6972;
-       const lat2 = 45.4215;
-       const lon2 = 75.6972;
+    it('should handle negative coordinates', () => {
+      const lat1 = -45.4215;
+      const lon1 = -75.6972;
+      const lat2 = 45.4215;
+      const lon2 = 75.6972;
 
-       const distance = getDistanceKm(lat1, lon1, lat2, lon2);
+      const distance = getDistanceKm(lat1, lon1, lat2, lon2);
 
-       expect(distance).toBeGreaterThan(0);
-       expect(distance).toBeCloseTo(17794, -2); // Actual calculated distance
-     });
+      expect(distance).toBeGreaterThan(0);
+      expect(distance).toBeCloseTo(17794, -2); // Actual calculated distance
+    });
   });
 
   describe('kmToMiles', () => {

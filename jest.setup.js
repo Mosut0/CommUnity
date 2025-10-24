@@ -74,19 +74,27 @@ jest.mock('react-native-maps', () => ({
 
 // Mock expo-location
 jest.mock('expo-location', () => ({
-  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  getCurrentPositionAsync: jest.fn(() => Promise.resolve({
-    coords: { latitude: 45.4215, longitude: -75.6972 }
-  })),
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({
+      coords: { latitude: 45.4215, longitude: -75.6972 },
+    })
+  ),
 }));
 
 // Mock expo-image-picker
 jest.mock('expo-image-picker', () => ({
-  requestMediaLibraryPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  launchImageLibraryAsync: jest.fn(() => Promise.resolve({
-    canceled: false,
-    assets: [{ uri: 'file://test-image.jpg' }]
-  })),
+  requestMediaLibraryPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  launchImageLibraryAsync: jest.fn(() =>
+    Promise.resolve({
+      canceled: false,
+      assets: [{ uri: 'file://test-image.jpg' }],
+    })
+  ),
 }));
 
 // Mock expo-haptics

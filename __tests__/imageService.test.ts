@@ -123,11 +123,9 @@ describe('Image Service', () => {
 
         const result = await uploadImage(testCase.uri);
 
-        expect(mockUpload).toHaveBeenCalledWith(
-          expect.any(String),
-          mockBlob,
-          { contentType: testCase.expectedContentType }
-        );
+        expect(mockUpload).toHaveBeenCalledWith(expect.any(String), mockBlob, {
+          contentType: testCase.expectedContentType,
+        });
         expect(result).toBe(mockPublicUrl);
       }
     });
@@ -159,7 +157,7 @@ describe('Image Service', () => {
       // Check that different filenames were generated
       const uploadCalls = mockUpload.mock.calls;
       const filenames = uploadCalls.map(call => call[0]);
-      
+
       // All filenames should be different
       const uniqueFilenames = new Set(filenames);
       expect(uniqueFilenames.size).toBe(3);

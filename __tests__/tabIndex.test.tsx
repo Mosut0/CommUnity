@@ -25,10 +25,10 @@ describe('TabIndex', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockPush = jest.fn();
     mockReplace = jest.fn();
-    
+
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
       replace: mockReplace,
@@ -36,21 +36,21 @@ describe('TabIndex', () => {
   });
 
   it('renders loading indicator initially', () => {
-    (supabase.auth.getSession as jest.Mock).mockImplementation(() => 
-      new Promise(() => {}) // Never resolves to keep loading state
+    (supabase.auth.getSession as jest.Mock).mockImplementation(
+      () => new Promise(() => {}) // Never resolves to keep loading state
     );
 
     const { getByTestId } = render(<TabIndex />);
-    
+
     // Should show loading indicator
     expect(getByTestId).toBeDefined();
   });
 
   it('redirects to home when user has session', async () => {
     const mockSession = { user: { id: '123' } };
-    
+
     (supabase.auth.getSession as jest.Mock).mockResolvedValue({
-      data: { session: mockSession }
+      data: { session: mockSession },
     });
 
     render(<TabIndex />);
@@ -62,7 +62,7 @@ describe('TabIndex', () => {
 
   it('redirects to sign-in when no session', async () => {
     (supabase.auth.getSession as jest.Mock).mockResolvedValue({
-      data: { session: null }
+      data: { session: null },
     });
 
     render(<TabIndex />);
@@ -74,7 +74,7 @@ describe('TabIndex', () => {
 
   it('sets up auth state change listener', () => {
     (supabase.auth.getSession as jest.Mock).mockResolvedValue({
-      data: { session: null }
+      data: { session: null },
     });
 
     render(<TabIndex />);

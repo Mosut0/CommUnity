@@ -81,7 +81,7 @@ describe('Colors', () => {
   it('should have correct theme name type', () => {
     const themeName: ThemeName = 'light';
     expect(themeName).toBe('light');
-    
+
     const darkThemeName: ThemeName = 'dark';
     expect(darkThemeName).toBe('dark');
   });
@@ -94,7 +94,7 @@ describe('Colors', () => {
 
   it('should have valid hex color values', () => {
     const hexColorRegex = /^#[0-9A-Fa-f]{6}$|^#[0-9A-Fa-f]{8}$/;
-    
+
     expect(Colors.light.text).toMatch(hexColorRegex);
     expect(Colors.light.background).toMatch(hexColorRegex);
     expect(Colors.dark.text).toMatch(hexColorRegex);

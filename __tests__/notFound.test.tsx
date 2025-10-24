@@ -11,9 +11,7 @@ jest.mock('expo-router', () => ({
   ),
   Stack: {
     Screen: ({ options }: any) => (
-      <div data-title={options?.title}>
-        Stack Screen
-      </div>
+      <div data-title={options?.title}>Stack Screen</div>
     ),
   },
 }));
@@ -21,23 +19,23 @@ jest.mock('expo-router', () => ({
 describe('NotFoundScreen', () => {
   it('renders correctly', () => {
     const { getByText } = render(<NotFoundScreen />);
-    
-    expect(getByText('This screen doesn\'t exist.')).toBeTruthy();
+
+    expect(getByText("This screen doesn't exist.")).toBeTruthy();
     expect(getByText('Go to home screen!')).toBeTruthy();
   });
 
   it('renders with correct text content', () => {
     const { getByText } = render(<NotFoundScreen />);
-    
-    expect(getByText('This screen doesn\'t exist.')).toBeTruthy();
+
+    expect(getByText("This screen doesn't exist.")).toBeTruthy();
     expect(getByText('Go to home screen!')).toBeTruthy();
   });
 
   it('renders Stack.Screen component', () => {
     const { getByText } = render(<NotFoundScreen />);
-    
+
     // The Stack.Screen is rendered but we can't easily test its content
     // Just verify the main content is there
-    expect(getByText('This screen doesn\'t exist.')).toBeTruthy();
+    expect(getByText("This screen doesn't exist.")).toBeTruthy();
   });
 });

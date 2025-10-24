@@ -5,8 +5,10 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: jest.fn(() => ({
       insert: jest.fn(() => ({
-        select: jest.fn(() => Promise.resolve({ data: [{ reportid: 1 }], error: null }))
-      }))
+        select: jest.fn(() =>
+          Promise.resolve({ data: [{ reportid: 1 }], error: null })
+        ),
+      })),
     })),
   })),
 }));
@@ -36,7 +38,7 @@ describe('Event Service', () => {
     };
 
     // This will test the location parsing logic
-    expect(() => submitEvent(eventData)).not.toThrow();
+    expect(() => submitEvent(eventData, 'test-callback')).not.toThrow();
   });
 
   it('should handle invalid location', () => {
@@ -49,6 +51,6 @@ describe('Event Service', () => {
     };
 
     // This should not throw an error even with invalid location
-    expect(() => submitEvent(eventData)).not.toThrow();
+    expect(() => submitEvent(eventData, 'test-callback')).not.toThrow();
   });
 });

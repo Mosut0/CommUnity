@@ -5,8 +5,10 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: jest.fn(() => ({
       insert: jest.fn(() => ({
-        select: jest.fn(() => Promise.resolve({ data: [{ reportid: 1 }], error: null }))
-      }))
+        select: jest.fn(() =>
+          Promise.resolve({ data: [{ reportid: 1 }], error: null })
+        ),
+      })),
     })),
   })),
 }));
@@ -30,10 +32,11 @@ describe('Hazard Service', () => {
       hazardType: 'test',
       description: 'Test hazard',
       location: '45.4215, -75.6972',
+      date: new Date(),
       imageUri: undefined,
     };
 
-    expect(() => submitHazard(hazardData)).not.toThrow();
+    expect(() => submitHazard(hazardData, 'test-callback')).not.toThrow();
   });
 
   it('should handle invalid location', () => {
@@ -41,9 +44,10 @@ describe('Hazard Service', () => {
       hazardType: 'test',
       description: 'Test hazard',
       location: 'invalid location',
+      date: new Date(),
       imageUri: undefined,
     };
 
-    expect(() => submitHazard(hazardData)).not.toThrow();
+    expect(() => submitHazard(hazardData, 'test-callback')).not.toThrow();
   });
 });

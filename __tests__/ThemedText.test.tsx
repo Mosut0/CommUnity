@@ -16,9 +16,7 @@ describe('ThemedText', () => {
   it('should render with default props', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
-    const { getByText } = render(
-      <ThemedText>Test text</ThemedText>
-    );
+    const { getByText } = render(<ThemedText>Test text</ThemedText>);
 
     expect(getByText('Test text')).toBeTruthy();
   });
@@ -26,9 +24,7 @@ describe('ThemedText', () => {
   it('should apply default type styling', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
-    const { getByText } = render(
-      <ThemedText>Test text</ThemedText>
-    );
+    const { getByText } = render(<ThemedText>Test text</ThemedText>);
 
     const textElement = getByText('Test text');
     expect(textElement).toBeTruthy();
@@ -38,7 +34,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
     const { getByText } = render(
-      <ThemedText type="title">Title text</ThemedText>
+      <ThemedText type='title'>Title text</ThemedText>
     );
 
     expect(getByText('Title text')).toBeTruthy();
@@ -48,7 +44,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
     const { getByText } = render(
-      <ThemedText type="subtitle">Subtitle text</ThemedText>
+      <ThemedText type='subtitle'>Subtitle text</ThemedText>
     );
 
     expect(getByText('Subtitle text')).toBeTruthy();
@@ -58,7 +54,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
     const { getByText } = render(
-      <ThemedText type="defaultSemiBold">SemiBold text</ThemedText>
+      <ThemedText type='defaultSemiBold'>SemiBold text</ThemedText>
     );
 
     expect(getByText('SemiBold text')).toBeTruthy();
@@ -68,7 +64,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
     const { getByText } = render(
-      <ThemedText type="link">Link text</ThemedText>
+      <ThemedText type='link'>Link text</ThemedText>
     );
 
     expect(getByText('Link text')).toBeTruthy();
@@ -77,9 +73,7 @@ describe('ThemedText', () => {
   it('should use theme color from useThemeColor hook', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#FF0000');
 
-    const { getByText } = render(
-      <ThemedText>Test text</ThemedText>
-    );
+    const { getByText } = render(<ThemedText>Test text</ThemedText>);
 
     expect(useThemeColor).toHaveBeenCalledWith(
       { light: undefined, dark: undefined },
@@ -91,7 +85,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByText } = render(
-      <ThemedText lightColor="#FF0000">Test text</ThemedText>
+      <ThemedText lightColor='#FF0000'>Test text</ThemedText>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -104,7 +98,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByText } = render(
-      <ThemedText darkColor="#0000FF">Test text</ThemedText>
+      <ThemedText darkColor='#0000FF'>Test text</ThemedText>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -117,7 +111,9 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#00FF00');
 
     const { getByText } = render(
-      <ThemedText lightColor="#FF0000" darkColor="#0000FF">Test text</ThemedText>
+      <ThemedText lightColor='#FF0000' darkColor='#0000FF'>
+        Test text
+      </ThemedText>
     );
 
     expect(useThemeColor).toHaveBeenCalledWith(
@@ -130,7 +126,7 @@ describe('ThemedText', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
     const { getByText } = render(
-      <ThemedText testID="test-text" accessibilityLabel="Test accessibility">
+      <ThemedText testID='test-text' accessibilityLabel='Test accessibility'>
         Test text
       </ThemedText>
     );
@@ -157,7 +153,9 @@ describe('ThemedText', () => {
     const customStyle = { fontSize: 20 };
 
     const { getByText } = render(
-      <ThemedText type="title" style={customStyle}>Test text</ThemedText>
+      <ThemedText type='title' style={customStyle}>
+        Test text
+      </ThemedText>
     );
 
     expect(getByText('Test text')).toBeTruthy();
@@ -166,9 +164,7 @@ describe('ThemedText', () => {
   it('should handle empty text', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
-    const { getByText } = render(
-      <ThemedText></ThemedText>
-    );
+    const { getByText } = render(<ThemedText></ThemedText>);
 
     expect(getByText('')).toBeTruthy();
   });
@@ -176,9 +172,7 @@ describe('ThemedText', () => {
   it('should handle null children', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
-    const { UNSAFE_root } = render(
-      <ThemedText>{null}</ThemedText>
-    );
+    const { UNSAFE_root } = render(<ThemedText>{null}</ThemedText>);
 
     expect(UNSAFE_root).toBeTruthy();
   });
@@ -186,9 +180,7 @@ describe('ThemedText', () => {
   it('should handle undefined children', () => {
     (useThemeColor as jest.Mock).mockReturnValue('#000000');
 
-    const { UNSAFE_root } = render(
-      <ThemedText>{undefined}</ThemedText>
-    );
+    const { UNSAFE_root } = render(<ThemedText>{undefined}</ThemedText>);
 
     expect(UNSAFE_root).toBeTruthy();
   });

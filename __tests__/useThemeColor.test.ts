@@ -51,9 +51,7 @@ describe('useThemeColor', () => {
   it('should return default light color when no props provided and theme is light', () => {
     (useColorScheme as jest.Mock).mockReturnValue('light');
 
-    const { result } = renderHook(() =>
-      useThemeColor({}, 'text')
-    );
+    const { result } = renderHook(() => useThemeColor({}, 'text'));
 
     expect(result.current).toBe('#000000');
   });
@@ -61,9 +59,7 @@ describe('useThemeColor', () => {
   it('should return default dark color when no props provided and theme is dark', () => {
     (useColorScheme as jest.Mock).mockReturnValue('dark');
 
-    const { result } = renderHook(() =>
-      useThemeColor({}, 'text')
-    );
+    const { result } = renderHook(() => useThemeColor({}, 'text'));
 
     expect(result.current).toBe('#FFFFFF');
   });
@@ -135,11 +131,11 @@ describe('useThemeColor', () => {
 
     // Start with light theme
     (useColorScheme as jest.Mock).mockReturnValue('light');
-    rerender();
+    rerender({ light: '#FF0000', dark: '#00FF00' });
 
     // Change to dark theme
     (useColorScheme as jest.Mock).mockReturnValue('dark');
-    rerender();
+    rerender({ light: '#FF0000', dark: '#00FF00' });
 
     // The hook should return the dark color
     expect(useColorScheme).toHaveBeenCalled();

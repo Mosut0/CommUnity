@@ -1,4 +1,8 @@
-import { makeFormStyles, getTheme, modalStyles } from '../components/formStyles';
+import {
+  makeFormStyles,
+  getTheme,
+  modalStyles,
+} from '../components/formStyles';
 import { Colors } from '../constants/Colors';
 
 describe('Form Styles', () => {
@@ -6,7 +10,7 @@ describe('Form Styles', () => {
     it('should create form styles with light theme', () => {
       const lightTheme = Colors.light;
       const styles = makeFormStyles(lightTheme);
-      
+
       expect(styles.container).toBeDefined();
       expect(styles.input).toBeDefined();
       expect(styles.submitButton).toBeDefined();
@@ -16,7 +20,7 @@ describe('Form Styles', () => {
     it('should create form styles with dark theme', () => {
       const darkTheme = Colors.dark;
       const styles = makeFormStyles(darkTheme);
-      
+
       expect(styles.container).toBeDefined();
       expect(styles.input).toBeDefined();
       expect(styles.submitButton).toBeDefined();
@@ -31,9 +35,9 @@ describe('Form Styles', () => {
           padding: 10,
         },
       };
-      
+
       const styles = makeFormStyles(lightTheme, customStyles);
-      
+
       expect(styles.container).toBeDefined();
       expect(styles.customButton).toBeDefined();
       expect(styles.customButton.backgroundColor).toBe('red');
@@ -42,7 +46,7 @@ describe('Form Styles', () => {
     it('should have all required base form styles', () => {
       const lightTheme = Colors.light;
       const styles = makeFormStyles(lightTheme);
-      
+
       expect(styles.container).toBeDefined();
       expect(styles.scrollContent).toBeDefined();
       expect(styles.inputGroup).toBeDefined();
