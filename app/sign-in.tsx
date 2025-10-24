@@ -85,12 +85,17 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='sign-in-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <TouchableOpacity
+          testID='sign-in-back'
           style={styles.backButton}
           onPress={() => router.push('/welcome')}
         >

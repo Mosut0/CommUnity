@@ -75,7 +75,11 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID='sign-up-screen'
+      style={styles.safeArea}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -87,6 +91,7 @@ export default function SignUpScreen() {
           bounces={false}
         >
           <TouchableOpacity
+            testID='sign-up-back'
             style={styles.backButton}
             onPress={() => router.push('/welcome')}
           >
