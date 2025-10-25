@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Modal, StyleSheet, Pressable, TextInput, Alert,
 import { ThemedText } from '@/components/ThemedText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
+import usePushNotifications, { registerForPushNotificationsAsync } from '../hooks/usePushNotifications';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
@@ -310,6 +311,9 @@ export default function Home() {
     });
   }, []);
 
+  // Register for push notifications and update location when session is available
+  usePushNotifications(session?.user?.id ?? null);
+
   // Redirect away only after auth state is resolved to avoid false negatives
   useEffect(() => {
     if (authReady && !session) {
@@ -495,6 +499,30 @@ export default function Home() {
             <MaterialIcons name="account-circle" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
           </View>
         </TouchableOpacity>
+        {/* Test Push button for manual testing of token retrieval */}
+        <TouchableOpacity
+          style={{ marginLeft: 8 }}
+          onPress={async () => {
+            try {
+              const token = await registerForPushNotificationsAsync();
+              if (token) {
+                Alert.alert('Push Token', String(token));
+                console.log('Manual push token:', token);
+              } else {
+                Alert.alert('Push Token', 'No token received (permission denied or not a device)');
+                console.log('No push token received');
+              }
+            } catch (e) {
+              console.error('Error getting push token:', e);
+              Alert.alert('Push Token', 'Error: ' + String(e));
+            }
+          }}
+          accessibilityLabel="Test push registration"
+        >
+          <View style={{ padding: 6 }}>
+            <ThemedText style={{ color: colorScheme === 'dark' ? '#fff' : '#000', fontSize: 13 }}>Test Push</ThemedText>
+          </View>
+        </TouchableOpacity>
       </View>
 
       {/* Map display showing the community data */}
@@ -582,6 +610,17 @@ export default function Home() {
                 <View style={styles.sheetRowTextWrap}>
                   <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}>Distance Unit</ThemedText>
                   <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Switch between km and miles</ThemedText>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
+              </TouchableOpacity>
+              <View style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]} />
+              <TouchableOpacity style={styles.sheetRow} onPress={() => { setIsProfileModalVisible(false); router.push('/settings'); }}>
+                <View style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}>
+                  <MaterialIcons name="notifications-none" size={20} color={uiTheme.textSecondary} />
+                </View>
+                <View style={styles.sheetRowTextWrap}>
+                  <ThemedText style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}>Notifications</ThemedText>
+                  <ThemedText style={[styles.sheetRowSubtitle, { color: uiTheme.textSecondary }]}>Manage notification types & radius</ThemedText>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={uiTheme.textSecondary} />
               </TouchableOpacity>

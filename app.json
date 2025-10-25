@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CommUnity",
-    "slug": "CommUnity",
+    "slug": "community",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -46,6 +46,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b85239e2-76f5-4f66-9ad9-7fe596bf1aaf"
+      }
+    },
+    "owner": "communityuo"
   }
 }
