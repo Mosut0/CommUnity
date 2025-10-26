@@ -129,7 +129,9 @@ export default function MapScreen({
   const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
   // Track whether a marker was just pressed to avoid map onPress immediately clearing selection
   const markerPressedRef = useRef<boolean>(false);
-  const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Cleanup mounted ref on unmount
   useEffect(() => {
