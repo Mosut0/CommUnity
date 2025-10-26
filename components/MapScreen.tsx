@@ -124,12 +124,12 @@ export default function MapScreen({
   const markerReadyRef = useRef<Map<number, boolean>>(new Map());
   const colorScheme = useColorScheme() ?? 'light';
   const isMountedRef = useRef(true);
-  const fetchTimeoutRef = useRef<number | null>(null);
+  const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
   // Track whether a marker was just pressed to avoid map onPress immediately clearing selection
   const markerPressedRef = useRef<boolean>(false);
-  const markerPressTimeoutRef = useRef<number | null>(null);
+  const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup mounted ref on unmount
   useEffect(() => {
