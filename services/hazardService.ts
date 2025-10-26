@@ -44,7 +44,7 @@ export async function submitHazard(data: HazardData, userId: string) {
         category: 'safety',
         description: data.description,
         location: `(${locationToPoint(data.location).lat},${locationToPoint(data.location).lng})`,
-        imageurl: imageUrl
+        imageurl: imageUrl,
       })
       .select();
 
@@ -60,12 +60,10 @@ export async function submitHazard(data: HazardData, userId: string) {
     const reportId = reportData[0].reportid;
 
     // Insert hazard details into 'hazards' table
-    const { error: hazardError } = await supabase
-      .from('hazards')
-      .insert({
-        reportid: reportId,
-        hazardtype: data.hazardType,
-      });
+    const { error: hazardError } = await supabase.from('hazards').insert({
+      reportid: reportId,
+      hazardtype: data.hazardType,
+    });
 
     if (hazardError) {
       console.error('Hazard insert error:', hazardError);

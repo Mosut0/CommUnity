@@ -36,5 +36,5 @@ jobs:
       - name: 📦 Setup Node + NPM + install deps
         uses: ./.github/actions/setup-node-npm-install
 
-      - name: 🏃‍♂️ Run TypeScript Commit
+      - name: 🏃‍♂️ Run ESLint
         run: npm run lint

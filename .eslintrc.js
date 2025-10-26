@@ -4,5 +4,5 @@ module.exports = {
   ignorePatterns: ['/dist/*'],
   env: {
     jest: true, // This tells ESLint that Jest globals are available
-  }
+  },
 };
