@@ -24,7 +24,11 @@ const REPORT_TYPES = [
   { key: 'hazard', label: 'Hazards', icon: 'alert-circle-outline' as const },
   { key: 'event', label: 'Events', icon: 'calendar-outline' as const },
   { key: 'lost', label: 'Lost items', icon: 'help-circle-outline' as const },
-  { key: 'found', label: 'Found items', icon: 'checkmark-circle-outline' as const },
+  {
+    key: 'found',
+    label: 'Found items',
+    icon: 'checkmark-circle-outline' as const,
+  },
 ];
 
 type NotificationSheetProps = {
@@ -178,10 +182,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
             />
           </View>
           <View style={styles.sheetHeaderRow}>
-            <TouchableOpacity
-              onPress={onPressBack}
-              style={styles.backButton}
-            >
+            <TouchableOpacity onPress={onPressBack} style={styles.backButton}>
               <MaterialIcons
                 name='arrow-back'
                 size={24}
@@ -208,7 +209,10 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
               >
                 <View style={styles.sectionHeader}>
                   <ThemedText
-                    style={[styles.sectionTitle, { color: uiTheme.textPrimary }]}
+                    style={[
+                      styles.sectionTitle,
+                      { color: uiTheme.textPrimary },
+                    ]}
                   >
                     Report Types
                   </ThemedText>
@@ -277,7 +281,10 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
               >
                 <View style={styles.sectionHeader}>
                   <ThemedText
-                    style={[styles.sectionTitle, { color: uiTheme.textPrimary }]}
+                    style={[
+                      styles.sectionTitle,
+                      { color: uiTheme.textPrimary },
+                    ]}
                   >
                     Notification Radius
                   </ThemedText>
@@ -297,7 +304,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
                     maximumValue={50000}
                     step={100}
                     value={prefs.notify_radius_m || 1000}
-                    onValueChange={(val) =>
+                    onValueChange={val =>
                       setPrefs({ ...prefs, notify_radius_m: Math.round(val) })
                     }
                     minimumTrackTintColor={uiTheme.tint}
@@ -334,7 +341,10 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
                   onPress={handleSave}
                 >
                   <ThemedText
-                    style={[styles.primaryBtnText, { color: CommonColors.white }]}
+                    style={[
+                      styles.primaryBtnText,
+                      { color: CommonColors.white },
+                    ]}
                   >
                     Save
                   </ThemedText>

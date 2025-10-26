@@ -9,7 +9,12 @@ describe('Notification Preferences', () => {
     ];
 
     expect(REPORT_TYPES).toHaveLength(4);
-    expect(REPORT_TYPES.map(t => t.key)).toEqual(['hazard', 'event', 'lost', 'found']);
+    expect(REPORT_TYPES.map(t => t.key)).toEqual([
+      'hazard',
+      'event',
+      'lost',
+      'found',
+    ]);
   });
 
   it('should have valid radius range', () => {

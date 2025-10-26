@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
-import usePushNotifications, { registerForPushNotificationsAsync } from '../hooks/usePushNotifications';
+import usePushNotifications from '../hooks/usePushNotifications';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
@@ -116,7 +116,8 @@ export default function Home() {
   const [unitMounted, setUnitMounted] = useState(false);
   const [isUnitModalVisible, setIsUnitModalVisible] = useState(false);
   const [notificationsMounted, setNotificationsMounted] = useState(false);
-  const [isNotificationsModalVisible, setIsNotificationsModalVisible] = useState(false);
+  const [isNotificationsModalVisible, setIsNotificationsModalVisible] =
+    useState(false);
   const emailAnim = React.useRef(new Animated.Value(0)).current;
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
   const unitAnim = React.useRef(new Animated.Value(0)).current;
@@ -634,7 +635,6 @@ export default function Home() {
             />
           </View>
         </TouchableOpacity>
-        
       </View>
 
       {/* Map display showing the community data */}

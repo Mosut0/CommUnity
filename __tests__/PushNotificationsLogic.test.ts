@@ -11,7 +11,7 @@ describe('Push Notifications Utilities', () => {
   // Test permission status handling
   it('should handle permission statuses correctly', () => {
     const statuses = ['granted', 'denied', 'undetermined'];
-    
+
     expect(statuses).toContain('granted');
     expect(statuses).toContain('denied');
     expect(statuses.length).toBe(3);
