@@ -77,6 +77,49 @@ serve(async (req)=>{
     };
 
     console.log(`[EdgeFunction] Report loaded: ${JSON.stringify(report)}`);
+    
+    // Fetch additional details based on report category
+    let additionalDetails = null;
+    if (report.type === 'lost') {
+      const lostResp = await fetch(`${SUPABASE_URL}/rest/v1/lostitems?reportid=eq.${reportId}&select=itemtype,contactinfo`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const lostItems = await lostResp.json();
+      additionalDetails = lostItems?.[0];
+    } else if (report.type === 'found') {
+      const foundResp = await fetch(`${SUPABASE_URL}/rest/v1/founditems?reportid=eq.${reportId}&select=itemtype,contactinfo`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const foundItems = await foundResp.json();
+      additionalDetails = foundItems?.[0];
+    } else if (report.type === 'event') {
+      const eventResp = await fetch(`${SUPABASE_URL}/rest/v1/events?reportid=eq.${reportId}&select=eventtype,time`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const events = await eventResp.json();
+      additionalDetails = events?.[0];
+    } else if (report.type === 'safety' || report.type === 'infrastructure' || report.type === 'wildlife' || report.type === 'health') {
+      const hazardResp = await fetch(`${SUPABASE_URL}/rest/v1/hazards?reportid=eq.${reportId}&select=hazardtype`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const hazards = await hazardResp.json();
+      additionalDetails = hazards?.[0];
+    }
+    
+    console.log(`[EdgeFunction] Additional details: ${JSON.stringify(additionalDetails)}`);
+    
     // Fetch users with matching notification preferences
     console.log("Type:", report.type);
 
@@ -97,17 +140,103 @@ serve(async (req)=>{
       console.error("[EdgeFunction] Failed to parse users JSON:", e);
     }
     console.log(`[EdgeFunction] Found ${users.length} users with notify type ${report.type}`);
+    
+    // Helper function to generate notification title and body
+    function generateNotificationContent(report, additionalDetails) {
+      let title = '';
+      let body = report.description || '';
+      
+      switch (report.type) {
+        case 'lost':
+          if (additionalDetails?.itemtype) {
+            title = `Lost ${additionalDetails.itemtype} Reported Nearby`;
+            body = report.description || `A ${additionalDetails.itemtype} has been reported lost nearby`;
+          } else {
+            title = 'Lost Item Reported Nearby';
+            body = report.description || 'An item has been reported lost nearby';
+          }
+          break;
+          
+        case 'found':
+          if (additionalDetails?.itemtype) {
+            title = `Found ${additionalDetails.itemtype} Reported Nearby`;
+            body = report.description || `A ${additionalDetails.itemtype} has been found nearby`;
+          } else {
+            title = 'Found Item Reported Nearby';
+            body = report.description || 'An item has been found nearby';
+          }
+          break;
+          
+        case 'event':
+          if (additionalDetails?.eventtype) {
+            title = `${additionalDetails.eventtype} Event Nearby`;
+            body = report.description || `A ${additionalDetails.eventtype} event is happening nearby`;
+          } else {
+            title = 'Community Event Nearby';
+            body = report.description || 'A community event is happening nearby';
+          }
+          break;
+          
+        case 'safety':
+          if (additionalDetails?.hazardtype) {
+            title = `Safety Alert: ${additionalDetails.hazardtype}`;
+            body = report.description || `A ${additionalDetails.hazardtype} safety hazard has been reported nearby`;
+          } else {
+            title = 'Safety Alert';
+            body = report.description || 'A safety hazard has been reported nearby';
+          }
+          break;
+          
+        case 'infrastructure':
+          if (additionalDetails?.hazardtype) {
+            title = `Infrastructure Issue: ${additionalDetails.hazardtype}`;
+            body = report.description || `${additionalDetails.hazardtype} infrastructure issue reported nearby`;
+          } else {
+            title = 'Infrastructure Issue';
+            body = report.description || 'An infrastructure issue has been reported nearby';
+          }
+          break;
+          
+        case 'wildlife':
+          if (additionalDetails?.hazardtype) {
+            title = `Wildlife Alert: ${additionalDetails.hazardtype}`;
+            body = report.description || `${additionalDetails.hazardtype} spotted nearby`;
+          } else {
+            title = 'Wildlife Alert';
+            body = report.description || 'Wildlife has been spotted nearby';
+          }
+          break;
+          
+        case 'health':
+          if (additionalDetails?.hazardtype) {
+            title = `Health Alert: ${additionalDetails.hazardtype}`;
+            body = report.description || `${additionalDetails.hazardtype} health concern reported nearby`;
+          } else {
+            title = 'Health Alert';
+            body = report.description || 'A health concern has been reported nearby';
+          }
+          break;
+          
+        default:
+          title = `Nearby ${report.type}`;
+          body = report.description || `New ${report.type} reported nearby`;
+      }
+      
+      return { title, body };
+    }
+    
     const messages = [];
     for (const u of users){
       if (!u.last_location_lat || !u.last_location_lon) continue;
       const dist = haversineDistance(report.lat, report.lon, Number(u.last_location_lat), Number(u.last_location_lon));
       const radius = u.notify_radius_m || 1000;
       if (dist <= radius) {
+        const { title, body } = generateNotificationContent(report, additionalDetails);
         messages.push({
           to: u.expo_push_token,
           sound: 'default',
-          title: `Nearby ${report.type}`,
-          body: report.description || `New ${report.type} reported nearby`,
+          title: title,
+          body: body,
           data: {
             reportId: report.id
           }
