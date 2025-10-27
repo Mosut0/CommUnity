@@ -41,3 +41,9 @@ yarn-error.*
 coverage/
 
 app-example
+
+# Supabase
+supabase/.temp/
+
+# VSCode
+.vscode/

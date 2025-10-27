@@ -28,8 +28,10 @@ module.exports = {
     '!**/__mocks__/**',
     // Exclude untestable files with complex dependencies
     '!app/_layout.tsx', // Complex app layout with expo-router
-    '!app/(tabs)/_layout.tsx', // Complex tab layout with expo-router
-    '!app/(tabs)/explore.tsx', // Complex explore page with ParallaxScrollView
+    '!app/\\(tabs\\)/_layout.tsx', // Complex tab layout with expo-router
+    '!app/\\(tabs\\)/explore.tsx', // Complex explore page with ParallaxScrollView
+    '!app/\\(tabs\\)/index.tsx', // Tab index screen
+    '!app/+not-found.tsx', // Not found screen
     '!app/forums.tsx', // Complex page with Supabase auth
     '!app/home.tsx', // Complex page with Supabase auth
     '!app/report-details.tsx', // Complex page with Supabase auth
@@ -57,6 +59,7 @@ module.exports = {
     '!components/Home/DistanceUnitSheet.tsx', // Uses Animated.Value
     '!components/Home/ChangeEmailSheet.tsx', // Uses Animated.Value
     '!components/Home/CreateSheet.tsx', // Uses Animated.Value
+    '!components/Home/NotificationSheet.tsx', // Complex UI component, logic tested separately
     '!components/Home/types.ts', // Type definitions
     '!lib/supabase.ts', // Uses Supabase client
     '!hooks/useColorScheme.ts', // Uses react-native

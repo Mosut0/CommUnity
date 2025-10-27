@@ -22,6 +22,7 @@ type ProfileSheetProps = {
   onPressChangePassword: () => void;
   onPressChangeDistance: () => void;
   onPressChangeUnit: () => void;
+  onPressNotifications: () => void;
   onPressSignOut: () => void;
   insetsBottom: number;
   uiTheme: ThemeConfig;
@@ -35,6 +36,7 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
   onPressChangePassword,
   onPressChangeDistance,
   onPressChangeUnit,
+  onPressNotifications,
   onPressSignOut,
   insetsBottom,
   uiTheme,
@@ -242,6 +244,52 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
                       ]}
                     >
                       Switch between km and miles
+                    </ThemedText>
+                  </View>
+                  <MaterialIcons
+                    name='chevron-right'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </TouchableOpacity>
+                <View
+                  style={[
+                    styles.rowDivider,
+                    { backgroundColor: uiTheme.divider },
+                  ]}
+                />
+                <TouchableOpacity
+                  style={styles.sheetRow}
+                  onPress={onPressNotifications}
+                >
+                  <View
+                    style={[
+                      styles.sheetIcon,
+                      { backgroundColor: uiTheme.chipBg },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name='notifications-none'
+                      size={20}
+                      color={uiTheme.textSecondary}
+                    />
+                  </View>
+                  <View style={styles.sheetRowTextWrap}>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowTitle,
+                        { color: uiTheme.textPrimary },
+                      ]}
+                    >
+                      Notifications
+                    </ThemedText>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowSubtitle,
+                        { color: uiTheme.textSecondary },
+                      ]}
+                    >
+                      Manage notification preferences
                     </ThemedText>
                   </View>
                   <MaterialIcons

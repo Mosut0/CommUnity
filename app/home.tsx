@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
+import usePushNotifications from '../hooks/usePushNotifications';
 import { Session } from '@supabase/supabase-js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapScreen from '../components/MapScreen';
@@ -27,6 +28,7 @@ import { ProfileSheet } from '@/components/Home/ProfileSheet';
 import { ChangeEmailSheet } from '@/components/Home/ChangeEmailSheet';
 import { DistanceSheet } from '@/components/Home/DistanceSheet';
 import { DistanceUnitSheet } from '@/components/Home/DistanceUnitSheet';
+import { NotificationSheet } from '@/components/Home/NotificationSheet';
 import { CreateSheet } from '@/components/Home/CreateSheet';
 import { SpeedDial } from '@/components/Home/SpeedDial';
 import type { FilterValue, DistanceUnit } from '@/components/Home/types';
@@ -104,7 +106,7 @@ export default function Home() {
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
   const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
   const [nextModal, setNextModal] = useState<
-    null | 'email' | 'distance' | 'unit'
+    null | 'email' | 'distance' | 'unit' | 'notifications'
   >(null);
   // Animated email & distance sheets
   const [emailMounted, setEmailMounted] = useState(false);
@@ -113,9 +115,13 @@ export default function Home() {
   const [distanceMounted, setDistanceMounted] = useState(false);
   const [unitMounted, setUnitMounted] = useState(false);
   const [isUnitModalVisible, setIsUnitModalVisible] = useState(false);
+  const [notificationsMounted, setNotificationsMounted] = useState(false);
+  const [isNotificationsModalVisible, setIsNotificationsModalVisible] =
+    useState(false);
   const emailAnim = React.useRef(new Animated.Value(0)).current;
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
   const unitAnim = React.useRef(new Animated.Value(0)).current;
+  const notificationsAnim = React.useRef(new Animated.Value(0)).current;
 
   const runFabAnimation = (to: number) => {
     Animated.timing(fabAnim, {
@@ -186,6 +192,10 @@ export default function Home() {
     setIsUnitModalVisible(true);
   }, [session]);
 
+  const openNotificationsModal = React.useCallback(() => {
+    setIsNotificationsModalVisible(true);
+  }, []);
+
   // Animate settings sheet open/close
   useEffect(() => {
     if (isProfileModalVisible) {
@@ -214,6 +224,8 @@ export default function Home() {
             openDistanceModal();
           } else if (nextModal === 'unit') {
             openUnitModal();
+          } else if (nextModal === 'notifications') {
+            openNotificationsModal();
           }
           setNextModal(null);
         }
@@ -226,6 +238,7 @@ export default function Home() {
     openEmailModal,
     openDistanceModal,
     openUnitModal,
+    openNotificationsModal,
     settingsAnim,
   ]);
 
@@ -304,6 +317,30 @@ export default function Home() {
     }
   }, [isUnitModalVisible, unitMounted, unitAnim]);
 
+  // Animate notifications modal
+  useEffect(() => {
+    if (isNotificationsModalVisible) {
+      setNotificationsMounted(true);
+      notificationsAnim.stopAnimation();
+      notificationsAnim.setValue(0);
+      Animated.timing(notificationsAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else if (notificationsMounted) {
+      Animated.timing(notificationsAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setNotificationsMounted(false);
+      });
+    }
+  }, [isNotificationsModalVisible, notificationsMounted, notificationsAnim]);
+
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -329,6 +366,9 @@ export default function Home() {
       setAuthReady(true);
     });
   }, []);
+
+  // Register for push notifications and update location when session is available
+  usePushNotifications(session?.user?.id ?? null);
 
   // Redirect away only after auth state is resolved to avoid false negatives
   useEffect(() => {
@@ -390,6 +430,11 @@ export default function Home() {
       }
     }
     setIsUnitModalVisible(!isUnitModalVisible);
+  };
+
+  // Toggle the visibility of the notifications modal
+  const toggleNotificationsModal = () => {
+    setIsNotificationsModalVisible(!isNotificationsModalVisible);
   };
 
   // Handle saving the new distance unit
@@ -618,6 +663,10 @@ export default function Home() {
           setNextModal('unit');
           setIsProfileModalVisible(false);
         }}
+        onPressNotifications={() => {
+          setNextModal('notifications');
+          setIsProfileModalVisible(false);
+        }}
         onPressSignOut={handleSignOut}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}
@@ -656,6 +705,18 @@ export default function Home() {
         distanceUnit={distanceUnit}
         onSelectUnit={setDistanceUnit}
         onSubmit={handleSaveUnit}
+      />
+
+      <NotificationSheet
+        visible={notificationsMounted}
+        animation={notificationsAnim}
+        onRequestClose={toggleNotificationsModal}
+        onPressBack={() => {
+          setIsNotificationsModalVisible(false);
+          setIsProfileModalVisible(true);
+        }}
+        insetsBottom={insets.bottom}
+        uiTheme={uiTheme}
       />
 
       <SpeedDial
