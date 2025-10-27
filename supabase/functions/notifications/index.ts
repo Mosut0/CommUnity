@@ -84,8 +84,8 @@ serve(async req => {
       type: reportRow.category,
       title: reportRow.category,
       description: reportRow.description,
-      lat: point.y,
-      lon: point.x, // longitude
+      lat: point.x,
+      lon: point.y,
     };
 
     console.log(`[EdgeFunction] Report loaded: ${JSON.stringify(report)}`);
