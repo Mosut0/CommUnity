@@ -2,8 +2,6 @@ import {
   fetchReports,
   fetchReportById,
   createReport,
-  updateReport,
-  deleteReport,
 } from '@/services/reportService';
 import { supabase } from '@/lib/supabase';
 
@@ -101,6 +99,37 @@ describe('reportService', () => {
   });
 
   describe('fetchReportById', () => {
+    it('should fetch a single report successfully', async () => {
+      const mockReport = {
+        reportid: 1,
+        category: 'event',
+        description: 'Test event',
+        location: '(40.7128,-74.0060)',
+        createdat: '2024-01-01',
+        userid: 'user1',
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({ data: mockReport, error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({ data: { eventtype: 'Meeting' }, error: null }),
+        });
+
+      const result = await fetchReportById(1);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toBeDefined();
+      expect(result.data?.reportid).toBe(1);
+    });
+
     it('should handle report not found', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
@@ -114,9 +143,144 @@ describe('reportService', () => {
 
       expect(result.success).toBe(false);
     });
+
+    it('should fetch category-specific data for different report types', async () => {
+      const mockSafetyReport = {
+        reportid: 2,
+        category: 'safety',
+        description: 'Hazard',
+        location: '(40.7128,-74.0060)',
+        createdat: '2024-01-01',
+        userid: 'user1',
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockSafetyReport, error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({ data: { hazardtype: 'Pothole' }, error: null }),
+        });
+
+      const result = await fetchReportById(2);
+
+      expect(result.success).toBe(true);
+      expect(result.data?.category).toBe('safety');
+    });
   });
 
   describe('createReport', () => {
+    it('should create an event report successfully', async () => {
+      const mockReportData = {
+        reportid: 1,
+        category: 'event',
+        description: 'New event',
+        location: '(40.7128,-74.0060)',
+        createdat: '2024-01-01',
+        userid: 'user1',
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce({
+          insert: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReportData, error: null }),
+        })
+        .mockReturnValueOnce({
+          insert: jest.fn().mockResolvedValue({ error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReportData, error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({ data: { eventtype: 'Meeting' }, error: null }),
+        });
+
+      const createData = {
+        type: 'event' as const,
+        data: {
+          eventType: 'Meeting',
+          description: 'New event',
+          location: '40.7128,-74.0060',
+          date: new Date('2024-01-01'),
+          time: '14:00',
+        },
+      };
+
+      const result = await createReport(createData, 'user1');
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should create a safety report successfully', async () => {
+      const mockReportData = {
+        reportid: 2,
+        category: 'safety',
+        description: 'Pothole',
+        location: '(40.7128,-74.0060)',
+        createdat: '2024-01-01',
+        userid: 'user1',
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce({
+          insert: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReportData, error: null }),
+        })
+        .mockReturnValueOnce({
+          insert: jest.fn().mockResolvedValue({ error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReportData, error: null }),
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({ data: { hazardtype: 'Pothole' }, error: null }),
+        });
+
+      const createData = {
+        type: 'safety' as const,
+        data: {
+          hazardType: 'Pothole',
+          description: 'Pothole',
+          location: '40.7128,-74.0060',
+          date: new Date('2024-01-01'),
+        },
+      };
+
+      const result = await createReport(createData, 'user1');
+
+      expect(result.success).toBe(true);
+    });
+
     it('should rollback on category data insertion failure', async () => {
       const mockReportData = {
         reportid: 1,
@@ -160,33 +324,77 @@ describe('reportService', () => {
       expect(result.success).toBe(false);
       expect(mockDelete).toHaveBeenCalled();
     });
-  });
 
-  describe('deleteReport', () => {
-    it('should delete a report successfully', async () => {
-      (supabase.from as jest.Mock).mockReturnValue({
-        delete: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      });
-
-      const result = await deleteReport(1);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toBe(true);
-    });
-
-    it('should handle deletion errors', async () => {
-      const mockError = new Error('Delete failed');
+    it('should handle report insertion error', async () => {
+      const mockError = new Error('Database error');
 
       (supabase.from as jest.Mock).mockReturnValue({
-        delete: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: mockError }),
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: mockError }),
       });
 
-      const result = await deleteReport(1);
+      const createData = {
+        type: 'event' as const,
+        data: {
+          eventType: 'Meeting',
+          description: 'New event',
+          location: '40.7128,-74.0060',
+          date: new Date('2024-01-01'),
+          time: '14:00',
+        },
+      };
+
+      const result = await createReport(createData, 'user1');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe(mockError);
+    });
+  });
+
+  describe('fetchReports with empty results', () => {
+    it('should return empty array when no reports exist', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({ data: [], error: null }),
+      });
+
+      const result = await fetchReports();
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([]);
+    });
+  });
+
+  describe('fetchReports with pagination', () => {
+    it('should handle limit option', async () => {
+      const mockLimit = jest.fn().mockResolvedValue({ data: [], error: null });
+
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        order: jest.fn().mockReturnThis(),
+        limit: mockLimit,
+      });
+
+      await fetchReports({ limit: 5 });
+
+      expect(mockLimit).toHaveBeenCalledWith(5);
+    });
+
+    it('should handle offset with limit', async () => {
+      // When offset is provided, the service uses .range() instead of .limit()
+      // This test verifies that pagination options are accepted without errors
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        order: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        range: jest.fn().mockResolvedValue({ data: [], error: null }),
+      });
+
+      const result = await fetchReports({ offset: 10, limit: 5 });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([]);
     });
   });
 });

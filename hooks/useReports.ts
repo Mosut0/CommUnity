@@ -2,18 +2,11 @@
 // This hook provides a centralized way to manage reports across the app
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Report,
-  ReportQueryOptions,
-  CreateReportData,
-  UpdateReportData,
-} from '@/types/report';
+import { Report, ReportQueryOptions, CreateReportData } from '@/types/report';
 import {
   fetchReports,
   fetchReportById,
   createReport,
-  updateReport,
-  deleteReport,
   subscribeToReports,
 } from '@/services/reportService';
 import { ReportFilters } from '@/types/report';
@@ -35,8 +28,6 @@ interface UseReportsReturn {
   refreshReports: () => Promise<void>;
   fetchReport: (id: number) => Promise<Report | null>;
   addReport: (reportData: CreateReportData, userId: string) => Promise<boolean>;
-  updateReportData: (id: number, data: UpdateReportData) => Promise<boolean>;
-  removeReport: (id: number) => Promise<boolean>;
   selectReport: (report: Report | null) => void;
   clearError: () => void;
 
@@ -142,64 +133,6 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
     []
   );
 
-  // Update report
-  const updateReportData = useCallback(
-    async (id: number, data: UpdateReportData): Promise<boolean> => {
-      try {
-        const result = await updateReport(id, data);
-        if (result.success && result.data) {
-          // Update local state
-          setReports(prev =>
-            prev.map(report => (report.reportid === id ? result.data! : report))
-          );
-
-          // Update selected report if it's the one being updated
-          if (selectedReport?.reportid === id) {
-            setSelectedReport(result.data);
-          }
-
-          return true;
-        } else {
-          setError(result.error?.message || 'Failed to update report');
-          return false;
-        }
-      } catch (err) {
-        console.error('Error updating report:', err);
-        setError('An unexpected error occurred');
-        return false;
-      }
-    },
-    [selectedReport]
-  );
-
-  // Delete report
-  const removeReport = useCallback(
-    async (id: number): Promise<boolean> => {
-      try {
-        const result = await deleteReport(id);
-        if (result.success) {
-          // Remove from local state
-          setReports(prev => prev.filter(report => report.reportid !== id));
-
-          // Clear selected report if it's the one being deleted
-          if (selectedReport?.reportid === id) {
-            setSelectedReport(null);
-          }
-
-          return true;
-        } else {
-          setError(result.error?.message || 'Failed to delete report');
-          return false;
-        }
-      } catch (err) {
-        console.error('Error deleting report:', err);
-        setError('An unexpected error occurred');
-        return false;
-      }
-    },
-    [selectedReport]
-  );
-
   // Select report
   const selectReport = useCallback((report: Report | null) => {
     setSelectedReport(report);
@@ -253,8 +186,6 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
     refreshReports,
     fetchReport,
     addReport,
-    updateReportData,
-    removeReport,
     selectReport,
     clearError,
 
