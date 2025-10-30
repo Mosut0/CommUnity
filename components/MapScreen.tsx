@@ -406,6 +406,22 @@ const styles = StyleSheet.create({
   calloutDark: {
     backgroundColor: '#0B1220',
   },
+  calloutActionsRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  calloutButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  calloutButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
+  },
   errorText: {
     color: 'red',
     textAlign: 'center',
