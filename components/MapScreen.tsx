@@ -23,6 +23,7 @@ import {
   getDisplayCoords,
   getDistanceKm,
 } from '@/utils/reportUtils';
+import { useRouter } from 'expo-router';
 
 interface MapScreenProps {
   distanceRadius: number;
@@ -37,6 +38,7 @@ export default function MapScreen({
   filter = 'all',
   onReportCardChange,
 }: MapScreenProps) {
+  const router = useRouter();
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -365,6 +367,12 @@ export default function MapScreen({
           onClose={() => {
             setSelectedReport(null);
             onReportCardChange?.(false);
+          }}
+          onDetails={() => {
+            router.push({
+              pathname: '/report-details',
+              params: { reportId: String(selectedReport.reportid) },
+            });
           }}
         />
       )}
