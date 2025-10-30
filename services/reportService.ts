@@ -56,7 +56,10 @@ export async function fetchReports(
     }
 
     if (options.offset) {
-      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+      query = query.range(
+        options.offset,
+        options.offset + (options.limit || 10) - 1
+      );
     }
 
     const { data: reportsData, error: reportsError } = await query;
@@ -72,7 +75,7 @@ export async function fetchReports(
 
     // Fetch additional details for each report based on category
     const enhancedReports = await Promise.all(
-      reportsData.map(async (report) => {
+      reportsData.map(async report => {
         try {
           let additionalData = {};
 
@@ -132,7 +135,9 @@ export async function fetchReports(
 /**
  * Fetch a single report by ID
  */
-export async function fetchReportById(reportId: number): Promise<ReportServiceResponse<Report>> {
+export async function fetchReportById(
+  reportId: number
+): Promise<ReportServiceResponse<Report>> {
   try {
     const { data: reportData, error: reportError } = await supabase
       .from('reports')
@@ -242,7 +247,7 @@ export async function createReport(
           const [hours, minutes] = reportData.data.time.split(':').map(Number);
           eventDateTime.setHours(hours, minutes);
         }
-        
+
         const { error: eventError } = await supabase.from('events').insert({
           reportid: reportId,
           eventtype: reportData.data.eventType,
@@ -300,7 +305,11 @@ export async function createReport(
 export async function updateReport(
   reportId: number,
   reportData: UpdateReportData,
-  categoryData?: UpdateEventData | UpdateHazardData | UpdateLostItemData | UpdateFoundItemData
+  categoryData?:
+    | UpdateEventData
+    | UpdateHazardData
+    | UpdateLostItemData
+    | UpdateFoundItemData
 ): Promise<ReportServiceResponse<Report>> {
   try {
     // Update main report data
@@ -379,7 +388,9 @@ export async function updateReport(
 /**
  * Delete a report
  */
-export async function deleteReport(reportId: number): Promise<ReportServiceResponse<boolean>> {
+export async function deleteReport(
+  reportId: number
+): Promise<ReportServiceResponse<boolean>> {
   try {
     // Delete from main reports table (cascade will handle related tables)
     const { error } = await supabase
@@ -402,7 +413,9 @@ export async function deleteReport(reportId: number): Promise<ReportServiceRespo
 /**
  * Get reports by user ID
  */
-export async function fetchReportsByUser(userId: string): Promise<ReportServiceResponse<Report[]>> {
+export async function fetchReportsByUser(
+  userId: string
+): Promise<ReportServiceResponse<Report[]>> {
   try {
     const { data, error } = await supabase
       .from('reports')
@@ -417,7 +430,7 @@ export async function fetchReportsByUser(userId: string): Promise<ReportServiceR
 
     // Process reports to include category-specific data
     const enhancedReports = await Promise.all(
-      (data || []).map(async (report) => {
+      (data || []).map(async report => {
         let additionalData = {};
 
         switch (report.category) {
@@ -477,7 +490,7 @@ export function subscribeToReports(
   onError?: (error: any) => void
 ) {
   const channelName = `reports-updates-${Date.now()}`;
-  
+
   const channel = supabase
     .channel(channelName)
     .on(
@@ -525,7 +538,7 @@ export function subscribeToReports(
       },
       onUpdate
     )
-    .subscribe((status) => {
+    .subscribe(status => {
       if (status === 'CHANNEL_ERROR' && onError) {
         onError(new Error('Subscription error'));
       }

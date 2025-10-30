@@ -2,7 +2,12 @@
 // This hook provides a centralized way to manage reports across the app
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Report, ReportQueryOptions, CreateReportData, UpdateReportData } from '@/types/report';
+import {
+  Report,
+  ReportQueryOptions,
+  CreateReportData,
+  UpdateReportData,
+} from '@/types/report';
 import {
   fetchReports,
   fetchReportById,
@@ -25,7 +30,7 @@ interface UseReportsReturn {
   loading: boolean;
   error: string | null;
   selectedReport: Report | null;
-  
+
   // Actions
   refreshReports: () => Promise<void>;
   fetchReport: (id: number) => Promise<Report | null>;
@@ -34,24 +39,20 @@ interface UseReportsReturn {
   removeReport: (id: number) => Promise<boolean>;
   selectReport: (report: Report | null) => void;
   clearError: () => void;
-  
+
   // Utilities
   isOwner: (report: Report, userId: string) => boolean;
 }
 
 export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
-  const {
-    autoFetch = true,
-    filters,
-    queryOptions,
-  } = options;
+  const { autoFetch = true, filters, queryOptions } = options;
 
   // State
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  
+
   // Refs for cleanup
   const isMountedRef = useRef(true);
   const subscriptionRef = useRef<(() => void) | null>(null);
@@ -69,7 +70,7 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
   // Refresh reports function
   const refreshReports = useCallback(async () => {
     if (!isMountedRef.current) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -80,7 +81,7 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
       };
 
       const result = await fetchReports(queryOptionsWithFilters);
-      
+
       if (!isMountedRef.current) return;
 
       if (result.success && result.data) {
@@ -100,94 +101,104 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
   }, [filters, queryOptions]);
 
   // Fetch single report
-  const fetchReport = useCallback(async (id: number): Promise<Report | null> => {
-    try {
-      const result = await fetchReportById(id);
-      if (result.success && result.data) {
-        return result.data;
-      } else {
-        setError(result.error?.message || 'Failed to fetch report');
+  const fetchReport = useCallback(
+    async (id: number): Promise<Report | null> => {
+      try {
+        const result = await fetchReportById(id);
+        if (result.success && result.data) {
+          return result.data;
+        } else {
+          setError(result.error?.message || 'Failed to fetch report');
+          return null;
+        }
+      } catch (err) {
+        console.error('Error fetching report:', err);
+        setError('An unexpected error occurred');
         return null;
       }
-    } catch (err) {
-      console.error('Error fetching report:', err);
-      setError('An unexpected error occurred');
-      return null;
-    }
-  }, []);
+    },
+    []
+  );
 
   // Add new report
-  const addReport = useCallback(async (reportData: CreateReportData, userId: string): Promise<boolean> => {
-    try {
-      const result = await createReport(reportData, userId);
-      if (result.success && result.data) {
-        // Add to local state
-        setReports(prev => [result.data!, ...prev]);
-        return true;
-      } else {
-        setError(result.error?.message || 'Failed to create report');
+  const addReport = useCallback(
+    async (reportData: CreateReportData, userId: string): Promise<boolean> => {
+      try {
+        const result = await createReport(reportData, userId);
+        if (result.success && result.data) {
+          // Add to local state
+          setReports(prev => [result.data!, ...prev]);
+          return true;
+        } else {
+          setError(result.error?.message || 'Failed to create report');
+          return false;
+        }
+      } catch (err) {
+        console.error('Error creating report:', err);
+        setError('An unexpected error occurred');
         return false;
       }
-    } catch (err) {
-      console.error('Error creating report:', err);
-      setError('An unexpected error occurred');
-      return false;
-    }
-  }, []);
+    },
+    []
+  );
 
   // Update report
-  const updateReportData = useCallback(async (id: number, data: UpdateReportData): Promise<boolean> => {
-    try {
-      const result = await updateReport(id, data);
-      if (result.success && result.data) {
-        // Update local state
-        setReports(prev => 
-          prev.map(report => 
-            report.reportid === id ? result.data! : report
-          )
-        );
-        
-        // Update selected report if it's the one being updated
-        if (selectedReport?.reportid === id) {
-          setSelectedReport(result.data);
+  const updateReportData = useCallback(
+    async (id: number, data: UpdateReportData): Promise<boolean> => {
+      try {
+        const result = await updateReport(id, data);
+        if (result.success && result.data) {
+          // Update local state
+          setReports(prev =>
+            prev.map(report => (report.reportid === id ? result.data! : report))
+          );
+
+          // Update selected report if it's the one being updated
+          if (selectedReport?.reportid === id) {
+            setSelectedReport(result.data);
+          }
+
+          return true;
+        } else {
+          setError(result.error?.message || 'Failed to update report');
+          return false;
         }
-        
-        return true;
-      } else {
-        setError(result.error?.message || 'Failed to update report');
+      } catch (err) {
+        console.error('Error updating report:', err);
+        setError('An unexpected error occurred');
         return false;
       }
-    } catch (err) {
-      console.error('Error updating report:', err);
-      setError('An unexpected error occurred');
-      return false;
-    }
-  }, [selectedReport]);
+    },
+    [selectedReport]
+  );
 
   // Delete report
-  const removeReport = useCallback(async (id: number): Promise<boolean> => {
-    try {
-      const result = await deleteReport(id);
-      if (result.success) {
-        // Remove from local state
-        setReports(prev => prev.filter(report => report.reportid !== id));
-        
-        // Clear selected report if it's the one being deleted
-        if (selectedReport?.reportid === id) {
-          setSelectedReport(null);
+  const removeReport = useCallback(
+    async (id: number): Promise<boolean> => {
+      try {
+        const result = await deleteReport(id);
+        if (result.success) {
+          // Remove from local state
+          setReports(prev => prev.filter(report => report.reportid !== id));
+
+          // Clear selected report if it's the one being deleted
+          if (selectedReport?.reportid === id) {
+            setSelectedReport(null);
+          }
+
+          return true;
+        } else {
+          setError(result.error?.message || 'Failed to delete report');
+          return false;
         }
-        
-        return true;
-      } else {
-        setError(result.error?.message || 'Failed to delete report');
+      } catch (err) {
+        console.error('Error deleting report:', err);
+        setError('An unexpected error occurred');
         return false;
       }
-    } catch (err) {
-      console.error('Error deleting report:', err);
-      setError('An unexpected error occurred');
-      return false;
-    }
-  }, [selectedReport]);
+    },
+    [selectedReport]
+  );
 
   // Select report
   const selectReport = useCallback((report: Report | null) => {
@@ -219,14 +230,14 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
           // Refresh reports when changes occur
           refreshReports();
         },
-        (err) => {
+        err => {
           console.error('Subscription error:', err);
           setError('Connection error - data may not be up to date');
         }
       );
-      
+
       subscriptionRef.current = cleanup;
-      
+
       return cleanup;
     }
   }, [autoFetch, refreshReports]);
@@ -237,7 +248,7 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
     loading,
     error,
     selectedReport,
-    
+
     // Actions
     refreshReports,
     fetchReport,
@@ -246,7 +257,7 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
     removeReport,
     selectReport,
     clearError,
-    
+
     // Utilities
     isOwner,
   };
@@ -289,6 +300,6 @@ export function useReport(reportId: number | null) {
     report,
     loading,
     error,
-    refetch: () => reportId ? fetchReport(reportId) : Promise.resolve(),
+    refetch: () => (reportId ? fetchReport(reportId) : Promise.resolve()),
   };
 }

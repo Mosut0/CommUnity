@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Dimensions, ScrollView, Image, Alert, Linking, Share } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Dimensions,
+  ScrollView,
+  Image,
+  Alert,
+  Linking,
+  Share,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Report } from '@/types/report';
-import { getReportTitle, getCategoryIcon, getIconSize } from '@/utils/reportUtils';
+import {
+  getReportTitle,
+  getCategoryIcon,
+  getIconSize,
+} from '@/utils/reportUtils';
 import { MARKER_COLORS } from '@/constants/Markers';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { parseLocation } from '@/utils/reportUtils';
@@ -14,7 +30,8 @@ type Props = {
 
 export default function ReportCard({ report, onClose }: Props) {
   const scheme = useColorScheme() ?? 'light';
-  const accentColor = (MARKER_COLORS as any)[report.category] || MARKER_COLORS.default;
+  const accentColor =
+    (MARKER_COLORS as any)[report.category] || MARKER_COLORS.default;
   const [imageError, setImageError] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -66,8 +83,13 @@ export default function ReportCard({ report, onClose }: Props) {
   };
 
   const handleShare = async () => {
-    const title = report.eventtype || report.itemtype || report.hazardtype || 'Community Report';
-    const category = report.category?.charAt(0).toUpperCase() + report.category?.slice(1);
+    const title =
+      report.eventtype ||
+      report.itemtype ||
+      report.hazardtype ||
+      'Community Report';
+    const category =
+      report.category?.charAt(0).toUpperCase() + report.category?.slice(1);
     const postedDate = formatDate(report.createdat);
 
     let shareMessage = `${category}: ${title}\n\n`;
@@ -101,32 +123,68 @@ export default function ReportCard({ report, onClose }: Props) {
   };
 
   return (
-    <View style={[styles.container, scheme === 'dark' ? styles.containerDark : styles.containerLight]}>
+    <View
+      style={[
+        styles.container,
+        scheme === 'dark' ? styles.containerDark : styles.containerLight,
+      ]}
+    >
       <View style={styles.titleRow}>
         <Ionicons
           name={getCategoryIcon(report.category) as any}
           size={getIconSize('detail')}
           color={accentColor}
         />
-        <Text numberOfLines={1} style={[styles.title, scheme === 'dark' ? styles.textDark : styles.textLight]}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.title,
+            scheme === 'dark' ? styles.textDark : styles.textLight,
+          ]}
+        >
           {getReportTitle(report)}
         </Text>
-        <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-          <Ionicons name='close' size={20} color={scheme === 'dark' ? '#fff' : '#000'} />
+        <TouchableOpacity
+          onPress={onClose}
+          hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+        >
+          <Ionicons
+            name='close'
+            size={20}
+            color={scheme === 'dark' ? '#fff' : '#000'}
+          />
         </TouchableOpacity>
       </View>
 
       <View style={[styles.accentBar, { backgroundColor: accentColor }]} />
 
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.categoryBadge}>
-          <Text style={[styles.categoryText, scheme === 'dark' ? styles.textSecondaryDark : styles.textSecondaryLight]}>
-            {report.category?.charAt(0).toUpperCase() + report.category?.slice(1)}
+          <Text
+            style={[
+              styles.categoryText,
+              scheme === 'dark'
+                ? styles.textSecondaryDark
+                : styles.textSecondaryLight,
+            ]}
+          >
+            {report.category?.charAt(0).toUpperCase() +
+              report.category?.slice(1)}
           </Text>
         </View>
 
         {report.description && (
-          <Text style={[styles.description, scheme === 'dark' ? styles.textSecondaryDark : styles.textSecondaryLight]}>
+          <Text
+            style={[
+              styles.description,
+              scheme === 'dark'
+                ? styles.textSecondaryDark
+                : styles.textSecondaryLight,
+            ]}
+          >
             {report.description}
           </Text>
         )}
@@ -147,7 +205,14 @@ export default function ReportCard({ report, onClose }: Props) {
                   size={32}
                   color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
                 />
-                <Text style={[styles.imageErrorText, scheme === 'dark' ? styles.textSecondaryDark : styles.textSecondaryLight]}>
+                <Text
+                  style={[
+                    styles.imageErrorText,
+                    scheme === 'dark'
+                      ? styles.textSecondaryDark
+                      : styles.textSecondaryLight,
+                  ]}
+                >
                   Image unavailable
                 </Text>
               </View>
@@ -157,29 +222,69 @@ export default function ReportCard({ report, onClose }: Props) {
 
         {report.category === 'event' && report.time && (
           <View style={styles.detailRow}>
-            <Ionicons name='calendar-outline' size={16} color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'} />
-            <Text style={[styles.detailText, scheme === 'dark' ? styles.textSecondaryDark : styles.textSecondaryLight]}>
+            <Ionicons
+              name='calendar-outline'
+              size={16}
+              color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+            />
+            <Text
+              style={[
+                styles.detailText,
+                scheme === 'dark'
+                  ? styles.textSecondaryDark
+                  : styles.textSecondaryLight,
+              ]}
+            >
               Event: {formatDate(report.time)}
             </Text>
           </View>
         )}
 
         <View style={styles.detailRow}>
-          <Ionicons name='time-outline' size={16} color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'} />
-          <Text style={[styles.detailText, scheme === 'dark' ? styles.textSecondaryDark : styles.textSecondaryLight]}>
+          <Ionicons
+            name='time-outline'
+            size={16}
+            color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          />
+          <Text
+            style={[
+              styles.detailText,
+              scheme === 'dark'
+                ? styles.textSecondaryDark
+                : styles.textSecondaryLight,
+            ]}
+          >
             Posted: {formatDate(report.createdat)}
           </Text>
         </View>
 
         <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionButton} onPress={openDirections} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={openDirections}
+            activeOpacity={0.85}
+          >
             <Ionicons name='navigate-outline' size={18} color={'#fff'} />
             <Text style={styles.actionButtonText}>Directions</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={handleShare} activeOpacity={0.85}>
-            <Ionicons name='share-outline' size={18} color={scheme === 'dark' ? '#fff' : '#000'} />
-            <Text style={[styles.actionButtonText, styles.secondaryButtonText, scheme === 'dark' ? styles.textDark : styles.textLight]}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+            onPress={handleShare}
+            activeOpacity={0.85}
+          >
+            <Ionicons
+              name='share-outline'
+              size={18}
+              color={scheme === 'dark' ? '#fff' : '#000'}
+            />
+            <Text
+              style={[
+                styles.actionButtonText,
+                styles.secondaryButtonText,
+                scheme === 'dark' ? styles.textDark : styles.textLight,
+              ]}
+            >
               Share
             </Text>
           </TouchableOpacity>
@@ -199,7 +304,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     ...Platform.select({
-      ios: { shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
+      },
       android: { elevation: 6 },
     }),
   },
@@ -305,5 +415,3 @@ const styles = StyleSheet.create({
   textSecondaryLight: { color: '#374151' },
   textSecondaryDark: { color: '#D1D5DB' },
 });
-
-

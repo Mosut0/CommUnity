@@ -2,7 +2,10 @@
 // This file is kept for backward compatibility but delegates to the new service
 
 import { createReport } from '@/services/reportService';
-import { CreateLostItemReportData, CreateFoundItemReportData } from '@/types/report';
+import {
+  CreateLostItemReportData,
+  CreateFoundItemReportData,
+} from '@/types/report';
 
 interface LostItemData {
   itemName: string;

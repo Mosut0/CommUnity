@@ -58,14 +58,20 @@ export function coordinatesToLocationString(
  * Get marker color for a report category
  */
 export function getMarkerColor(category: ReportCategory): string {
-  return MARKER_COLORS[category] || MARKER_COLORS.default;
+  if (category in MARKER_COLORS) {
+    return MARKER_COLORS[category as keyof typeof MARKER_COLORS];
+  }
+  return MARKER_COLORS.default;
 }
 
 /**
  * Get icon name for a report category
  */
 export function getCategoryIcon(category: ReportCategory): string {
-  return CATEGORY_ICONS[category] || CATEGORY_ICONS.default;
+  if (category in CATEGORY_ICONS) {
+    return CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS];
+  }
+  return CATEGORY_ICONS.default;
 }
 
 /**
@@ -106,17 +112,20 @@ export function getReportTitle(report: Report): string {
  */
 export function getReportDescription(report: Report): string {
   let description = report.description;
-  
+
   // Add category-specific information
   if (report.category === 'event' && report.time) {
     const eventTime = new Date(report.time).toLocaleString();
     description += `\n\nEvent Time: ${eventTime}`;
   }
-  
-  if ((report.category === 'lost' || report.category === 'found') && report.contactinfo) {
+
+  if (
+    (report.category === 'lost' || report.category === 'found') &&
+    report.contactinfo
+  ) {
     description += `\n\nContact: ${report.contactinfo}`;
   }
-  
+
   return description;
 }
 
@@ -167,12 +176,19 @@ function deg2rad(deg: number): number {
 /**
  * Format distance for display
  */
-export function formatDistance(distanceKm: number, unit: 'km' | 'miles' = 'km'): string {
+export function formatDistance(
+  distanceKm: number,
+  unit: 'km' | 'miles' = 'km'
+): string {
   if (unit === 'miles') {
     const miles = distanceKm * 0.621371;
-    return miles < 1 ? `${Math.round(miles * 5280)} ft` : `${miles.toFixed(1)} mi`;
+    return miles < 1
+      ? `${Math.round(miles * 5280)} ft`
+      : `${miles.toFixed(1)} mi`;
   }
-  return distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`;
+  return distanceKm < 1
+    ? `${Math.round(distanceKm * 1000)} m`
+    : `${distanceKm.toFixed(1)} km`;
 }
 
 /**
@@ -186,14 +202,14 @@ export function filterReportsByDistance(
   return reports.filter(report => {
     const coords = parseLocation(report.location);
     if (!coords) return false;
-    
+
     const distance = getDistanceKm(
       userLocation.latitude,
       userLocation.longitude,
       coords.latitude,
       coords.longitude
     );
-    
+
     return distance <= maxDistanceKm;
   });
 }
@@ -208,23 +224,23 @@ export function sortReportsByDistance(
   return reports.sort((a, b) => {
     const coordsA = parseLocation(a.location);
     const coordsB = parseLocation(b.location);
-    
+
     if (!coordsA || !coordsB) return 0;
-    
+
     const distanceA = getDistanceKm(
       userLocation.latitude,
       userLocation.longitude,
       coordsA.latitude,
       coordsA.longitude
     );
-    
+
     const distanceB = getDistanceKm(
       userLocation.latitude,
       userLocation.longitude,
       coordsB.latitude,
       coordsB.longitude
     );
-    
+
     return distanceA - distanceB;
   });
 }
@@ -249,18 +265,23 @@ export function clusterReports(
     coords: { latitude: number; longitude: number }
   ) => {
     for (const cluster of clusters) {
-      const distance = getDistanceKm(
-        cluster.center.latitude,
-        cluster.center.longitude,
-        coords.latitude,
-        coords.longitude
-      ) * 1000; // Convert to meters
-      
+      const distance =
+        getDistanceKm(
+          cluster.center.latitude,
+          cluster.center.longitude,
+          coords.latitude,
+          coords.longitude
+        ) * 1000; // Convert to meters
+
       if (distance <= thresholdMeters) {
         cluster.members.push(report);
         // Update cluster center (simple average)
-        const latSum = cluster.center.latitude * (cluster.members.length - 1) + coords.latitude;
-        const lngSum = cluster.center.longitude * (cluster.members.length - 1) + coords.longitude;
+        const latSum =
+          cluster.center.latitude * (cluster.members.length - 1) +
+          coords.latitude;
+        const lngSum =
+          cluster.center.longitude * (cluster.members.length - 1) +
+          coords.longitude;
         cluster.center.latitude = latSum / cluster.members.length;
         cluster.center.longitude = lngSum / cluster.members.length;
         return;
@@ -288,13 +309,16 @@ export function clusterReports(
 export function getDisplayCoords(
   report: Report,
   coords: { latitude: number; longitude: number },
-  clusters: Array<{ center: { latitude: number; longitude: number }; members: Report[] }>
+  clusters: Array<{
+    center: { latitude: number; longitude: number };
+    members: Report[];
+  }>
 ): { latitude: number; longitude: number } {
   // Find the cluster containing this report
   const cluster = clusters.find(cl =>
     cl.members.some(m => m.reportid === report.reportid)
   );
-  
+
   if (!cluster || cluster.members.length <= 1) {
     return coords;
   }

@@ -1,4 +1,10 @@
-import { fetchReports, fetchReportById, createReport, updateReport, deleteReport } from '@/services/reportService';
+import {
+  fetchReports,
+  fetchReportById,
+  createReport,
+  updateReport,
+  deleteReport,
+} from '@/services/reportService';
 import { supabase } from '@/lib/supabase';
 
 // Mock the supabase client
@@ -34,7 +40,9 @@ describe('reportService', () => {
       ];
 
       const mockSelect = jest.fn().mockReturnThis();
-      const mockOrder = jest.fn().mockResolvedValue({ data: mockReports, error: null });
+      const mockOrder = jest
+        .fn()
+        .mockResolvedValue({ data: mockReports, error: null });
 
       (supabase.from as jest.Mock).mockReturnValue({
         select: mockSelect,
@@ -42,14 +50,18 @@ describe('reportService', () => {
       });
 
       // Mock the category-specific query
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: mockSelect,
-        order: mockOrder,
-      }).mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: { eventtype: 'Meeting' }, error: null }),
-      });
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce({
+          select: mockSelect,
+          order: mockOrder,
+        })
+        .mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({ data: { eventtype: 'Meeting' }, error: null }),
+        });
 
       const result = await fetchReports();
 
@@ -60,7 +72,7 @@ describe('reportService', () => {
 
     it('should handle errors when fetching reports', async () => {
       const mockError = new Error('Database error');
-      
+
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         order: jest.fn().mockResolvedValue({ data: null, error: mockError }),
@@ -74,7 +86,7 @@ describe('reportService', () => {
 
     it('should apply filters correctly', async () => {
       const mockEq = jest.fn().mockReturnThis();
-      
+
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         order: jest.fn().mockReturnThis(),
@@ -93,7 +105,9 @@ describe('reportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: new Error('Not found') }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('Not found') }),
       });
 
       const result = await fetchReportById(999);
@@ -116,10 +130,14 @@ describe('reportService', () => {
         .mockReturnValueOnce({
           insert: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({ data: mockReportData, error: null }),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReportData, error: null }),
         })
         .mockReturnValueOnce({
-          insert: jest.fn().mockResolvedValue({ error: new Error('Insert failed') }),
+          insert: jest
+            .fn()
+            .mockResolvedValue({ error: new Error('Insert failed') }),
         })
         .mockReturnValueOnce({
           delete: mockDelete,
@@ -159,7 +177,7 @@ describe('reportService', () => {
 
     it('should handle deletion errors', async () => {
       const mockError = new Error('Delete failed');
-      
+
       (supabase.from as jest.Mock).mockReturnValue({
         delete: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ error: mockError }),
@@ -172,4 +190,3 @@ describe('reportService', () => {
     });
   });
 });
-

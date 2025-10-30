@@ -6,11 +6,9 @@ import React, {
   useRef,
 } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import MapView, { Marker, Callout, Region, MapMarker } from 'react-native-maps';
+import MapView, { Marker, Region, MapMarker } from 'react-native-maps';
 import ReportCard from '@/components/ReportCard';
-import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import { ThemedText } from './ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useReports } from '@/hooks/useReports';
@@ -20,8 +18,6 @@ import {
   getMarkerColor,
   getCategoryIcon,
   getIconSize,
-  getReportTitle,
-  getReportDescription,
   matchesFilter,
   clusterReports,
   getDisplayCoords,
@@ -41,28 +37,26 @@ export default function MapScreen({
   filter = 'all',
   onReportCardChange,
 }: MapScreenProps) {
-  const router = useRouter();
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  
+
   // Refs for marker management
   const markerReadyRef = useRef<Map<number, boolean>>(new Map());
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
   const markerPressedRef = useRef<boolean>(false);
-  const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const colorScheme = useColorScheme() ?? 'light';
   const isMountedRef = useRef(true);
 
   // Use the centralized reports hook
-  const {
-    reports,
-    loading,
-    error,
-    selectReport,
-  } = useReports({
+  const { reports, loading, error, selectReport } = useReports({
     autoFetch: true,
   });
 
@@ -199,50 +193,54 @@ export default function MapScreen({
   }, [location]);
 
   // Handle marker press
-  const handleMarkerPress = useCallback((report: Report) => {
-    // Mark that a marker was pressed
-    markerPressedRef.current = true;
-    
-    // Clear any existing timeout
-    if (markerPressTimeoutRef.current) {
-      clearTimeout(markerPressTimeoutRef.current);
-    }
-    
-    // Reset the markerPressed flag shortly after
-    markerPressTimeoutRef.current = setTimeout(() => {
-      markerPressedRef.current = false;
-      markerPressTimeoutRef.current = null;
-    }, 200);
+  const handleMarkerPress = useCallback(
+    (report: Report) => {
+      // Mark that a marker was pressed
+      markerPressedRef.current = true;
 
-    // Toggle selection
-    const newSelection = selectedReport?.reportid === report.reportid ? null : report;
-    setSelectedReport(newSelection);
-    selectReport(newSelection);
-    onReportCardChange?.(newSelection !== null);
+      // Clear any existing timeout
+      if (markerPressTimeoutRef.current) {
+        clearTimeout(markerPressTimeoutRef.current);
+      }
 
-    // Show/hide callout
-    if (newSelection) {
-      setTimeout(() => {
+      // Reset the markerPressed flag shortly after
+      markerPressTimeoutRef.current = setTimeout(() => {
+        markerPressedRef.current = false;
+        markerPressTimeoutRef.current = null;
+      }, 200);
+
+      // Toggle selection
+      const newSelection =
+        selectedReport?.reportid === report.reportid ? null : report;
+      setSelectedReport(newSelection);
+      selectReport(newSelection);
+      onReportCardChange?.(newSelection !== null);
+
+      // Show/hide callout
+      if (newSelection) {
+        setTimeout(() => {
+          const mr = markerRefs.current[report.reportid];
+          if (mr && mr.showCallout) {
+            try {
+              mr.showCallout();
+            } catch (e) {
+              console.error('Error calling showCallout on marker:', e);
+            }
+          }
+        }, 0);
+      } else {
         const mr = markerRefs.current[report.reportid];
-        if (mr && mr.showCallout) {
+        if (mr && mr.hideCallout) {
           try {
-            mr.showCallout();
+            mr.hideCallout();
           } catch (e) {
-            console.error('Error calling showCallout on marker:', e);
+            console.error('Error calling hideCallout on marker:', e);
           }
         }
-      }, 0);
-    } else {
-      const mr = markerRefs.current[report.reportid];
-      if (mr && mr.hideCallout) {
-        try {
-          mr.hideCallout();
-        } catch (e) {
-          console.error('Error calling hideCallout on marker:', e);
-        }
       }
-    }
-  }, [selectedReport, selectReport]);
+    },
+    [selectedReport, selectReport, onReportCardChange]
+  );
 
   // Handle map press
   const handleMapPress = useCallback(() => {
@@ -256,19 +254,20 @@ export default function MapScreen({
   }, [selectReport, onReportCardChange]);
 
   // Render marker icon
-  const renderMarkerIcon = useCallback((report: Report, isSelected: boolean) => {
-    const iconName = getCategoryIcon(report.category as ReportCategory);
-    const iconSize = getIconSize('marker');
-    const iconColor = isSelected ? '#fff' : getMarkerColor(report.category as ReportCategory);
+  const renderMarkerIcon = useCallback(
+    (report: Report, isSelected: boolean) => {
+      const iconName = getCategoryIcon(report.category as ReportCategory);
+      const iconSize = getIconSize('marker');
+      const iconColor = isSelected
+        ? '#fff'
+        : getMarkerColor(report.category as ReportCategory);
 
-    return (
-      <Ionicons
-        name={iconName as any}
-        size={iconSize}
-        color={iconColor}
-      />
-    );
-  }, []);
+      return (
+        <Ionicons name={iconName as any} size={iconSize} color={iconColor} />
+      );
+    },
+    []
+  );
 
   // Loading state
   if (errorMsg) {
@@ -306,7 +305,9 @@ export default function MapScreen({
           if (!coords) return null;
 
           const isSelected = selectedReport?.reportid === report.reportid;
-          const tracksViewChanges = !markerReadyRef.current.get(report.reportid);
+          const tracksViewChanges = !markerReadyRef.current.get(
+            report.reportid
+          );
           const displayCoords = getDisplayCoords(report, coords, clusters);
 
           return (
@@ -325,8 +326,12 @@ export default function MapScreen({
                   styles.iconWrapper,
                   isSelected
                     ? {
-                        backgroundColor: getMarkerColor(report.category as ReportCategory),
-                        shadowColor: getMarkerColor(report.category as ReportCategory),
+                        backgroundColor: getMarkerColor(
+                          report.category as ReportCategory
+                        ),
+                        shadowColor: getMarkerColor(
+                          report.category as ReportCategory
+                        ),
                         elevation: 4,
                       }
                     : colorScheme === 'dark'
@@ -336,7 +341,7 @@ export default function MapScreen({
               >
                 {renderMarkerIcon(report, isSelected)}
               </View>
-              
+
               {/* Mark marker as ready to stop tracking view changes */}
               {tracksViewChanges && (
                 <View
@@ -346,7 +351,7 @@ export default function MapScreen({
                   style={{ width: 0, height: 0 }}
                 />
               )}
-              
+
               {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );

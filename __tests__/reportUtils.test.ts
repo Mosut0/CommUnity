@@ -17,12 +17,12 @@ describe('reportUtils', () => {
   describe('parseLocation', () => {
     it('should parse valid location string', () => {
       const result = parseLocation('(40.7128,-74.0060)');
-      expect(result).toEqual({ latitude: 40.7128, longitude: -74.0060 });
+      expect(result).toEqual({ latitude: 40.7128, longitude: -74.006 });
     });
 
     it('should handle swapped coordinates', () => {
       const result = parseLocation('(-74.0060,40.7128)');
-      expect(result).toEqual({ latitude: -74.0060, longitude: 40.7128 });
+      expect(result).toEqual({ latitude: -74.006, longitude: 40.7128 });
     });
 
     it('should return null for invalid format', () => {
@@ -43,7 +43,7 @@ describe('reportUtils', () => {
 
   describe('coordinatesToLocationString', () => {
     it('should convert coordinates to location string', () => {
-      const result = coordinatesToLocationString(40.7128, -74.0060);
+      const result = coordinatesToLocationString(40.7128, -74.006);
       expect(result).toBe('(40.7128,-74.006)');
     });
   });
@@ -88,7 +88,7 @@ describe('reportUtils', () => {
         category: 'event',
         eventtype: 'Community Meeting',
       } as Report;
-      
+
       const title = getReportTitle(report);
       expect(title).toBe('Event: Community Meeting');
     });
@@ -98,7 +98,7 @@ describe('reportUtils', () => {
         category: 'safety',
         hazardtype: 'Pothole',
       } as Report;
-      
+
       const title = getReportTitle(report);
       expect(title).toBe('Hazard: Pothole');
     });
@@ -108,7 +108,7 @@ describe('reportUtils', () => {
         category: 'lost',
         itemtype: 'Wallet',
       } as Report;
-      
+
       const title = getReportTitle(report);
       expect(title).toBe('Lost: Wallet');
     });
@@ -122,10 +122,10 @@ describe('reportUtils', () => {
         location: '(40.7128,-74.0060)',
         createdat: '2024-01-01',
       } as Report;
-      
+
       // Override category to test unknown case
       (report as any).category = 'unknown';
-      
+
       const title = getReportTitle(report);
       expect(title).toBe('Report');
     });
@@ -138,7 +138,7 @@ describe('reportUtils', () => {
         description: 'Test event',
         time: '2024-01-01T14:00:00Z',
       } as Report;
-      
+
       const desc = getReportDescription(report);
       expect(desc).toContain('Test event');
       expect(desc).toContain('Event Time:');
@@ -150,7 +150,7 @@ describe('reportUtils', () => {
         description: 'Lost wallet',
         contactinfo: 'test@example.com',
       } as Report;
-      
+
       const desc = getReportDescription(report);
       expect(desc).toContain('Lost wallet');
       expect(desc).toContain('Contact: test@example.com');
@@ -161,7 +161,7 @@ describe('reportUtils', () => {
         category: 'safety',
         description: 'Pothole on road',
       } as Report;
-      
+
       const desc = getReportDescription(report);
       expect(desc).toBe('Pothole on road');
     });
@@ -192,13 +192,13 @@ describe('reportUtils', () => {
   describe('getDistanceKm', () => {
     it('should calculate distance between two points', () => {
       // Distance between New York and Los Angeles (approx 3944 km)
-      const distance = getDistanceKm(40.7128, -74.0060, 34.0522, -118.2437);
+      const distance = getDistanceKm(40.7128, -74.006, 34.0522, -118.2437);
       expect(distance).toBeGreaterThan(3900);
       expect(distance).toBeLessThan(4000);
     });
 
     it('should return 0 for same coordinates', () => {
-      const distance = getDistanceKm(40.7128, -74.0060, 40.7128, -74.0060);
+      const distance = getDistanceKm(40.7128, -74.006, 40.7128, -74.006);
       expect(distance).toBe(0);
     });
   });
@@ -232,7 +232,7 @@ describe('reportUtils', () => {
         } as Report,
       ];
 
-      const userLocation = { latitude: 40.7128, longitude: -74.0060 };
+      const userLocation = { latitude: 40.7128, longitude: -74.006 };
       const filtered = filterReportsByDistance(reports, userLocation, 100);
 
       expect(filtered).toHaveLength(1);
@@ -281,4 +281,3 @@ describe('reportUtils', () => {
     });
   });
 });
-

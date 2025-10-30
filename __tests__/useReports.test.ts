@@ -160,7 +160,9 @@ describe('useReports', () => {
 
     let success = false;
     await act(async () => {
-      success = await result.current.updateReportData(1, { description: 'Updated description' });
+      success = await result.current.updateReportData(1, {
+        description: 'Updated description',
+      });
     });
 
     expect(success).toBe(true);
@@ -319,4 +321,3 @@ describe('useReport', () => {
     expect(reportService.fetchReportById).toHaveBeenCalledWith(1);
   });
 });
-

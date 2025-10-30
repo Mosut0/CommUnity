@@ -22,11 +22,15 @@ interface ReportActionsProps {
   onClose?: () => void;
 }
 
-export default function ReportActions({ report, userId, onClose }: ReportActionsProps) {
+export default function ReportActions({
+  report,
+  userId,
+  onClose,
+}: ReportActionsProps) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editDescription, setEditDescription] = useState(report.description);
   const colorScheme = useColorScheme() ?? 'light';
-  
+
   const { updateReportData, removeReport, isOwner } = useReports();
 
   // Check if current user owns this report
@@ -43,7 +47,7 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
     };
 
     const success = await updateReportData(report.reportid, updateData);
-    
+
     if (success) {
       Alert.alert('Success', 'Report updated successfully');
       setShowEditModal(false);
@@ -64,7 +68,7 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
           style: 'destructive',
           onPress: async () => {
             const success = await removeReport(report.reportid);
-            
+
             if (success) {
               Alert.alert('Success', 'Report deleted successfully');
               onClose?.();
@@ -87,7 +91,7 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
         style={[styles.button, styles.editButton]}
         onPress={() => setShowEditModal(true)}
       >
-        <Ionicons name="pencil" size={20} color="#fff" />
+        <Ionicons name='pencil' size={20} color='#fff' />
         <Text style={styles.buttonText}>Edit</Text>
       </TouchableOpacity>
 
@@ -95,7 +99,7 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
         style={[styles.button, styles.deleteButton]}
         onPress={handleDelete}
       >
-        <Ionicons name="trash" size={20} color="#fff" />
+        <Ionicons name='trash' size={20} color='#fff' />
         <Text style={styles.buttonText}>Delete</Text>
       </TouchableOpacity>
 
@@ -103,34 +107,42 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
       <Modal
         visible={showEditModal}
         transparent
-        animationType="slide"
+        animationType='slide'
         onRequestClose={() => setShowEditModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[
-            styles.modalContent,
-            colorScheme === 'dark' ? styles.modalContentDark : styles.modalContentLight
-          ]}>
-            <Text style={[
-              styles.modalTitle,
-              colorScheme === 'dark' ? styles.textDark : styles.textLight
-            ]}>
+          <View
+            style={[
+              styles.modalContent,
+              colorScheme === 'dark'
+                ? styles.modalContentDark
+                : styles.modalContentLight,
+            ]}
+          >
+            <Text
+              style={[
+                styles.modalTitle,
+                colorScheme === 'dark' ? styles.textDark : styles.textLight,
+              ]}
+            >
               Edit Report
             </Text>
-            
+
             <TextInput
               style={[
                 styles.textInput,
-                colorScheme === 'dark' ? styles.textInputDark : styles.textInputLight
+                colorScheme === 'dark'
+                  ? styles.textInputDark
+                  : styles.textInputLight,
               ]}
               value={editDescription}
               onChangeText={setEditDescription}
-              placeholder="Enter description..."
+              placeholder='Enter description...'
               multiline
               numberOfLines={4}
-              textAlignVertical="top"
+              textAlignVertical='top'
             />
-            
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -138,7 +150,7 @@ export default function ReportActions({ report, userId, onClose }: ReportActions
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={handleUpdate}
