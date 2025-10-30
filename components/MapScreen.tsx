@@ -7,6 +7,8 @@ import React, {
 } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import MapView, { Marker, Callout, Region, MapMarker } from 'react-native-maps';
+import ReportCard from '@/components/ReportCard';
+import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { ThemedText } from './ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -30,13 +32,16 @@ interface MapScreenProps {
   distanceRadius: number;
   selectedReportId?: number;
   filter?: 'all' | 'hazard' | 'event' | 'lost' | 'found';
+  onReportCardChange?: (isOpen: boolean) => void;
 }
 
 export default function MapScreen({
   distanceRadius,
   selectedReportId,
   filter = 'all',
+  onReportCardChange,
 }: MapScreenProps) {
+  const router = useRouter();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -71,7 +76,8 @@ export default function MapScreen({
   // When the filter changes, clear any selected report
   useEffect(() => {
     setSelectedReport(null);
-  }, [filter]);
+    onReportCardChange?.(false);
+  }, [filter, onReportCardChange]);
 
   // Fetch user location
   useEffect(() => {
@@ -212,6 +218,7 @@ export default function MapScreen({
     const newSelection = selectedReport?.reportid === report.reportid ? null : report;
     setSelectedReport(newSelection);
     selectReport(newSelection);
+    onReportCardChange?.(newSelection !== null);
 
     // Show/hide callout
     if (newSelection) {
@@ -245,7 +252,8 @@ export default function MapScreen({
     // Clear selection
     setSelectedReport(null);
     selectReport(null);
-  }, [selectReport]);
+    onReportCardChange?.(false);
+  }, [selectReport, onReportCardChange]);
 
   // Render marker icon
   const renderMarkerIcon = useCallback((report: Report, isSelected: boolean) => {
@@ -339,25 +347,22 @@ export default function MapScreen({
                 />
               )}
               
-              <Callout tooltip>
-                <View
-                  style={[
-                    styles.callout,
-                    colorScheme === 'dark'
-                      ? styles.calloutDark
-                      : styles.calloutLight,
-                  ]}
-                >
-                  <ThemedText type='defaultSemiBold'>
-                    {getReportTitle(report)}
-                  </ThemedText>
-                  <ThemedText>{getReportDescription(report)}</ThemedText>
-                </View>
-              </Callout>
+              {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );
         })}
       </MapView>
+
+      {/* Bottom sheet for selected report */}
+      {selectedReport && (
+        <ReportCard
+          report={selectedReport}
+          onClose={() => {
+            setSelectedReport(null);
+            onReportCardChange?.(false);
+          }}
+        />
+      )}
 
       {loading && (
         <View style={styles.cornerOverlay}>
