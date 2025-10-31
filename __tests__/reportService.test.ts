@@ -113,7 +113,9 @@ describe('reportService', () => {
         .mockReturnValueOnce({
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({ data: mockReport, error: null }),
+          single: jest
+            .fn()
+            .mockResolvedValue({ data: mockReport, error: null }),
         })
         .mockReturnValueOnce({
           select: jest.fn().mockReturnThis(),
@@ -165,9 +167,10 @@ describe('reportService', () => {
         .mockReturnValueOnce({
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
-          maybeSingle: jest
-            .fn()
-            .mockResolvedValue({ data: { hazardtype: 'Pothole' }, error: null }),
+          maybeSingle: jest.fn().mockResolvedValue({
+            data: { hazardtype: 'Pothole' },
+            error: null,
+          }),
         });
 
       const result = await fetchReportById(2);
@@ -261,9 +264,10 @@ describe('reportService', () => {
         .mockReturnValueOnce({
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
-          maybeSingle: jest
-            .fn()
-            .mockResolvedValue({ data: { hazardtype: 'Pothole' }, error: null }),
+          maybeSingle: jest.fn().mockResolvedValue({
+            data: { hazardtype: 'Pothole' },
+            error: null,
+          }),
         });
 
       const createData = {

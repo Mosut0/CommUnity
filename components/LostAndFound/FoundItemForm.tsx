@@ -161,12 +161,12 @@ export default function FoundItemForm({
               <>
                 {/* Item Name Input */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Item Name*</ThemedText>
+                  <ThemedText style={styles.label}>Item*</ThemedText>
                   <TextInput
                     style={styles.input}
                     value={itemName}
                     onChangeText={setItemName}
-                    placeholder='What did you find?'
+                    placeholder='e.g., Keys, Wallet, Phone, Backpack'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>

@@ -32,6 +32,7 @@ interface DetailedReport {
   eventtime?: string;
   itemtype?: string;
   hazardtype?: string;
+  contactinfo?: string;
   userid?: string;
   imageurl?: string;
 }
@@ -116,8 +117,8 @@ export default function ReportDetails() {
           userid,
           imageurl,
           eventtype:events(eventtype, time),
-          lostitemtype:lostitems(itemtype),
-          founditemtype:founditems(itemtype),
+          lostitemtype:lostitems(itemtype, contactinfo),
+          founditemtype:founditems(itemtype, contactinfo),
           hazardtype:hazards(hazardtype)
         `
         )
@@ -144,6 +145,10 @@ export default function ReportDetails() {
         itemtype:
           data.lostitemtype?.[0]?.itemtype ||
           data.founditemtype?.[0]?.itemtype ||
+          '',
+        contactinfo:
+          data.lostitemtype?.[0]?.contactinfo ||
+          data.founditemtype?.[0]?.contactinfo ||
           '',
         hazardtype: data.hazardtype?.[0]?.hazardtype || '',
       };
@@ -500,6 +505,18 @@ export default function ReportDetails() {
           <Text style={styles.cardTitle}>Details</Text>
 
           {/* Event-specific details */}
+          {report.category === 'event' && report.eventtype && (
+            <View style={styles.detailRow}>
+              <Ionicons
+                name='pricetag-outline'
+                size={18}
+                color={uiTheme.textSecondary}
+              />
+              <Text style={styles.detailLabel}>Event Name:</Text>
+              <Text style={styles.detailValue}>{report.eventtype}</Text>
+            </View>
+          )}
+
           {report.category === 'event' && report.eventtime && (
             <View style={styles.detailRow}>
               <Ionicons
@@ -513,6 +530,46 @@ export default function ReportDetails() {
               </Text>
             </View>
           )}
+
+          {/* Safety/Hazard-specific details */}
+          {report.category === 'safety' && report.hazardtype && (
+            <View style={styles.detailRow}>
+              <Ionicons
+                name='warning-outline'
+                size={18}
+                color={uiTheme.textSecondary}
+              />
+              <Text style={styles.detailLabel}>Hazard:</Text>
+              <Text style={styles.detailValue}>{report.hazardtype}</Text>
+            </View>
+          )}
+
+          {/* Lost/Found items-specific details */}
+          {(report.category === 'lost' || report.category === 'found') &&
+            report.itemtype && (
+              <View style={styles.detailRow}>
+                <Ionicons
+                  name='cube-outline'
+                  size={18}
+                  color={uiTheme.textSecondary}
+                />
+                <Text style={styles.detailLabel}>Item:</Text>
+                <Text style={styles.detailValue}>{report.itemtype}</Text>
+              </View>
+            )}
+
+          {(report.category === 'lost' || report.category === 'found') &&
+            report.contactinfo && (
+              <View style={styles.detailRow}>
+                <Ionicons
+                  name='mail-outline'
+                  size={18}
+                  color={uiTheme.textSecondary}
+                />
+                <Text style={styles.detailLabel}>Contact:</Text>
+                <Text style={styles.detailValue}>{report.contactinfo}</Text>
+              </View>
+            )}
 
           {/* Location details */}
           <View style={styles.detailRow}>

@@ -158,14 +158,14 @@ export default function FillHazardForm({
               </View>
             ) : (
               <>
-                {/* Hazard Type Input */}
+                {/* Hazard Input */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Hazard Type*</ThemedText>
+                  <ThemedText style={styles.label}>Hazard*</ThemedText>
                   <TextInput
                     style={styles.input}
                     value={hazardType}
                     onChangeText={setHazardType}
-                    placeholder='What is the nearby hazard?'
+                    placeholder='e.g., Pothole, Broken Glass, Fallen Tree'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>

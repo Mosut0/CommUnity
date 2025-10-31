@@ -220,6 +220,27 @@ export default function ReportCard({ report, onClose }: Props) {
           </View>
         )}
 
+        {/* Event-specific details */}
+        {report.category === 'event' && report.eventtype && (
+          <View style={styles.detailRow}>
+            <Ionicons
+              name='pricetag-outline'
+              size={16}
+              color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+            />
+            <Text
+              style={[
+                styles.detailText,
+                scheme === 'dark'
+                  ? styles.textSecondaryDark
+                  : styles.textSecondaryLight,
+              ]}
+            >
+              Event: {report.eventtype}
+            </Text>
+          </View>
+        )}
+
         {report.category === 'event' && report.time && (
           <View style={styles.detailRow}>
             <Ionicons
@@ -235,10 +256,74 @@ export default function ReportCard({ report, onClose }: Props) {
                   : styles.textSecondaryLight,
               ]}
             >
-              Event: {formatDate(report.time)}
+              Event Time: {formatDate(report.time)}
             </Text>
           </View>
         )}
+
+        {/* Safety/Hazard-specific details */}
+        {report.category === 'safety' && report.hazardtype && (
+          <View style={styles.detailRow}>
+            <Ionicons
+              name='warning-outline'
+              size={16}
+              color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+            />
+            <Text
+              style={[
+                styles.detailText,
+                scheme === 'dark'
+                  ? styles.textSecondaryDark
+                  : styles.textSecondaryLight,
+              ]}
+            >
+              Hazard: {report.hazardtype}
+            </Text>
+          </View>
+        )}
+
+        {/* Lost/Found items-specific details */}
+        {(report.category === 'lost' || report.category === 'found') &&
+          report.itemtype && (
+            <View style={styles.detailRow}>
+              <Ionicons
+                name='cube-outline'
+                size={16}
+                color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+              />
+              <Text
+                style={[
+                  styles.detailText,
+                  scheme === 'dark'
+                    ? styles.textSecondaryDark
+                    : styles.textSecondaryLight,
+                ]}
+              >
+                Item: {report.itemtype}
+              </Text>
+            </View>
+          )}
+
+        {(report.category === 'lost' || report.category === 'found') &&
+          report.contactinfo && (
+            <View style={styles.detailRow}>
+              <Ionicons
+                name='mail-outline'
+                size={16}
+                color={scheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+              />
+              <Text
+                style={[
+                  styles.detailText,
+                  scheme === 'dark'
+                    ? styles.textSecondaryDark
+                    : styles.textSecondaryLight,
+                ]}
+              >
+                Contact: {report.contactinfo}
+              </Text>
+            </View>
+          )}
 
         <View style={styles.detailRow}>
           <Ionicons
