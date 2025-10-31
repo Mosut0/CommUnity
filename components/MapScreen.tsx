@@ -355,6 +355,8 @@ export default function MapScreen({
               )}
 
               {/* No map callout; we show a bottom sheet instead */}
+
+              {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );
         })}
