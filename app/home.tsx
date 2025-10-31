@@ -101,6 +101,7 @@ export default function Home() {
   const [isDistanceModalVisible, setIsDistanceModalVisible] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>('km');
   const [isFabExpanded, setIsFabExpanded] = useState(false);
+  const [isReportCardOpen, setIsReportCardOpen] = useState(false);
   const fabAnim = React.useRef(new Animated.Value(0)).current; // 0 collapsed, 1 expanded
   // Animated settings sheet
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
@@ -644,6 +645,7 @@ export default function Home() {
           selectedReportId ? Number(selectedReportId) : undefined
         }
         filter={appliedFilter}
+        onReportCardChange={setIsReportCardOpen}
       />
 
       <ProfileSheet
@@ -719,15 +721,17 @@ export default function Home() {
         uiTheme={uiTheme}
       />
 
-      <SpeedDial
-        isExpanded={isFabExpanded}
-        animation={fabAnim}
-        onToggle={toggleFab}
-        onPressCreate={handleOpenCreateSheet}
-        onPressForums={handleOpenForums}
-        uiTheme={uiTheme}
-        theme={theme}
-      />
+      {!isReportCardOpen && (
+        <SpeedDial
+          isExpanded={isFabExpanded}
+          animation={fabAnim}
+          onToggle={toggleFab}
+          onPressCreate={handleOpenCreateSheet}
+          onPressForums={handleOpenForums}
+          uiTheme={uiTheme}
+          theme={theme}
+        />
+      )}
 
       <CreateSheet
         visible={isCreateVisible}

@@ -6,132 +6,59 @@ import React, {
   useRef,
 } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import MapView, { Marker, Callout, Region, MapMarker } from 'react-native-maps';
+import MapView, { Marker, Region, MapMarker } from 'react-native-maps';
+import ReportCard from '@/components/ReportCard';
 import * as Location from 'expo-location';
-import { supabase } from '@/lib/supabase';
-import { ThemedText } from './ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
-
-// Define the structure of a report
-interface Report {
-  reportid: number;
-  category: string;
-  description: string;
-  location: string; // In the format "(lat,lng)"
-  createdAt: string;
-  imageurl?: string;
-  // Additional fields depending on report type
-  eventtype?: string;
-  hazardtype?: string;
-  itemtype?: string;
-  contactinfo?: string;
-  time?: string;
-}
+import { useReports } from '@/hooks/useReports';
+import { Report, ReportCategory } from '@/types/report';
+import {
+  parseLocation,
+  getMarkerColor,
+  getCategoryIcon,
+  getIconSize,
+  matchesFilter,
+  clusterReports,
+  getDisplayCoords,
+  getDistanceKm,
+} from '@/utils/reportUtils';
 
 interface MapScreenProps {
   distanceRadius: number;
   selectedReportId?: number;
   filter?: 'all' | 'hazard' | 'event' | 'lost' | 'found';
+  onReportCardChange?: (isOpen: boolean) => void;
 }
-
-// Colors must match `app/forums.tsx` categoryColors
-const FORUM_COLORS = {
-  event: '#7C3AED', // purple-600
-  lost: '#EAB308', // yellow-500
-  found: '#22C55E', // green-500
-  safety: '#EF4444', // red-500
-};
-
-const deg2rad = (deg: number): number => deg * (Math.PI / 180);
-
-const getDistanceFromLatLonInKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number => {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
-};
-
-const metersToDegreeOffset = (lat: number, meters: number) => {
-  const latDegree = meters / 111320; // approx meters per degree latitude
-  const lngDegree = meters / (111320 * Math.cos((lat * Math.PI) / 180));
-  return { latDegree, lngDegree };
-};
-
-const parseLocation = (
-  locationStr: string
-): { latitude: number; longitude: number } | null => {
-  try {
-    // Expected format: "(lat,lng)"
-    const coordsStr = locationStr.substring(1, locationStr.length - 1).trim();
-    const parts = coordsStr.split(',').map(s => parseFloat(s.trim()));
-    if (parts.length < 2) return null;
-    let [lat, lng] = parts;
-
-    if (isNaN(lat) || isNaN(lng)) {
-      return null;
-    }
-
-    // Basic validation: lat must be between -90 and 90, lng between -180 and 180.
-    // If values look swapped (e.g., lat outside [-90,90]), swap them.
-    if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
-      const tmp = lat;
-      lat = lng;
-      lng = tmp;
-    }
-
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      console.warn(
-        'parseLocation: coordinates out of bounds for',
-        locationStr,
-        '->',
-        { lat, lng }
-      );
-      return null;
-    }
-
-    return { latitude: lat, longitude: lng };
-  } catch (error) {
-    console.error('Error parsing location:', error);
-    return null;
-  }
-};
 
 export default function MapScreen({
   distanceRadius,
   selectedReportId,
   filter = 'all',
+  onReportCardChange,
 }: MapScreenProps) {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  // track whether a marker's view has finished updating to disable tracksViewChanges
+
+  // Refs for marker management
   const markerReadyRef = useRef<Map<number, boolean>>(new Map());
-  const colorScheme = useColorScheme() ?? 'light';
-  const isMountedRef = useRef(true);
-  const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: number]: MapMarker | null }>({});
-  // Track whether a marker was just pressed to avoid map onPress immediately clearing selection
   const markerPressedRef = useRef<boolean>(false);
   const markerPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+
+  const colorScheme = useColorScheme() ?? 'light';
+  const isMountedRef = useRef(true);
+
+  // Use the centralized reports hook
+  const { reports, loading, error, selectReport } = useReports({
+    autoFetch: true,
+  });
 
   // Cleanup mounted ref on unmount
   useEffect(() => {
@@ -140,22 +67,11 @@ export default function MapScreen({
     };
   }, []);
 
-  // When the filter changes, clear any selected report to prevent callout/ref races
+  // When the filter changes, clear any selected report
   useEffect(() => {
-    setSelectedReport(prevSelected => {
-      if (prevSelected) {
-        const mr = markerRefs.current[prevSelected.reportid];
-        if (mr && (mr as any).hideCallout) {
-          try {
-            (mr as any).hideCallout();
-          } catch {
-            // no-op: hideCallout may not be supported on all platforms
-          }
-        }
-      }
-      return null;
-    });
-  }, [filter]);
+    setSelectedReport(null);
+    onReportCardChange?.(false);
+  }, [filter, onReportCardChange]);
 
   // Fetch user location
   useEffect(() => {
@@ -178,11 +94,13 @@ export default function MapScreen({
         subscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 1000, // update every second
-            distanceInterval: 1, // update every meter
+            timeInterval: 1000,
+            distanceInterval: 1,
           },
           loc => {
-            setLocation(loc);
+            if (isMountedRef.current) {
+              setLocation(loc);
+            }
           }
         );
       } catch (error) {
@@ -199,252 +117,6 @@ export default function MapScreen({
     };
   }, []);
 
-  // Function to fetch all reports
-  const fetchReports = useCallback(async () => {
-    try {
-      console.log('Fetching reports...');
-
-      // Create a timestamp to track this fetch request
-      const fetchId = Date.now();
-      console.log(`Starting fetch request ${fetchId}`);
-
-      // First fetch basic report data
-      const { data: reportsData, error: reportsError } = await supabase
-        .from('reports')
-        .select('*')
-        .order('createdat', { ascending: false }); // Order by newest first
-
-      if (reportsError) {
-        console.error('Error fetching reports:', reportsError);
-        return;
-      }
-
-      if (!reportsData || reportsData.length === 0) {
-        console.log('No reports found');
-        setReports([]);
-        return;
-      }
-
-      console.log(`Found ${reportsData.length} reports for fetch ${fetchId}`);
-
-      // For each report, fetch additional details based on category
-      const enhancedReports = await Promise.all(
-        reportsData.map(async report => {
-          try {
-            let additionalData = {};
-
-            switch (report.category) {
-              case 'event':
-                const { data: eventData, error: eventError } = await supabase
-                  .from('events')
-                  .select('*')
-                  .eq('reportid', report.reportid)
-                  .maybeSingle(); // Use maybeSingle instead of single to avoid errors
-                if (eventError) {
-                  console.warn(
-                    `Error fetching event data for report ${report.reportid}:`,
-                    eventError
-                  );
-                }
-                additionalData = eventData || {};
-                break;
-              case 'safety':
-                const { data: hazardData, error: hazardError } = await supabase
-                  .from('hazards')
-                  .select('*')
-                  .eq('reportid', report.reportid)
-                  .maybeSingle();
-                if (hazardError) {
-                  console.warn(
-                    `Error fetching hazard data for report ${report.reportid}:`,
-                    hazardError
-                  );
-                }
-                additionalData = hazardData || {};
-                break;
-              case 'lost':
-                const { data: lostItemData, error: lostError } = await supabase
-                  .from('lostitems')
-                  .select('*')
-                  .eq('reportid', report.reportid)
-                  .maybeSingle();
-                if (lostError) {
-                  console.warn(
-                    `Error fetching lost item data for report ${report.reportid}:`,
-                    lostError
-                  );
-                }
-                additionalData = lostItemData || {};
-                break;
-              case 'found':
-                const { data: foundItemData, error: foundError } =
-                  await supabase
-                    .from('founditems')
-                    .select('*')
-                    .eq('reportid', report.reportid)
-                    .maybeSingle();
-                if (foundError) {
-                  console.warn(
-                    `Error fetching found item data for report ${report.reportid}:`,
-                    foundError
-                  );
-                }
-                additionalData = foundItemData || {};
-                break;
-            }
-
-            return { ...report, ...additionalData };
-          } catch (reportError) {
-            console.error(
-              `Error processing report ${report.reportid}:`,
-              reportError
-            );
-            // Return the basic report data even if additional data fails
-            return report;
-          }
-        })
-      );
-
-      console.log(
-        `Successfully processed ${enhancedReports.length} reports for fetch ${fetchId}`
-      );
-
-      // Only update state if component is still mounted
-      if (isMountedRef.current) {
-        setReports(enhancedReports);
-      }
-    } catch (error) {
-      console.error('Error processing reports:', error);
-      // Don't clear existing reports on error, keep what we have
-    }
-  }, []);
-
-  // Debounced version of fetchReports to prevent too many rapid calls
-  const debouncedFetchReports = useCallback(() => {
-    // Clear any existing timeout
-    if (fetchTimeoutRef.current) {
-      clearTimeout(fetchTimeoutRef.current);
-    }
-
-    // Set a new timeout
-    fetchTimeoutRef.current = setTimeout(() => {
-      if (isMountedRef.current) {
-        fetchReports();
-      }
-    }, 300); // 300ms debounce
-  }, [fetchReports]);
-
-  // Fetch reports on component mount and set up real-time subscription
-  useEffect(() => {
-    // Initial data fetch
-    fetchReports();
-
-    // Set up Supabase subscription for real-time updates
-    const setupRealtimeSubscriptions = () => {
-      console.log('Setting up real-time subscriptions...');
-
-      // Create a unique channel name to avoid conflicts
-      const channelName = `reports-updates-${Date.now()}`;
-
-      // Subscribe to changes in the reports table and related tables
-      const channel = supabase
-        .channel(channelName)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'reports',
-          },
-          payload => {
-            console.log('Reports table changed:', payload);
-            debouncedFetchReports();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'events',
-          },
-          payload => {
-            console.log('Events table changed:', payload);
-            debouncedFetchReports();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'hazards',
-          },
-          payload => {
-            console.log('Hazards table changed:', payload);
-            debouncedFetchReports();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'lostitems',
-          },
-          payload => {
-            console.log('Lost items table changed:', payload);
-            debouncedFetchReports();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'founditems',
-          },
-          payload => {
-            console.log('Found items table changed:', payload);
-            debouncedFetchReports();
-          }
-        )
-        .subscribe(status => {
-          console.log('Subscription status:', status);
-          if (status === 'SUBSCRIBED') {
-            console.log('Successfully subscribed to real-time updates');
-          } else if (status === 'CHANNEL_ERROR') {
-            console.log('Subscription error, retrying...');
-            // Retry subscription after a delay
-            setTimeout(() => {
-              setupRealtimeSubscriptions();
-            }, 2000);
-          }
-        });
-
-      // Return cleanup function
-      return () => {
-        console.log('Cleaning up subscriptions...');
-        supabase.removeChannel(channel);
-      };
-    };
-
-    const cleanup = setupRealtimeSubscriptions();
-
-    // Clean up subscription when component unmounts
-    return () => {
-      isMountedRef.current = false;
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-      }
-      cleanup();
-      // clear any pending marker press timeout
-      if (markerPressTimeoutRef.current) {
-        clearTimeout(markerPressTimeoutRef.current);
-      }
-    };
-  }, [fetchReports, debouncedFetchReports]);
-
   // Auto-select report when selectedReportId is provided
   useEffect(() => {
     if (selectedReportId && reports.length > 0) {
@@ -453,6 +125,7 @@ export default function MapScreen({
       );
       if (reportToSelect) {
         setSelectedReport(reportToSelect);
+        selectReport(reportToSelect);
 
         // Focus the map on the selected report
         const coords = parseLocation(reportToSelect.location);
@@ -461,7 +134,7 @@ export default function MapScreen({
             {
               latitude: coords.latitude,
               longitude: coords.longitude,
-              latitudeDelta: 0.005, // Smaller delta for closer zoom
+              latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             },
             100
@@ -477,119 +150,35 @@ export default function MapScreen({
         }
       }
     }
-  }, [selectedReportId, reports]);
+  }, [selectedReportId, reports, selectReport]);
 
-  // Cluster reports that are within a proximity threshold (meters) to avoid stacking
-  const clusters = useMemo(() => {
-    const thresholdMeters = 2; // distance within which points are considered same cluster
-    const clusters: {
-      center: { latitude: number; longitude: number };
-      members: Report[];
-    }[] = [];
+  // Filter reports based on current filter and distance
+  const filteredReports = useMemo(() => {
+    if (!location) return [];
 
-    const pushToCluster = (
-      r: Report,
-      coords: { latitude: number; longitude: number }
-    ) => {
-      for (const c of clusters) {
-        const d =
-          getDistanceFromLatLonInKm(
-            c.center.latitude,
-            c.center.longitude,
-            coords.latitude,
-            coords.longitude
-          ) * 1000;
-        if (d <= thresholdMeters) {
-          c.members.push(r);
-          // optionally update cluster center (simple average)
-          const latSum =
-            c.center.latitude * (c.members.length - 1) + coords.latitude;
-          const lngSum =
-            c.center.longitude * (c.members.length - 1) + coords.longitude;
-          c.center.latitude = latSum / c.members.length;
-          c.center.longitude = lngSum / c.members.length;
-          return;
-        }
-      }
-      clusters.push({
-        center: { latitude: coords.latitude, longitude: coords.longitude },
-        members: [r],
-      });
-    };
+    return reports.filter(report => {
+      // Check filter match
+      if (!matchesFilter(report, filter)) return false;
 
-    reports.forEach(r => {
-      const c = parseLocation(r.location);
-      if (!c) return;
-      pushToCluster(r, c);
+      // Check distance
+      const coords = parseLocation(report.location);
+      if (!coords) return false;
+
+      const distance = getDistanceKm(
+        location.coords.latitude,
+        location.coords.longitude,
+        coords.latitude,
+        coords.longitude
+      );
+
+      return distance <= distanceRadius;
     });
+  }, [reports, filter, location, distanceRadius]);
 
-    return clusters;
-  }, [reports]);
-
-  // Given a report and its parsed coords, return a possibly offset display coordinate so markers don't stack
-  const getDisplayCoords = (
-    report: Report,
-    coords: { latitude: number; longitude: number }
-  ) => {
-    // find the cluster containing this report
-    const cluster = clusters.find(cl =>
-      cl.members.some(m => m.reportid === report.reportid)
-    );
-    if (!cluster) return coords;
-    const count = cluster.members.length;
-    if (count <= 1) return coords;
-
-    const index = cluster.members.findIndex(
-      m => m.reportid === report.reportid
-    );
-
-    // Increase radius with cluster size to reduce overlap for larger groups
-    const baseRadius = 6;
-    const radiusMeters = Math.min(baseRadius + count * 2, 40); // cap at 40m
-
-    const angle = (2 * Math.PI * index) / count;
-    const { latDegree, lngDegree } = metersToDegreeOffset(
-      cluster.center.latitude,
-      radiusMeters
-    );
-
-    const adjustedLat = cluster.center.latitude + Math.cos(angle) * latDegree;
-    const adjustedLng = cluster.center.longitude + Math.sin(angle) * lngDegree;
-
-    return { latitude: adjustedLat, longitude: adjustedLng };
-  };
-
-  // Get appropriate marker color based on report category
-  const getMarkerColor = (category: string): string => {
-    switch (category) {
-      case 'event':
-        return FORUM_COLORS.event;
-      case 'safety':
-        return FORUM_COLORS.safety;
-      case 'lost':
-        return FORUM_COLORS.lost;
-      case 'found':
-        return FORUM_COLORS.found;
-      default:
-        return '#9E9E9E'; // Gray
-    }
-  };
-
-  // Generate title for the marker based on report type
-  const getReportTitle = (report: Report): string => {
-    switch (report.category) {
-      case 'event':
-        return `Event: ${report.eventtype || ''}`;
-      case 'safety':
-        return `Hazard: ${report.hazardtype || ''}`;
-      case 'lost':
-        return `Lost: ${report.itemtype || ''}`;
-      case 'found':
-        return `Found: ${report.itemtype || ''}`;
-      default:
-        return 'Report';
-    }
-  };
+  // Cluster reports to avoid marker stacking
+  const clusters = useMemo(() => {
+    return clusterReports(filteredReports);
+  }, [filteredReports]);
 
   // Define the initial map region
   const region: Region | undefined = useMemo(() => {
@@ -602,6 +191,83 @@ export default function MapScreen({
       longitudeDelta: 0.01,
     };
   }, [location]);
+
+  // Handle marker press
+  const handleMarkerPress = useCallback(
+    (report: Report) => {
+      // Mark that a marker was pressed
+      markerPressedRef.current = true;
+
+      // Clear any existing timeout
+      if (markerPressTimeoutRef.current) {
+        clearTimeout(markerPressTimeoutRef.current);
+      }
+
+      // Reset the markerPressed flag shortly after
+      markerPressTimeoutRef.current = setTimeout(() => {
+        markerPressedRef.current = false;
+        markerPressTimeoutRef.current = null;
+      }, 200);
+
+      // Toggle selection
+      const newSelection =
+        selectedReport?.reportid === report.reportid ? null : report;
+      setSelectedReport(newSelection);
+      selectReport(newSelection);
+      onReportCardChange?.(newSelection !== null);
+
+      // Show/hide callout
+      if (newSelection) {
+        setTimeout(() => {
+          const mr = markerRefs.current[report.reportid];
+          if (mr && mr.showCallout) {
+            try {
+              mr.showCallout();
+            } catch (e) {
+              console.error('Error calling showCallout on marker:', e);
+            }
+          }
+        }, 0);
+      } else {
+        const mr = markerRefs.current[report.reportid];
+        if (mr && mr.hideCallout) {
+          try {
+            mr.hideCallout();
+          } catch (e) {
+            console.error('Error calling hideCallout on marker:', e);
+          }
+        }
+      }
+    },
+    [selectedReport, selectReport, onReportCardChange]
+  );
+
+  // Handle map press
+  const handleMapPress = useCallback(() => {
+    // If a marker was just pressed, ignore this map press
+    if (markerPressedRef.current) return;
+
+    // Clear selection
+    setSelectedReport(null);
+    selectReport(null);
+    onReportCardChange?.(false);
+  }, [selectReport, onReportCardChange]);
+
+  // Render marker icon
+  const renderMarkerIcon = useCallback(
+    (report: Report, isSelected: boolean) => {
+      const iconName = getCategoryIcon(report.category as ReportCategory);
+      const iconSize = getIconSize('marker');
+      const iconColor = isSelected
+        ? '#fff'
+        : getMarkerColor(report.category as ReportCategory);
+
+      return (
+        <Ionicons name={iconName as any} size={iconSize} color={iconColor} />
+      );
+    },
+    []
+  );
 
   // Loading state
   if (errorMsg) {
@@ -620,155 +286,29 @@ export default function MapScreen({
     );
   }
 
+  // For loading/error of reports, show a small non-blocking overlay instead of blocking the screen
+
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
         initialRegion={region}
-        onPress={() => {
-          // If a marker was just pressed, ignore this map press (it comes immediately after marker press)
-          if (markerPressedRef.current) return;
-
-          // Immediately hide callout (if any) and clear selection to make the change instant
-          if (selectedReport) {
-            const mr = markerRefs.current[selectedReport.reportid];
-            if (mr && mr.hideCallout) {
-              try {
-                mr.hideCallout();
-              } catch {
-                // ignore if hideCallout isn't supported on this platform
-              }
-            }
-          }
-          setSelectedReport(null);
-        }}
+        onPress={handleMapPress}
         showsUserLocation={true}
         followsUserLocation={false}
         showsCompass={false}
       >
-        {/* Render markers for reports matching the selected filter */}
-        {reports.map(report => {
-          // Map the app filter to report.category values
-          const matchesFilter = (() => {
-            if (filter === 'all') return true;
-            if (filter === 'hazard') return report.category === 'safety';
-            if (filter === 'event') return report.category === 'event';
-            if (filter === 'lost') return report.category === 'lost';
-            if (filter === 'found') return report.category === 'found';
-            return true;
-          })();
-
-          if (!matchesFilter) return null;
-
+        {/* Render markers for filtered reports */}
+        {filteredReports.map(report => {
           const coords = parseLocation(report.location);
           if (!coords) return null;
 
-          const distance = getDistanceFromLatLonInKm(
-            location.coords.latitude,
-            location.coords.longitude,
-            coords.latitude,
-            coords.longitude
-          );
-
-          if (distance > distanceRadius) return null;
-
-          // Render a marker using an icon to match the top bar, with circular background and press animation
-          const IconForReport = () => {
-            // Use the same Ionicons names as `app/forums.tsx` for visual consistency
-            switch (report.category) {
-              case 'event':
-                return (
-                  <Ionicons
-                    name='calendar-outline'
-                    size={20}
-                    color={getMarkerColor(report.category)}
-                  />
-                );
-              case 'safety':
-                return (
-                  <Ionicons
-                    name='alert-circle-outline'
-                    size={20}
-                    color={getMarkerColor(report.category)}
-                  />
-                );
-              case 'lost':
-                return (
-                  <Ionicons
-                    name='help-circle-outline'
-                    size={18}
-                    color={getMarkerColor(report.category)}
-                  />
-                );
-              case 'found':
-                return (
-                  <Ionicons
-                    name='checkmark-circle-outline'
-                    size={18}
-                    color={getMarkerColor(report.category)}
-                  />
-                );
-              default:
-                return (
-                  <Ionicons
-                    name='information-circle-outline'
-                    size={18}
-                    color={getMarkerColor(report.category)}
-                  />
-                );
-            }
-          };
-
-          const handlePress = () => {
-            // Mark that a marker was pressed so the map's onPress doesn't immediately clear selection
-            markerPressedRef.current = true;
-            // Clear any existing timeout
-            if (markerPressTimeoutRef.current) {
-              clearTimeout(markerPressTimeoutRef.current);
-            }
-            // Reset the markerPressed flag shortly after
-            markerPressTimeoutRef.current = setTimeout(() => {
-              markerPressedRef.current = false;
-              markerPressTimeoutRef.current = null;
-            }, 200);
-
-            // Toggle selection: if already selected, deselect; otherwise select and show callout
-            setSelectedReport(prev => {
-              const next = prev?.reportid === report.reportid ? null : report;
-              // If selecting, show the callout for this marker
-              if (next) {
-                setTimeout(() => {
-                  const mr = markerRefs.current[report.reportid];
-                  if (mr && mr.showCallout) {
-                    try {
-                      mr.showCallout();
-                    } catch (e) {
-                      console.error('Error calling showCallout on marker:', e);
-                    }
-                  }
-                }, 0);
-              } else {
-                // If deselecting via marker tap, hide its callout immediately
-                const mr = markerRefs.current[report.reportid];
-                if (mr && mr.hideCallout) {
-                  try {
-                    mr.hideCallout();
-                  } catch (e) {
-                    console.error('Error calling hideCallout on marker:', e);
-                  }
-                }
-              }
-
-              return next;
-            });
-          };
-
+          const isSelected = selectedReport?.reportid === report.reportid;
           const tracksViewChanges = !markerReadyRef.current.get(
             report.reportid
           );
-
-          const displayCoords = getDisplayCoords(report, coords);
+          const displayCoords = getDisplayCoords(report, coords, clusters);
 
           return (
             <Marker
@@ -777,18 +317,21 @@ export default function MapScreen({
                 markerRefs.current[report.reportid] = ref;
               }}
               coordinate={displayCoords}
-              onPress={handlePress}
+              onPress={() => handleMarkerPress(report)}
               anchor={{ x: 0.5, y: 0.5 }}
               tracksViewChanges={tracksViewChanges}
             >
               <View
                 style={[
                   styles.iconWrapper,
-                  // If selected, use the marker's category color as background and a slight shadow
-                  selectedReport?.reportid === report.reportid
+                  isSelected
                     ? {
-                        backgroundColor: getMarkerColor(report.category),
-                        shadowColor: getMarkerColor(report.category),
+                        backgroundColor: getMarkerColor(
+                          report.category as ReportCategory
+                        ),
+                        shadowColor: getMarkerColor(
+                          report.category as ReportCategory
+                        ),
                         elevation: 4,
                       }
                     : colorScheme === 'dark'
@@ -796,55 +339,10 @@ export default function MapScreen({
                       : styles.iconWrapperLight,
                 ]}
               >
-                {/* If selected, render white icon for contrast */}
-                {selectedReport?.reportid === report.reportid
-                  ? (() => {
-                      switch (report.category) {
-                        case 'event':
-                          return (
-                            <Ionicons
-                              name='calendar-outline'
-                              size={20}
-                              color='#fff'
-                            />
-                          );
-                        case 'safety':
-                          return (
-                            <Ionicons
-                              name='alert-circle-outline'
-                              size={20}
-                              color='#fff'
-                            />
-                          );
-                        case 'lost':
-                          return (
-                            <Ionicons
-                              name='help-circle-outline'
-                              size={18}
-                              color='#fff'
-                            />
-                          );
-                        case 'found':
-                          return (
-                            <Ionicons
-                              name='checkmark-circle-outline'
-                              size={18}
-                              color='#fff'
-                            />
-                          );
-                        default:
-                          return (
-                            <Ionicons
-                              name='information-circle-outline'
-                              size={18}
-                              color='#fff'
-                            />
-                          );
-                      }
-                    })()
-                  : IconForReport()}
+                {renderMarkerIcon(report, isSelected)}
               </View>
-              {/* once rendered, mark ready to stop tracking view changes to stabilize marker */}
+
+              {/* Mark marker as ready to stop tracking view changes */}
               {tracksViewChanges && (
                 <View
                   onLayout={() => {
@@ -853,33 +351,35 @@ export default function MapScreen({
                   style={{ width: 0, height: 0 }}
                 />
               )}
-              <Callout tooltip>
-                <View
-                  style={[
-                    styles.callout,
-                    colorScheme === 'dark'
-                      ? styles.calloutDark
-                      : styles.calloutLight,
-                  ]}
-                >
-                  <ThemedText type='defaultSemiBold'>
-                    {getReportTitle(report)}
-                  </ThemedText>
-                  <ThemedText>{report.description}</ThemedText>
-                  {report.contactinfo && (
-                    <ThemedText>Contact: {report.contactinfo}</ThemedText>
-                  )}
-                  {report.time && (
-                    <ThemedText>
-                      Time: {new Date(report.time).toLocaleString()}
-                    </ThemedText>
-                  )}
-                </View>
-              </Callout>
+
+              {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );
         })}
       </MapView>
+
+      {/* Bottom sheet for selected report */}
+      {selectedReport && (
+        <ReportCard
+          report={selectedReport}
+          onClose={() => {
+            setSelectedReport(null);
+            onReportCardChange?.(false);
+          }}
+        />
+      )}
+
+      {loading && (
+        <View style={styles.cornerOverlay}>
+          <Text style={styles.cornerOverlayText}>Loading reports...</Text>
+        </View>
+      )}
+
+      {!!error && (
+        <View style={styles.cornerOverlayError}>
+          <Text style={styles.cornerOverlayText}>Failed to load reports</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -911,19 +411,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: 20,
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 10,
-    alignSelf: 'center',
-    backgroundColor: '#0B1220',
-    padding: 10,
-    borderRadius: 20,
-    opacity: 0.7,
-  },
-  loadingText: {
-    color: '#fff',
-    fontSize: 14,
-  },
   iconWrapper: {
     width: 44,
     height: 44,
@@ -937,5 +424,27 @@ const styles = StyleSheet.create({
   },
   iconWrapperDark: {
     backgroundColor: '#0B1220',
+  },
+  cornerOverlay: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  cornerOverlayError: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    backgroundColor: 'rgba(239,68,68,0.8)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  cornerOverlayText: {
+    color: '#fff',
+    fontSize: 12,
   },
 });

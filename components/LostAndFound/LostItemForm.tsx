@@ -162,12 +162,12 @@ export default function LostItemForm({
               <>
                 {/* Item Name Input */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Item Name*</ThemedText>
+                  <ThemedText style={styles.label}>Item*</ThemedText>
                   <TextInput
                     style={styles.input}
                     value={itemName}
                     onChangeText={setItemName}
-                    placeholder='What did you lose?'
+                    placeholder='e.g., Keys, Wallet, Phone, Backpack'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>

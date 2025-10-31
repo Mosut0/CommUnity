@@ -227,14 +227,14 @@ export default function FillEventForm({
               </View>
             ) : (
               <>
-                {/* Event Type Input */}
+                {/* Event Name Input */}
                 <View style={styles.inputGroup}>
-                  <ThemedText style={styles.label}>Event Type*</ThemedText>
+                  <ThemedText style={styles.label}>Event Name*</ThemedText>
                   <TextInput
                     style={styles.input}
                     value={eventType}
                     onChangeText={setEventType}
-                    placeholder='What type of event?'
+                    placeholder='e.g., Community Meetup, Workshop, Block Party'
                     placeholderTextColor={theme.textSecondary}
                   />
                 </View>
