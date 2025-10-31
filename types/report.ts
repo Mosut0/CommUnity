@@ -102,6 +102,32 @@ export type CreateReportData =
   | { type: 'lost'; data: CreateLostItemReportData }
   | { type: 'found'; data: CreateFoundItemReportData };
 
+// Report update data (partial updates)
+export interface UpdateReportData {
+  description?: string;
+  location?: string;
+  imageurl?: string;
+}
+
+export interface UpdateEventData {
+  eventtype?: string;
+  time?: string;
+}
+
+export interface UpdateHazardData {
+  hazardtype?: string;
+}
+
+export interface UpdateLostItemData {
+  itemtype?: string;
+  contactinfo?: string;
+}
+
+export interface UpdateFoundItemData {
+  itemtype?: string;
+  contactinfo?: string;
+}
+
 // Service response types
 export interface ReportServiceResponse<T = any> {
   success: boolean;
