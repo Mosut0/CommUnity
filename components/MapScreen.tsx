@@ -388,6 +388,35 @@ export default function MapScreen({
           <Text style={styles.cornerOverlayText}>Failed to load reports</Text>
         </View>
       )}
+
+      {/* Bottom sheet for selected report */}
+      {selectedReport && (
+        <ReportCard
+          report={selectedReport}
+          onClose={() => {
+            setSelectedReport(null);
+            onReportCardChange?.(false);
+          }}
+          onDetails={() => {
+            router.push({
+              pathname: '/report-details',
+              params: { reportId: String(selectedReport.reportid) },
+            });
+          }}
+        />
+      )}
+
+      {loading && (
+        <View style={styles.cornerOverlay}>
+          <Text style={styles.cornerOverlayText}>Loading reports...</Text>
+        </View>
+      )}
+
+      {!!error && (
+        <View style={styles.cornerOverlayError}>
+          <Text style={styles.cornerOverlayText}>Failed to load reports</Text>
+        </View>
+      )}
     </View>
   );
 }
