@@ -26,9 +26,10 @@ import { parseLocation } from '@/utils/reportUtils';
 type Props = {
   report: Report;
   onClose: () => void;
+  onDetails?: () => void;
 };
 
-export default function ReportCard({ report, onClose }: Props) {
+export default function ReportCard({ report, onClose, onDetails }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const accentColor =
     (MARKER_COLORS as any)[report.category] || MARKER_COLORS.default;
@@ -344,13 +345,47 @@ export default function ReportCard({ report, onClose }: Props) {
         </View>
 
         <View style={styles.actionsRow}>
+          {onDetails && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={onDetails}
+              activeOpacity={0.85}
+            >
+              <Ionicons
+                name='information-circle-outline'
+                size={18}
+                color={'#fff'}
+              />
+              <Text style={styles.actionButtonText}>Details</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
-            style={styles.actionButton}
+            style={[
+              styles.actionButton,
+              onDetails ? styles.secondaryButton : {},
+            ]}
             onPress={openDirections}
             activeOpacity={0.85}
           >
-            <Ionicons name='navigate-outline' size={18} color={'#fff'} />
-            <Text style={styles.actionButtonText}>Directions</Text>
+            <Ionicons
+              name='navigate-outline'
+              size={18}
+              color={onDetails ? (scheme === 'dark' ? '#fff' : '#000') : '#fff'}
+            />
+            <Text
+              style={[
+                styles.actionButtonText,
+                onDetails ? styles.secondaryButtonText : {},
+                onDetails
+                  ? scheme === 'dark'
+                    ? styles.textDark
+                    : styles.textLight
+                  : {},
+              ]}
+            >
+              Directions
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity

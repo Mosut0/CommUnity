@@ -23,6 +23,7 @@ import {
   getDisplayCoords,
   getDistanceKm,
 } from '@/utils/reportUtils';
+import { useRouter } from 'expo-router';
 
 interface MapScreenProps {
   distanceRadius: number;
@@ -37,6 +38,7 @@ export default function MapScreen({
   filter = 'all',
   onReportCardChange,
 }: MapScreenProps) {
+  const router = useRouter();
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -353,6 +355,8 @@ export default function MapScreen({
               )}
 
               {/* No map callout; we show a bottom sheet instead */}
+
+              {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );
         })}
@@ -365,6 +369,12 @@ export default function MapScreen({
           onClose={() => {
             setSelectedReport(null);
             onReportCardChange?.(false);
+          }}
+          onDetails={() => {
+            router.push({
+              pathname: '/report-details',
+              params: { reportId: String(selectedReport.reportid) },
+            });
           }}
         />
       )}
@@ -405,6 +415,22 @@ const styles = StyleSheet.create({
   },
   calloutDark: {
     backgroundColor: '#0B1220',
+  },
+  calloutActionsRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  calloutButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  calloutButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
   },
   errorText: {
     color: 'red',
