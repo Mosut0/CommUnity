@@ -316,11 +316,13 @@ export async function updateReport(
     console.log('Report ID:', reportId);
     console.log('Update Data:', reportData);
     console.log('Category Data:', categoryData);
-    
+
     // Check if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     console.log('Current user:', user?.id);
-    
+
     // Update main report data
     const { data: updatedData, error: reportError } = await supabase
       .from('reports')

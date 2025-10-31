@@ -60,7 +60,9 @@ export default function ReportActions({
 
   // Lost/Found item fields
   const [editItemType, setEditItemType] = useState(report.itemtype || '');
-  const [editContactInfo, setEditContactInfo] = useState(report.contactinfo || '');
+  const [editContactInfo, setEditContactInfo] = useState(
+    report.contactinfo || ''
+  );
 
   const { updateReportData, removeReport, isOwner } = useReports();
 
@@ -108,7 +110,12 @@ export default function ReportActions({
     }
 
     setIsUpdating(true);
-    console.log('Updating report:', report.reportid, 'category:', report.category);
+    console.log(
+      'Updating report:',
+      report.reportid,
+      'category:',
+      report.category
+    );
 
     // Common update data
     const updateData: UpdateReportData = {
@@ -232,7 +239,7 @@ export default function ReportActions({
         disabled={isDeleting}
         activeOpacity={0.7}
       >
-        <Ionicons name="pencil" size={20} color="#fff" />
+        <Ionicons name='pencil' size={20} color='#fff' />
         <Text style={styles.buttonText}>Edit Report</Text>
       </TouchableOpacity>
 
@@ -243,10 +250,10 @@ export default function ReportActions({
         activeOpacity={0.7}
       >
         {isDeleting ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size='small' color='#fff' />
         ) : (
           <>
-            <Ionicons name="trash" size={20} color="#fff" />
+            <Ionicons name='trash' size={20} color='#fff' />
             <Text style={styles.buttonText}>Delete Report</Text>
           </>
         )}
@@ -256,7 +263,7 @@ export default function ReportActions({
       <Modal
         visible={showEditModal}
         transparent
-        animationType="slide"
+        animationType='slide'
         onRequestClose={() => setShowEditModal(false)}
       >
         <View style={styles.modalOverlay}>
@@ -275,11 +282,14 @@ export default function ReportActions({
                   colorScheme === 'dark' ? styles.textDark : styles.textLight,
                 ]}
               >
-                Edit {report.category.charAt(0).toUpperCase() + report.category.slice(1)} Report
+                Edit{' '}
+                {report.category.charAt(0).toUpperCase() +
+                  report.category.slice(1)}{' '}
+                Report
               </Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
                 <Ionicons
-                  name="close"
+                  name='close'
                   size={24}
                   color={colorScheme === 'dark' ? '#fff' : '#000'}
                 />
@@ -309,7 +319,7 @@ export default function ReportActions({
                 value={editDescription}
                 onChangeText={setEditDescription}
                 multiline
-                placeholder="Description"
+                placeholder='Description'
                 placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
                 editable={!isUpdating}
               />
@@ -320,7 +330,9 @@ export default function ReportActions({
                   <Text
                     style={[
                       styles.label,
-                      colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
                     ]}
                   >
                     Event Type
@@ -335,15 +347,19 @@ export default function ReportActions({
                     ]}
                     value={editEventType}
                     onChangeText={setEditEventType}
-                    placeholder="e.g., Community Meetup, Workshop"
-                    placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
+                    placeholder='e.g., Community Meetup, Workshop'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
                   />
 
                   <Text
                     style={[
                       styles.label,
-                      colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
                     ]}
                   >
                     Event Date & Time
@@ -359,14 +375,16 @@ export default function ReportActions({
                     disabled={isUpdating}
                   >
                     <Ionicons
-                      name="calendar-outline"
+                      name='calendar-outline'
                       size={20}
                       color={colorScheme === 'dark' ? '#fff' : '#000'}
                     />
                     <Text
                       style={[
                         styles.dateText,
-                        colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                        colorScheme === 'dark'
+                          ? styles.textDark
+                          : styles.textLight,
                       ]}
                     >
                       {formatDateTime(editEventTime)}
@@ -376,7 +394,7 @@ export default function ReportActions({
                   {showDatePicker && (
                     <DateTimePicker
                       value={editEventTime}
-                      mode="datetime"
+                      mode='datetime'
                       is24Hour={false}
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                       onChange={handleDateChange}
@@ -391,7 +409,9 @@ export default function ReportActions({
                   <Text
                     style={[
                       styles.label,
-                      colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
                     ]}
                   >
                     Hazard Type
@@ -406,8 +426,10 @@ export default function ReportActions({
                     ]}
                     value={editHazardType}
                     onChangeText={setEditHazardType}
-                    placeholder="e.g., Pothole, Broken Glass"
-                    placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
+                    placeholder='e.g., Pothole, Broken Glass'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
                   />
                 </>
@@ -419,7 +441,9 @@ export default function ReportActions({
                   <Text
                     style={[
                       styles.label,
-                      colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
                     ]}
                   >
                     Item Type
@@ -434,15 +458,19 @@ export default function ReportActions({
                     ]}
                     value={editItemType}
                     onChangeText={setEditItemType}
-                    placeholder="e.g., Keys, Wallet, Phone"
-                    placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
+                    placeholder='e.g., Keys, Wallet, Phone'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
                   />
 
                   <Text
                     style={[
                       styles.label,
-                      colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
                     ]}
                   >
                     Contact Info
@@ -457,10 +485,12 @@ export default function ReportActions({
                     ]}
                     value={editContactInfo}
                     onChangeText={setEditContactInfo}
-                    placeholder="Email or phone number"
-                    placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
+                    placeholder='Email or phone number'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
-                    keyboardType="email-address"
+                    keyboardType='email-address'
                   />
                 </>
               )}
@@ -481,7 +511,7 @@ export default function ReportActions({
                 disabled={isUpdating}
               >
                 {isUpdating ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size='small' color='#fff' />
                 ) : (
                   <Text style={styles.saveButtonText}>Save Changes</Text>
                 )}
