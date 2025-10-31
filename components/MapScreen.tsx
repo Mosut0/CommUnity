@@ -355,12 +355,39 @@ export default function MapScreen({
               )}
 
               {/* No map callout; we show a bottom sheet instead */}
-
-              {/* No map callout; we show a bottom sheet instead */}
             </Marker>
           );
         })}
       </MapView>
+
+      {/* Bottom sheet for selected report */}
+      {selectedReport && (
+        <ReportCard
+          report={selectedReport}
+          onClose={() => {
+            setSelectedReport(null);
+            onReportCardChange?.(false);
+          }}
+          onDetails={() => {
+            router.push({
+              pathname: '/report-details',
+              params: { reportId: String(selectedReport.reportid) },
+            });
+          }}
+        />
+      )}
+
+      {loading && (
+        <View style={styles.cornerOverlay}>
+          <Text style={styles.cornerOverlayText}>Loading reports...</Text>
+        </View>
+      )}
+
+      {!!error && (
+        <View style={styles.cornerOverlayError}>
+          <Text style={styles.cornerOverlayText}>Failed to load reports</Text>
+        </View>
+      )}
 
       {/* Bottom sheet for selected report */}
       {selectedReport && (
