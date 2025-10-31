@@ -166,7 +166,7 @@ export function useReports(options: UseReportsOptions = {}): UseReportsReturn {
         | UpdateFoundItemData
     ): Promise<boolean> => {
       try {
-        console.log("Trying to update report in useReports hook")
+        console.log('Trying to update report in useReports hook');
         const result = await updateReport(id, data, categoryData);
         if (result.success && result.data) {
           // Update local state

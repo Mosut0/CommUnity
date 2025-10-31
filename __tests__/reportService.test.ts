@@ -416,7 +416,9 @@ describe('reportService', () => {
     it('should update a report with only common fields', async () => {
       const mockUpdate = jest.fn().mockReturnThis();
       const mockEq = jest.fn().mockReturnThis();
-      const mockSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       // Mock for update query
       (supabase.from as jest.Mock).mockReturnValueOnce({
@@ -457,10 +459,14 @@ describe('reportService', () => {
     it('should update a report with category-specific data (event)', async () => {
       const mockReportUpdate = jest.fn().mockReturnThis();
       const mockReportEq = jest.fn().mockReturnThis();
-      const mockReportSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockReportSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
       const mockCategoryUpdate = jest.fn().mockReturnThis();
       const mockCategoryEq = jest.fn().mockReturnThis();
-      const mockCategorySelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockCategorySelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       // Mock for report update
       (supabase.from as jest.Mock).mockReturnValueOnce({
@@ -528,10 +534,14 @@ describe('reportService', () => {
     it('should update a report with category-specific data (safety)', async () => {
       const mockReportUpdate = jest.fn().mockReturnThis();
       const mockReportEq = jest.fn().mockReturnThis();
-      const mockReportSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockReportSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
       const mockCategoryUpdate = jest.fn().mockReturnThis();
       const mockCategoryEq = jest.fn().mockReturnThis();
-      const mockCategorySelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockCategorySelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       // Mock for report update
       (supabase.from as jest.Mock).mockReturnValueOnce({
@@ -592,10 +602,14 @@ describe('reportService', () => {
     it('should update a report with category-specific data (lost item)', async () => {
       const mockReportUpdate = jest.fn().mockReturnThis();
       const mockReportEq = jest.fn().mockReturnThis();
-      const mockReportSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockReportSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
       const mockCategoryUpdate = jest.fn().mockReturnThis();
       const mockCategoryEq = jest.fn().mockReturnThis();
-      const mockCategorySelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockCategorySelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       // Mock for report update
       (supabase.from as jest.Mock).mockReturnValueOnce({
@@ -662,10 +676,14 @@ describe('reportService', () => {
     it('should update a report with category-specific data (found item)', async () => {
       const mockReportUpdate = jest.fn().mockReturnThis();
       const mockReportEq = jest.fn().mockReturnThis();
-      const mockReportSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockReportSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
       const mockCategoryUpdate = jest.fn().mockReturnThis();
       const mockCategoryEq = jest.fn().mockReturnThis();
-      const mockCategorySelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockCategorySelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       // Mock for report update
       (supabase.from as jest.Mock).mockReturnValueOnce({
@@ -804,7 +822,9 @@ describe('reportService', () => {
     it('should only update common fields when categoryData is not provided', async () => {
       const mockUpdate = jest.fn().mockReturnThis();
       const mockEq = jest.fn().mockReturnThis();
-      const mockSelect = jest.fn().mockResolvedValue({ data: [{}], error: null });
+      const mockSelect = jest
+        .fn()
+        .mockResolvedValue({ data: [{}], error: null });
 
       (supabase.from as jest.Mock).mockReturnValueOnce({
         update: mockUpdate,
@@ -950,7 +970,10 @@ describe('reportService', () => {
     });
 
     it('should handle database connection errors during delete', async () => {
-      const mockError = { code: 'CONNECTION_ERROR', message: 'Connection lost' };
+      const mockError = {
+        code: 'CONNECTION_ERROR',
+        message: 'Connection lost',
+      };
 
       (supabase.from as jest.Mock).mockReturnValue({
         delete: jest.fn().mockReturnThis(),
