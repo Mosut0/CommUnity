@@ -452,7 +452,9 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
               <TouchableOpacity
                 style={[
                   styles.expandedImageCloseButton,
-                  scheme === 'dark' ? styles.containerDark : styles.containerLight,
+                  scheme === 'dark'
+                    ? styles.containerDark
+                    : styles.containerLight,
                   {
                     borderColor: scheme === 'dark' ? '#1F2A37' : '#E5E2DB',
                   },

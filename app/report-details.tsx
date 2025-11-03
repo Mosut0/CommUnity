@@ -674,11 +674,7 @@ export default function ReportDetails() {
                 onPress={() => setImageExpanded(false)}
                 hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
               >
-                <Ionicons
-                  name='close'
-                  size={28}
-                  color={uiTheme.textPrimary}
-                />
+                <Ionicons name='close' size={28} color={uiTheme.textPrimary} />
               </TouchableOpacity>
               <Image
                 source={{ uri: report.imageurl }}
