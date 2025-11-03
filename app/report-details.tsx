@@ -11,6 +11,8 @@ import {
   Platform,
   Share,
   Image,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -59,6 +61,7 @@ export default function ReportDetails() {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [imageExpanded, setImageExpanded] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -445,7 +448,11 @@ export default function ReportDetails() {
           {report.imageurl && isValidImageUrl(report.imageurl) && (
             <View style={styles.imageSection}>
               <Text style={styles.sectionTitle}>Image</Text>
-              <View style={styles.imageContainer}>
+              <TouchableOpacity
+                style={styles.imageContainer}
+                activeOpacity={0.9}
+                onPress={() => setImageExpanded(true)}
+              >
                 {!imageError ? (
                   <>
                     {imageLoading && (
@@ -484,6 +491,15 @@ export default function ReportDetails() {
                         setImageLoading(false);
                       }}
                     />
+                    {!imageLoading && (
+                      <View style={styles.imageTapIndicator}>
+                        <Ionicons
+                          name='expand-outline'
+                          size={20}
+                          color={uiTheme.textPrimary}
+                        />
+                      </View>
+                    )}
                   </>
                 ) : (
                   <View style={styles.imageErrorContainer}>
@@ -507,7 +523,7 @@ export default function ReportDetails() {
                     )}
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -674,6 +690,36 @@ export default function ReportDetails() {
           />
         )}
       </ScrollView>
+
+      {/* Expanded Image Modal */}
+      {report.imageurl && isValidImageUrl(report.imageurl) && (
+        <Modal
+          visible={imageExpanded}
+          transparent
+          animationType='fade'
+          onRequestClose={() => setImageExpanded(false)}
+        >
+          <Pressable
+            style={styles.expandedImageOverlay}
+            onPress={() => setImageExpanded(false)}
+          >
+            <View style={styles.expandedImageContainer}>
+              <TouchableOpacity
+                style={styles.expandedImageCloseButton}
+                onPress={() => setImageExpanded(false)}
+                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+              >
+                <Ionicons name='close' size={28} color={uiTheme.textPrimary} />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: report.imageurl }}
+                style={styles.expandedImage}
+                resizeMode='contain'
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -780,6 +826,14 @@ const makeStyles = (t: ThemeColors) =>
     reportImage: {
       width: '100%',
       height: 200,
+    },
+    imageTapIndicator: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 16,
+      padding: 6,
     },
     imageLoadingContainer: {
       position: 'absolute',
@@ -892,5 +946,46 @@ const makeStyles = (t: ThemeColors) =>
     errorText: {
       color: t.errorText,
       fontSize: 16,
+    },
+
+    expandedImageOverlay: {
+      flex: 1,
+      backgroundColor: t.overlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    expandedImageContainer: {
+      flex: 1,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative',
+    },
+    expandedImageCloseButton: {
+      position: 'absolute',
+      top: 16,
+      right: 16,
+      zIndex: 10,
+      backgroundColor: t.cardBg,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: t.divider,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+        },
+        android: { elevation: 4 },
+      }),
+    },
+    expandedImage: {
+      width: '100%',
+      height: '100%',
     },
   });
