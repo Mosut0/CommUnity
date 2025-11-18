@@ -42,6 +42,7 @@ Upload all files to your web hosting provider's public HTML directory.
 ### Update Email Addresses
 
 Before deploying, update the email addresses in the following files:
+
 - `privacy-policy.html` - Replace `privacy@communityuo.com` and `support@communityuo.com`
 - `terms-of-service.html` - Replace `support@communityuo.com`
 - `contact.html` - Replace `support@communityuo.com` and `privacy@communityuo.com`
@@ -62,6 +63,7 @@ In your Supabase project settings, add these redirect URLs:
 ### Update App Store Links
 
 In `index.html`, update the download buttons with your actual App Store and Google Play Store links:
+
 - Replace `#` in the iOS download button with your App Store URL
 - Replace `#` in the Android download button with your Google Play Store URL
 
@@ -73,6 +75,7 @@ When submitting to app stores, you'll need to provide:
 2. **Terms of Service URL:** `https://yourdomain.com/terms-of-service.html`
 
 Make sure these URLs are:
+
 - Accessible via HTTPS
 - Publicly accessible (no login required)
 - Mobile-friendly
@@ -82,6 +85,7 @@ Make sure these URLs are:
 ### Colors and Styling
 
 Edit `styles.css` to customize:
+
 - Color scheme (CSS variables at the top)
 - Fonts
 - Spacing and layout
@@ -105,4 +109,3 @@ Before deploying:
 ## Support
 
 For questions or issues, contact: support@communityuo.com
-
