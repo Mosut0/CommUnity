@@ -21,7 +21,18 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true,
+      "node": "22.9.0",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://vtuvubvhstdwtnbchjvd.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dXZ1YnZoc3Rkd3RuYmNoanZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNjM0MDgsImV4cCI6MjA3MjkzOTQwOH0.wf_jSsCKG02NiKy2F7VZn3H4uWK9JGbwj8ApyrLZ6Ic"
+      },
+      "npm": {
+        "cache": true
+      }
     }
   },
   "submit": {
