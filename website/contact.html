@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact CommUnity - Get in touch with our support team.">
+    <title>Contact Us - CommUnity</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">👥</span>
+                    <span class="logo-text">CommUnity</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="privacy-policy.html">Privacy</a></li>
+                    <li><a href="terms-of-service.html">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content-page">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you! Whether you have a question, feedback, or need support, we're here to help.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0;">
+            <div class="feature-card">
+                <div class="feature-icon">📧</div>
+                <h3>General Support</h3>
+                <p>For general inquiries, app support, or questions about CommUnity:</p>
+                <p><strong><a href="mailto:support@communityuo.com">support@communityuo.com</a></strong></p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy & Data</h3>
+                <p>For privacy-related questions or data requests:</p>
+                <p><strong><a href="mailto:privacy@communityuo.com">privacy@communityuo.com</a></strong></p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <h3>Legal & Terms</h3>
+                <p>For legal inquiries or questions about our Terms of Service:</p>
+                <p><strong><a href="mailto:support@communityuo.com">support@communityuo.com</a></strong></p>
+            </div>
+        </div>
+
+        <h2>Send Us a Message</h2>
+        <form class="contact-form" id="contact-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required placeholder="What is this regarding?">
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required placeholder="Tell us how we can help..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+
+        <div id="form-success" style="display: none; margin-top: 2rem; padding: 1.5rem; background-color: var(--success); color: white; border-radius: 12px;">
+            <p><strong>Thank you!</strong> Your message has been sent. We'll get back to you as soon as possible.</p>
+        </div>
+
+        <h2 style="margin-top: 3rem;">Frequently Asked Questions</h2>
+        
+        <div style="margin-top: 2rem;">
+            <h3>How do I report an issue in the app?</h3>
+            <p>You can report issues directly through the app or by emailing us at support@communityuo.com. Please include details about the issue, your device type, and app version if possible.</p>
+            
+            <h3>How do I delete my account?</h3>
+            <p>You can delete your account through the app settings, or contact us at support@communityuo.com and we'll assist you with account deletion.</p>
+            
+            <h3>How do I update my email or password?</h3>
+            <p>You can update your email and password directly in the app through the Settings menu.</p>
+            
+            <h3>I forgot my password. How do I reset it?</h3>
+            <p>Use the "Forgot Password" option on the sign-in screen. We'll send you a password reset link via email.</p>
+            
+            <h3>How do I change my notification preferences?</h3>
+            <p>Go to Settings > Notifications in the app to customize which types of reports you want to be notified about.</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CommUnity</h3>
+                    <p>Connecting communities through real-time information sharing.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="mailto:support@communityuo.com">support@communityuo.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CommUnity. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Handle contact form submission
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // In a real implementation, you would send this to a backend API
+            // For now, we'll just show a success message and create a mailto link
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            // Create mailto link
+            const mailtoLink = `mailto:support@communityuo.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + message)}`;
+            
+            // Show success message
+            document.getElementById('form-success').style.display = 'block';
+            document.getElementById('contact-form').reset();
+            
+            // Optionally open email client
+            // window.location.href = mailtoLink;
+            
+            // Scroll to success message
+            document.getElementById('form-success').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
+

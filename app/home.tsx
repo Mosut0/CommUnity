@@ -669,6 +669,14 @@ export default function Home() {
           setNextModal('notifications');
           setIsProfileModalVisible(false);
         }}
+        onPressTermsOfService={() => {
+          setIsProfileModalVisible(false);
+          router.push('/terms-of-service');
+        }}
+        onPressPrivacyPolicy={() => {
+          setIsProfileModalVisible(false);
+          router.push('/privacy-policy');
+        }}
         onPressSignOut={handleSignOut}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}

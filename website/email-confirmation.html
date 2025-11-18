@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Email Confirmation - CommUnity">
+    <title>Email Confirmation - CommUnity</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">👥</span>
+                    <span class="logo-text">CommUnity</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="privacy-policy.html">Privacy</a></li>
+                    <li><a href="terms-of-service.html">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-icon" id="status-icon">✉️</div>
+            <h1 id="status-title">Confirming Your Email</h1>
+            <p id="status-message">Please wait while we verify your email address...</p>
+            <div id="loading-spinner" style="display: block;">
+                <div style="border: 4px solid var(--border); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto;"></div>
+            </div>
+            <div id="success-message" style="display: none;">
+                <p class="status-success" style="margin-top: 20px;">Your email has been confirmed successfully!</p>
+                <p style="margin-top: 10px;">You can now close this page and return to the app.</p>
+                <a href="myapp://sign-in" class="btn btn-primary" style="margin-top: 20px;">Open App</a>
+            </div>
+            <div id="error-message" style="display: none;">
+                <p class="status-error" style="margin-top: 20px;">There was an error confirming your email.</p>
+                <p style="margin-top: 10px;">The confirmation link may have expired or is invalid. Please request a new confirmation email from the app.</p>
+                <a href="myapp://sign-in" class="btn btn-secondary" style="margin-top: 20px;">Return to App</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CommUnity</h3>
+                    <p>Connecting communities through real-time information sharing.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="mailto:support@communityuo.com">support@communityuo.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CommUnity. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        // Handle Supabase email confirmation
+        // This page is typically opened from an email link
+        // Supabase will redirect here with tokens in the URL
+        
+        function handleEmailConfirmation() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hash);
+            
+            // Check for Supabase tokens
+            const accessToken = urlParams.get('access_token') || hashParams.get('access_token');
+            const type = urlParams.get('type') || hashParams.get('type');
+            
+            if (accessToken && type === 'signup') {
+                // Email confirmation successful
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('status-icon').textContent = '✅';
+                document.getElementById('status-title').textContent = 'Email Confirmed!';
+                document.getElementById('status-message').textContent = '';
+                document.getElementById('success-message').style.display = 'block';
+                
+                // Try to redirect to app
+                setTimeout(() => {
+                    window.location.href = 'myapp://sign-in';
+                }, 2000);
+            } else if (type === 'recovery') {
+                // This is a password reset link, redirect
+                window.location.href = 'reset-password.html' + window.location.search + window.location.hash;
+            } else {
+                // Check if there's an error
+                const error = urlParams.get('error') || hashParams.get('error');
+                const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+                
+                if (error) {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('status-icon').textContent = '❌';
+                    document.getElementById('status-title').textContent = 'Confirmation Failed';
+                    document.getElementById('status-message').textContent = errorDescription || 'An error occurred during email confirmation.';
+                    document.getElementById('error-message').style.display = 'block';
+                } else {
+                    // No tokens found, show generic message
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('status-icon').textContent = 'ℹ️';
+                    document.getElementById('status-title').textContent = 'Email Confirmation';
+                    document.getElementById('status-message').textContent = 'If you clicked a confirmation link, please wait a moment. If the page doesn\'t update, the link may have expired.';
+                }
+            }
+        }
+        
+        // Run on page load
+        handleEmailConfirmation();
+    </script>
+</body>
+</html>
+
