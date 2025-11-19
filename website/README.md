@@ -43,10 +43,10 @@ Upload all files to your web hosting provider's public HTML directory.
 
 Before deploying, update the email addresses in the following files:
 
-- `privacy-policy.html` - Replace `privacy@communityuo.com` and `support@communityuo.com`
-- `terms-of-service.html` - Replace `support@communityuo.com`
-- `contact.html` - Replace `support@communityuo.com` and `privacy@communityuo.com`
-- `index.html` - Replace `support@communityuo.com`
+- `privacy-policy.html` - Replace `privacy@communityuo.com` and `support@community-app.ca`
+- `terms-of-service.html` - Replace `support@community-app.ca`
+- `contact.html` - Replace `support@community-app.ca` and `privacy@communityuo.com`
+- `index.html` - Replace `support@community-app.ca`
 
 ### Update Supabase Redirect URLs
 
@@ -108,4 +108,4 @@ Before deploying:
 
 ## Support
 
-For questions or issues, contact: support@communityuo.com
+For questions or issues, contact: support@community-app.ca

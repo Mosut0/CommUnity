@@ -360,7 +360,7 @@ export default function TermsOfService() {
         <ThemedText
           style={[styles.paragraph, { color: uiTheme.textSecondary }]}
         >
-          Email: support@communityuo.com
+          Email: support@community-app.ca
         </ThemedText>
 
         <View style={styles.spacer} />

@@ -534,7 +534,7 @@ export default function PrivacyPolicy() {
         <ThemedText
           style={[styles.paragraph, { color: uiTheme.textSecondary }]}
         >
-          For general support: support@communityuo.com
+          For general support: support@community-app.ca
         </ThemedText>
 
         <View style={styles.spacer} />
