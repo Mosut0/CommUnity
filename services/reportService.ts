@@ -7,6 +7,11 @@ import { uploadImage } from '@/services/imageService';
 import {
   Report,
   CreateReportData,
+  UpdateReportData,
+  UpdateEventData,
+  UpdateHazardData,
+  UpdateLostItemData,
+  UpdateFoundItemData,
   ReportServiceResponse,
   ReportFilters,
   ReportQueryOptions,
@@ -290,6 +295,148 @@ export async function createReport(
     return completeReport;
   } catch (error) {
     console.error('Error in createReport:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Update a report
+ */
+export async function updateReport(
+  reportId: number,
+  reportData: UpdateReportData,
+  categoryData?:
+    | UpdateEventData
+    | UpdateHazardData
+    | UpdateLostItemData
+    | UpdateFoundItemData
+): Promise<ReportServiceResponse<Report>> {
+  try {
+    console.log('=== UPDATE REPORT DEBUG ===');
+    console.log('Report ID:', reportId);
+    console.log('Update Data:', reportData);
+    console.log('Category Data:', categoryData);
+
+    // Check if user is authenticated
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    console.log('Current user:', user?.id);
+
+    // Update main report data
+    const { data: updatedData, error: reportError } = await supabase
+      .from('reports')
+      .update(reportData)
+      .eq('reportid', reportId)
+      .select();
+
+    console.log('Update result:', updatedData);
+    console.log('Update error:', reportError);
+
+    if (reportError) {
+      console.error('Report update error:', reportError);
+      return { success: false, error: reportError };
+    }
+
+    // Update category-specific data if provided
+    if (categoryData) {
+      // First, get the report to determine its category
+      const { data: report } = await supabase
+        .from('reports')
+        .select('category')
+        .eq('reportid', reportId)
+        .single();
+
+      if (report) {
+        let categoryError = null;
+
+        switch (report.category) {
+          case 'event':
+            console.log('Updating event data:', categoryData);
+            const { data: eventData, error: eventError } = await supabase
+              .from('events')
+              .update(categoryData as UpdateEventData)
+              .eq('reportid', reportId)
+              .select();
+            console.log('Event update result:', eventData);
+            console.log('Event update error:', eventError);
+            categoryError = eventError;
+            break;
+
+          case 'safety':
+            console.log('Updating hazard data:', categoryData);
+            const { data: hazardData, error: hazardError } = await supabase
+              .from('hazards')
+              .update(categoryData as UpdateHazardData)
+              .eq('reportid', reportId)
+              .select();
+            console.log('Hazard update result:', hazardData);
+            console.log('Hazard update error:', hazardError);
+            categoryError = hazardError;
+            break;
+
+          case 'lost':
+            console.log('Updating lost item data:', categoryData);
+            const { data: lostData, error: lostError } = await supabase
+              .from('lostitems')
+              .update(categoryData as UpdateLostItemData)
+              .eq('reportid', reportId)
+              .select();
+            console.log('Lost item update result:', lostData);
+            console.log('Lost item update error:', lostError);
+            categoryError = lostError;
+            break;
+
+          case 'found':
+            console.log('Updating found item data:', categoryData);
+            const { data: foundData, error: foundError } = await supabase
+              .from('founditems')
+              .update(categoryData as UpdateFoundItemData)
+              .eq('reportid', reportId)
+              .select();
+            console.log('Found item update result:', foundData);
+            console.log('Found item update error:', foundError);
+            categoryError = foundError;
+            break;
+        }
+
+        if (categoryError) {
+          console.error('Category data update error:', categoryError);
+          return { success: false, error: categoryError };
+        }
+      }
+    }
+
+    // Fetch the updated report
+    const updatedReport = await fetchReportById(reportId);
+    return updatedReport;
+  } catch (error) {
+    console.error('Error in updateReport:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Delete a report
+ */
+export async function deleteReport(
+  reportId: number
+): Promise<ReportServiceResponse<boolean>> {
+  try {
+    // Delete from main reports table (cascade will handle related tables)
+    const { error } = await supabase
+      .from('reports')
+      .delete()
+      .eq('reportid', reportId);
+
+    if (error) {
+      console.error('Report delete error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data: true };
+  } catch (error) {
+    console.error('Error in deleteReport:', error);
     return { success: false, error };
   }
 }

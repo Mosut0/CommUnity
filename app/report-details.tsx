@@ -23,6 +23,7 @@ import { getDistanceKm, formatDistance } from '@/utils/distance';
 import { MARKER_COLORS } from '@/constants/Markers';
 import { Colors } from '@/constants/Colors';
 import type { ThemeName } from '@/constants/Colors';
+import ReportActions from '@/components/ReportActions';
 
 interface DetailedReport {
   reportid: number;
@@ -56,10 +57,21 @@ export default function ReportDetails() {
   );
   const [distanceText, setDistanceText] = useState<string | null>(null);
   const [distanceUnit, setDistanceUnit] = useState<'km' | 'miles'>('km');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [imageExpanded, setImageExpanded] = useState(false);
+
+  // Get current user
+  useEffect(() => {
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -654,6 +666,29 @@ export default function ReportDetails() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Edit/Delete Actions for report owner */}
+        {report && currentUserId && (
+          <ReportActions
+            report={{
+              reportid: report.reportid,
+              userid: report.userid || '',
+              category: report.category as any,
+              description: report.description,
+              location: report.location,
+              createdat: report.created_at,
+            }}
+            currentUserId={currentUserId}
+            onUpdate={() => {
+              // Refresh the report data
+              fetchReportDetails();
+            }}
+            onDelete={() => {
+              // Navigate back after deletion
+              router.back();
+            }}
+          />
+        )}
       </ScrollView>
 
       {/* Expanded Image Modal */}
