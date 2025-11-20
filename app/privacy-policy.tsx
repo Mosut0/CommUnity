@@ -529,12 +529,12 @@ export default function PrivacyPolicy() {
         <ThemedText
           style={[styles.paragraph, { color: uiTheme.textSecondary }]}
         >
-          Email: privacy@communityuo.com
+          Email: communityappuo@gmail.com
         </ThemedText>
         <ThemedText
           style={[styles.paragraph, { color: uiTheme.textSecondary }]}
         >
-          For general support: support@community-app.ca
+          For general support: communityappuo@gmail.com
         </ThemedText>
 
         <View style={styles.spacer} />
