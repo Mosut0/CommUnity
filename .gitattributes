@@ -1,0 +1,10 @@
+# Ensure package-lock.json uses LF line endings (required for EAS Build on Linux)
+package-lock.json text eol=lf
+
+# Other files
+*.json text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+

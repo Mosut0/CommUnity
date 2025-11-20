@@ -1,0 +1,41 @@
+# EAS Build ignore file
+# Files and directories to exclude from the build
+
+# Dependencies will be installed fresh on EAS servers
+# node_modules/ - Don't ignore, EAS needs to see package.json structure
+
+# Build artifacts
+.expo/
+dist/
+web-build/
+build/
+*.apk
+*.aab
+
+# Test files
+coverage/
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+*.md
+!README.md
+BUILD_GUIDE.md
+
+# CI/CD
+.github/
+
+# Website (not needed for app build)
+website/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+

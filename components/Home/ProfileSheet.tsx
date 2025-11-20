@@ -23,6 +23,8 @@ type ProfileSheetProps = {
   onPressChangeDistance: () => void;
   onPressChangeUnit: () => void;
   onPressNotifications: () => void;
+  onPressTermsOfService: () => void;
+  onPressPrivacyPolicy: () => void;
   onPressSignOut: () => void;
   insetsBottom: number;
   uiTheme: ThemeConfig;
@@ -37,6 +39,8 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
   onPressChangeDistance,
   onPressChangeUnit,
   onPressNotifications,
+  onPressTermsOfService,
+  onPressPrivacyPolicy,
   onPressSignOut,
   insetsBottom,
   uiTheme,
@@ -290,6 +294,97 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
                       ]}
                     >
                       Manage notification preferences
+                    </ThemedText>
+                  </View>
+                  <MaterialIcons
+                    name='chevron-right'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={[styles.sheetSection, { borderColor: uiTheme.divider }]}
+              >
+                <TouchableOpacity
+                  style={styles.sheetRow}
+                  onPress={onPressTermsOfService}
+                >
+                  <View
+                    style={[
+                      styles.sheetIcon,
+                      { backgroundColor: uiTheme.chipBg },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name='description'
+                      size={20}
+                      color={uiTheme.textSecondary}
+                    />
+                  </View>
+                  <View style={styles.sheetRowTextWrap}>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowTitle,
+                        { color: uiTheme.textPrimary },
+                      ]}
+                    >
+                      Terms of Service
+                    </ThemedText>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowSubtitle,
+                        { color: uiTheme.textSecondary },
+                      ]}
+                    >
+                      Read our terms and conditions
+                    </ThemedText>
+                  </View>
+                  <MaterialIcons
+                    name='chevron-right'
+                    size={20}
+                    color={uiTheme.textSecondary}
+                  />
+                </TouchableOpacity>
+                <View
+                  style={[
+                    styles.rowDivider,
+                    { backgroundColor: uiTheme.divider },
+                  ]}
+                />
+                <TouchableOpacity
+                  style={styles.sheetRow}
+                  onPress={onPressPrivacyPolicy}
+                >
+                  <View
+                    style={[
+                      styles.sheetIcon,
+                      { backgroundColor: uiTheme.chipBg },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name='privacy-tip'
+                      size={20}
+                      color={uiTheme.textSecondary}
+                    />
+                  </View>
+                  <View style={styles.sheetRowTextWrap}>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowTitle,
+                        { color: uiTheme.textPrimary },
+                      ]}
+                    >
+                      Privacy Policy
+                    </ThemedText>
+                    <ThemedText
+                      style={[
+                        styles.sheetRowSubtitle,
+                        { color: uiTheme.textSecondary },
+                      ]}
+                    >
+                      How we handle your data
                     </ThemedText>
                   </View>
                   <MaterialIcons
