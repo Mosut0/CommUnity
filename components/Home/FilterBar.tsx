@@ -75,7 +75,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         'hazard',
         'Hazards',
         'alert-circle-outline',
-        MARKER_COLORS.safety
+        MARKER_COLORS.hazard
       )}
       {renderFilterButton(
         'event',

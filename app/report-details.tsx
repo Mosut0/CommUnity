@@ -206,8 +206,8 @@ export default function ReportDetails() {
             name: 'checkmark-circle-outline',
             color: MARKER_COLORS.found,
           };
-        case 'safety':
-          return { name: 'alert-circle-outline', color: MARKER_COLORS.safety };
+        case 'hazard':
+          return { name: 'alert-circle-outline', color: MARKER_COLORS.hazard };
         default:
           return { name: 'information-circle-outline', color: uiTheme.accent };
       }
@@ -543,8 +543,8 @@ export default function ReportDetails() {
             </View>
           )}
 
-          {/* Safety/Hazard-specific details */}
-          {report.category === 'safety' && report.hazardtype && (
+          {/* Hazard-specific details */}
+          {report.category === 'hazard' && report.hazardtype && (
             <View style={styles.detailRow}>
               <Ionicons
                 name='warning-outline'

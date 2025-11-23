@@ -5,7 +5,7 @@ export const MARKER_COLORS = {
   event: '#7C3AED', // purple-600
   lost: '#EAB308', // yellow-500
   found: '#22C55E', // green-500
-  safety: '#EF4444', // red-500
+  hazard: '#EF4444', // red-500
   default: '#9E9E9E', // gray-500
 } as const;
 
@@ -21,7 +21,7 @@ export const CATEGORY_DISPLAY_NAMES = {
 // Database category names (for filtering)
 export const DB_CATEGORY_NAMES = {
   event: 'event',
-  safety: 'safety',
+  hazard: 'hazard',
   lost: 'lost',
   found: 'found',
 } as const;
@@ -29,7 +29,7 @@ export const DB_CATEGORY_NAMES = {
 // Icon names for each category (using Ionicons)
 export const CATEGORY_ICONS = {
   event: 'calendar-outline',
-  safety: 'alert-circle-outline',
+  hazard: 'alert-circle-outline',
   lost: 'help-circle-outline',
   found: 'checkmark-circle-outline',
   default: 'information-circle-outline',

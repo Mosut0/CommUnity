@@ -129,7 +129,7 @@ serve(async req => {
       const events = await eventResp.json();
       additionalDetails = events?.[0];
     } else if (
-      report.type === 'safety' ||
+      report.type === 'hazard' ||
       report.type === 'infrastructure' ||
       report.type === 'wildlife' ||
       report.type === 'health'
@@ -221,7 +221,7 @@ serve(async req => {
           }
           break;
 
-        case 'safety':
+        case 'hazard':
           if (additionalDetails?.hazardtype) {
             title = `Safety Alert: ${additionalDetails.hazardtype}`;
             body =

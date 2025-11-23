@@ -93,7 +93,7 @@ export default function ReportActions({
         Alert.alert('Error', 'Event type cannot be empty');
         return;
       }
-    } else if (report.category === 'safety') {
+    } else if (report.category === 'hazard') {
       if (!editHazardType.trim()) {
         Alert.alert('Error', 'Hazard type cannot be empty');
         return;
@@ -138,7 +138,7 @@ export default function ReportActions({
         } as UpdateEventData;
         break;
 
-      case 'safety':
+      case 'hazard':
         categoryData = {
           hazardtype: editHazardType.trim(),
         } as UpdateHazardData;
@@ -404,7 +404,7 @@ export default function ReportActions({
               )}
 
               {/* Hazard-specific fields */}
-              {report.category === 'safety' && (
+              {report.category === 'hazard' && (
                 <>
                   <Text
                     style={[

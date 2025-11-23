@@ -89,7 +89,7 @@ export async function fetchReports(
               additionalData = eventData || {};
               break;
 
-            case 'safety':
+            case 'hazard':
               const { data: hazardData } = await supabase
                 .from('hazards')
                 .select('*')
@@ -167,7 +167,7 @@ export async function fetchReportById(
         additionalData = eventData || {};
         break;
 
-      case 'safety':
+      case 'hazard':
         const { data: hazardData } = await supabase
           .from('hazards')
           .select('*')
@@ -256,7 +256,7 @@ export async function createReport(
         categoryError = eventError;
         break;
 
-      case 'safety':
+      case 'hazard':
         const { error: hazardError } = await supabase.from('hazards').insert({
           reportid: reportId,
           hazardtype: reportData.data.hazardType,
@@ -363,7 +363,7 @@ export async function updateReport(
             categoryError = eventError;
             break;
 
-          case 'safety':
+          case 'hazard':
             console.log('Updating hazard data:', categoryData);
             const { data: hazardData, error: hazardError } = await supabase
               .from('hazards')
@@ -474,7 +474,7 @@ export async function fetchReportsByUser(
             additionalData = eventData || {};
             break;
 
-          case 'safety':
+          case 'hazard':
             const { data: hazardData } = await supabase
               .from('hazards')
               .select('*')
