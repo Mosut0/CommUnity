@@ -96,7 +96,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
   const getIconColor = (key: string) => {
     switch (key) {
       case 'hazard':
-        return MARKER_COLORS.safety;
+        return MARKER_COLORS.hazard;
       case 'event':
         return MARKER_COLORS.event;
       case 'lost':

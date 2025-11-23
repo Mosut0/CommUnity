@@ -157,9 +157,9 @@ describe('reportService', () => {
     });
 
     it('should fetch category-specific data for different report types', async () => {
-      const mockSafetyReport = {
+      const mockHazardReport = {
         reportid: 2,
-        category: 'safety',
+        category: 'hazard',
         description: 'Hazard',
         location: '(40.7128,-74.0060)',
         createdat: '2024-01-01',
@@ -172,7 +172,7 @@ describe('reportService', () => {
           eq: jest.fn().mockReturnThis(),
           single: jest
             .fn()
-            .mockResolvedValue({ data: mockSafetyReport, error: null }),
+            .mockResolvedValue({ data: mockHazardReport, error: null }),
         })
         .mockReturnValueOnce({
           select: jest.fn().mockReturnThis(),
@@ -186,7 +186,7 @@ describe('reportService', () => {
       const result = await fetchReportById(2);
 
       expect(result.success).toBe(true);
-      expect(result.data?.category).toBe('safety');
+      expect(result.data?.category).toBe('hazard');
     });
   });
 
@@ -243,10 +243,10 @@ describe('reportService', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should create a safety report successfully', async () => {
+    it('should create a hazard report successfully', async () => {
       const mockReportData = {
         reportid: 2,
-        category: 'safety',
+        category: 'hazard',
         description: 'Pothole',
         location: '(40.7128,-74.0060)',
         createdat: '2024-01-01',
@@ -281,7 +281,7 @@ describe('reportService', () => {
         });
 
       const createData = {
-        type: 'safety' as const,
+        type: 'hazard' as const,
         data: {
           hazardType: 'Pothole',
           description: 'Pothole',
@@ -531,7 +531,7 @@ describe('reportService', () => {
       expect(supabase.from).toHaveBeenCalledWith('events');
     });
 
-    it('should update a report with category-specific data (safety)', async () => {
+    it('should update a report with category-specific data (hazard)', async () => {
       const mockReportUpdate = jest.fn().mockReturnThis();
       const mockReportEq = jest.fn().mockReturnThis();
       const mockReportSelect = jest
@@ -556,7 +556,7 @@ describe('reportService', () => {
         eq: jest.fn().mockReturnThis(),
         single: jest
           .fn()
-          .mockResolvedValue({ data: { category: 'safety' }, error: null }),
+          .mockResolvedValue({ data: { category: 'hazard' }, error: null }),
       });
 
       // Mock for category update
@@ -575,7 +575,7 @@ describe('reportService', () => {
             data: {
               reportid: 2,
               description: 'Updated hazard',
-              category: 'safety',
+              category: 'hazard',
             },
             error: null,
           }),

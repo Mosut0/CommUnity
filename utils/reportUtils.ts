@@ -88,7 +88,7 @@ export function getReportTitle(report: Report): string {
   switch (report.category) {
     case 'event':
       return `Event: ${report.eventtype || 'Unknown Event'}`;
-    case 'safety':
+    case 'hazard':
       return `Hazard: ${report.hazardtype || 'Unknown Hazard'}`;
     case 'lost':
       return `Lost: ${report.itemtype || 'Unknown Item'}`;
@@ -137,7 +137,7 @@ export function matchesFilter(
   filter: 'all' | 'hazard' | 'event' | 'lost' | 'found'
 ): boolean {
   if (filter === 'all') return true;
-  if (filter === 'hazard') return report.category === 'safety';
+  if (filter === 'hazard') return report.category === 'hazard';
   if (filter === 'event') return report.category === 'event';
   if (filter === 'lost') return report.category === 'lost';
   if (filter === 'found') return report.category === 'found';

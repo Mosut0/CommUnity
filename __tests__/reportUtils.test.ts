@@ -54,8 +54,8 @@ describe('reportUtils', () => {
       expect(color).toBe('#7C3AED');
     });
 
-    it('should return correct color for safety', () => {
-      const color = getMarkerColor('safety');
+    it('should return correct color for hazard', () => {
+      const color = getMarkerColor('hazard');
       expect(color).toBe('#EF4444');
     });
 
@@ -71,8 +71,8 @@ describe('reportUtils', () => {
       expect(icon).toBe('calendar-outline');
     });
 
-    it('should return correct icon for safety', () => {
-      const icon = getCategoryIcon('safety');
+    it('should return correct icon for hazard', () => {
+      const icon = getCategoryIcon('hazard');
       expect(icon).toBe('alert-circle-outline');
     });
 
@@ -95,7 +95,7 @@ describe('reportUtils', () => {
 
     it('should return hazard title', () => {
       const report = {
-        category: 'safety',
+        category: 'hazard',
         hazardtype: 'Pothole',
       } as Report;
 
@@ -158,7 +158,7 @@ describe('reportUtils', () => {
 
     it('should return plain description for reports without extras', () => {
       const report = {
-        category: 'safety',
+        category: 'hazard',
         description: 'Pothole on road',
       } as Report;
 
@@ -178,8 +178,8 @@ describe('reportUtils', () => {
       expect(matchesFilter(report, 'event')).toBe(true);
     });
 
-    it('should match hazard filter for safety category', () => {
-      const report = { category: 'safety' } as Report;
+    it('should match hazard filter for hazard category', () => {
+      const report = { category: 'hazard' } as Report;
       expect(matchesFilter(report, 'hazard')).toBe(true);
     });
 
@@ -251,7 +251,7 @@ describe('reportUtils', () => {
         {
           reportid: 2,
           location: '(40.7128,-74.0060)',
-          category: 'safety',
+          category: 'hazard',
         } as Report,
         {
           reportid: 3,

@@ -262,8 +262,8 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
           </View>
         )}
 
-        {/* Safety/Hazard-specific details */}
-        {report.category === 'safety' && report.hazardtype && (
+        {/* Hazard-specific details */}
+        {report.category === 'hazard' && report.hazardtype && (
           <View style={styles.detailRow}>
             <Ionicons
               name='warning-outline'

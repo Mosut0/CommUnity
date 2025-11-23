@@ -47,7 +47,7 @@ const dbNameByDisplay: Record<string, string> = {
   Events: 'event',
   Lost: 'lost',
   Found: 'found',
-  Hazards: 'safety',
+  Hazards: 'hazard',
 };
 
 type ThemeColors = typeof Colors.light;
@@ -219,8 +219,8 @@ export default function Forums() {
             name: 'checkmark-circle-outline',
             color: MARKER_COLORS.found,
           };
-        case 'safety':
-          return { name: 'alert-circle-outline', color: MARKER_COLORS.safety };
+        case 'hazard':
+          return { name: 'alert-circle-outline', color: MARKER_COLORS.hazard };
         default:
           return { name: 'information-circle-outline', color: uiTheme.accent };
       }
@@ -393,10 +393,10 @@ export default function Forums() {
             <View style={styles.modalGrid}>
               {[
                 {
-                  key: 'safety',
+                  key: 'hazard',
                   label: 'Hazard',
                   icon: 'alert-circle-outline',
-                  color: MARKER_COLORS.safety,
+                  color: MARKER_COLORS.hazard,
                 },
                 {
                   key: 'event',
@@ -430,7 +430,7 @@ export default function Forums() {
                     }
                     setIsCreateVisible(false);
 
-                    if (c.key === 'safety') {
+                    if (c.key === 'hazard') {
                       setIsHazardFormVisible(true);
                     } else if (c.key === 'event') {
                       setIsEventFormVisible(true);

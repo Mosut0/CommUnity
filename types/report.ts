@@ -3,7 +3,7 @@
 
 export type ReportCategory =
   | 'event'
-  | 'safety'
+  | 'hazard'
   | 'lost'
   | 'found'
   | 'infrastructure'
@@ -44,7 +44,7 @@ export interface FoundItemData {
 // Union type for category-specific data
 export type CategorySpecificData =
   | { category: 'event'; data: EventData }
-  | { category: 'safety'; data: HazardData }
+  | { category: 'hazard'; data: HazardData }
   | { category: 'lost'; data: LostItemData }
   | { category: 'found'; data: FoundItemData }
   | {
@@ -98,7 +98,7 @@ export interface CreateFoundItemReportData {
 
 export type CreateReportData =
   | { type: 'event'; data: CreateEventReportData }
-  | { type: 'safety'; data: CreateHazardReportData }
+  | { type: 'hazard'; data: CreateHazardReportData }
   | { type: 'lost'; data: CreateLostItemReportData }
   | { type: 'found'; data: CreateFoundItemReportData };
 

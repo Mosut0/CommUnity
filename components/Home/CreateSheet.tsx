@@ -34,7 +34,7 @@ const ACTIONS: {
     action: 'hazard',
     label: 'Hazard',
     icon: 'alert-circle-outline',
-    color: MARKER_COLORS.safety,
+    color: MARKER_COLORS.hazard,
   },
   {
     action: 'event',
