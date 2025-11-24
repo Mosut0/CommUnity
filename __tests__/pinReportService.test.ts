@@ -274,9 +274,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ 
-          data: { strike_count: 2 }, 
-          error: null 
+        single: jest.fn().mockResolvedValue({
+          data: { strike_count: 2 },
+          error: null,
         }),
       });
 
@@ -328,9 +328,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ 
-          data: { strike_count: 4 }, 
-          error: null 
+        single: jest.fn().mockResolvedValue({
+          data: { strike_count: 4 },
+          error: null,
         }),
       });
 
@@ -377,9 +377,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ 
-          data: { strike_count: 2 }, 
-          error: null 
+        single: jest.fn().mockResolvedValue({
+          data: { strike_count: 2 },
+          error: null,
         }),
       });
 
