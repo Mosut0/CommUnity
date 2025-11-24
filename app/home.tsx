@@ -25,10 +25,12 @@ import { Colors, CommonColors } from '@/constants/Colors';
 import type { ThemeName } from '@/constants/Colors';
 import { FilterBar } from '@/components/Home/FilterBar';
 import { ProfileSheet } from '@/components/Home/ProfileSheet';
+import { AccountSettingsSheet } from '@/components/Home/AccountSettingsSheet';
 import { ChangeEmailSheet } from '@/components/Home/ChangeEmailSheet';
 import { DistanceSheet } from '@/components/Home/DistanceSheet';
 import { DistanceUnitSheet } from '@/components/Home/DistanceUnitSheet';
 import { NotificationSheet } from '@/components/Home/NotificationSheet';
+import { AboutSheet } from '@/components/Home/AboutSheet';
 import { CreateSheet } from '@/components/Home/CreateSheet';
 import { SpeedDial } from '@/components/Home/SpeedDial';
 import type { FilterValue, DistanceUnit } from '@/components/Home/types';
@@ -107,9 +109,13 @@ export default function Home() {
   const [profileSheetMounted, setProfileSheetMounted] = useState(false);
   const settingsAnim = React.useRef(new Animated.Value(0)).current; // 0 hidden, 1 shown
   const [nextModal, setNextModal] = useState<
-    null | 'email' | 'distance' | 'unit' | 'notifications'
+    null | 'account' | 'email' | 'distance' | 'unit' | 'notifications' | 'about'
   >(null);
-  // Animated email & distance sheets
+  const [shouldReopenProfile, setShouldReopenProfile] = useState(false);
+  const [shouldReopenAccount, setShouldReopenAccount] = useState(false);
+  // Animated sheets
+  const [accountMounted, setAccountMounted] = useState(false);
+  const [isAccountModalVisible, setIsAccountModalVisible] = useState(false);
   const [emailMounted, setEmailMounted] = useState(false);
   const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -119,10 +125,14 @@ export default function Home() {
   const [notificationsMounted, setNotificationsMounted] = useState(false);
   const [isNotificationsModalVisible, setIsNotificationsModalVisible] =
     useState(false);
+  const [aboutMounted, setAboutMounted] = useState(false);
+  const [isAboutModalVisible, setIsAboutModalVisible] = useState(false);
+  const accountAnim = React.useRef(new Animated.Value(0)).current;
   const emailAnim = React.useRef(new Animated.Value(0)).current;
   const distanceAnim = React.useRef(new Animated.Value(0)).current;
   const unitAnim = React.useRef(new Animated.Value(0)).current;
   const notificationsAnim = React.useRef(new Animated.Value(0)).current;
+  const aboutAnim = React.useRef(new Animated.Value(0)).current;
 
   const runFabAnimation = (to: number) => {
     Animated.timing(fabAnim, {
@@ -162,6 +172,10 @@ export default function Home() {
     openForm(action);
   };
 
+  const openAccountModal = React.useCallback(() => {
+    setIsAccountModalVisible(true);
+  }, []);
+
   const openEmailModal = React.useCallback(() => {
     setNewEmail('');
     setIsEmailModalVisible(true);
@@ -197,6 +211,10 @@ export default function Home() {
     setIsNotificationsModalVisible(true);
   }, []);
 
+  const openAboutModal = React.useCallback(() => {
+    setIsAboutModalVisible(true);
+  }, []);
+
   // Animate settings sheet open/close
   useEffect(() => {
     if (isProfileModalVisible) {
@@ -219,7 +237,9 @@ export default function Home() {
       }).start(({ finished }) => {
         if (finished) {
           setProfileSheetMounted(false);
-          if (nextModal === 'email') {
+          if (nextModal === 'account') {
+            openAccountModal();
+          } else if (nextModal === 'email') {
             openEmailModal();
           } else if (nextModal === 'distance') {
             openDistanceModal();
@@ -227,6 +247,8 @@ export default function Home() {
             openUnitModal();
           } else if (nextModal === 'notifications') {
             openNotificationsModal();
+          } else if (nextModal === 'about') {
+            openAboutModal();
           }
           setNextModal(null);
         }
@@ -239,9 +261,41 @@ export default function Home() {
     openEmailModal,
     openDistanceModal,
     openUnitModal,
+    openAccountModal,
     openNotificationsModal,
+    openAboutModal,
     settingsAnim,
   ]);
+
+  // Animate account settings modal
+  useEffect(() => {
+    if (isAccountModalVisible) {
+      setAccountMounted(true);
+      accountAnim.stopAnimation();
+      accountAnim.setValue(0);
+      Animated.timing(accountAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else if (accountMounted) {
+      Animated.timing(accountAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setAccountMounted(false);
+          if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
+        }
+      });
+    }
+  }, [isAccountModalVisible, accountMounted, accountAnim, shouldReopenProfile]);
 
   // Animate email modal
   useEffect(() => {
@@ -265,10 +319,17 @@ export default function Home() {
         if (finished) {
           setEmailMounted(false);
           setNewEmail('');
+          if (shouldReopenAccount) {
+            setShouldReopenAccount(false);
+            setIsAccountModalVisible(true);
+          } else if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
         }
       });
     }
-  }, [isEmailModalVisible, emailMounted, emailAnim]);
+  }, [isEmailModalVisible, emailMounted, emailAnim, shouldReopenAccount, shouldReopenProfile]);
 
   // Animate distance modal
   useEffect(() => {
@@ -289,10 +350,16 @@ export default function Home() {
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
-        if (finished) setDistanceMounted(false);
+        if (finished) {
+          setDistanceMounted(false);
+          if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
+        }
       });
     }
-  }, [isDistanceModalVisible, distanceMounted, distanceAnim]);
+  }, [isDistanceModalVisible, distanceMounted, distanceAnim, shouldReopenProfile]);
 
   // Animate unit modal
   useEffect(() => {
@@ -313,10 +380,16 @@ export default function Home() {
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
-        if (finished) setUnitMounted(false);
+        if (finished) {
+          setUnitMounted(false);
+          if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
+        }
       });
     }
-  }, [isUnitModalVisible, unitMounted, unitAnim]);
+  }, [isUnitModalVisible, unitMounted, unitAnim, shouldReopenProfile]);
 
   // Animate notifications modal
   useEffect(() => {
@@ -337,10 +410,46 @@ export default function Home() {
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
-        if (finished) setNotificationsMounted(false);
+        if (finished) {
+          setNotificationsMounted(false);
+          if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
+        }
       });
     }
-  }, [isNotificationsModalVisible, notificationsMounted, notificationsAnim]);
+  }, [isNotificationsModalVisible, notificationsMounted, notificationsAnim, shouldReopenProfile]);
+
+  // Animate about modal
+  useEffect(() => {
+    if (isAboutModalVisible) {
+      setAboutMounted(true);
+      aboutAnim.stopAnimation();
+      aboutAnim.setValue(0);
+      Animated.timing(aboutAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else if (aboutMounted) {
+      Animated.timing(aboutAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setAboutMounted(false);
+          if (shouldReopenProfile) {
+            setShouldReopenProfile(false);
+            setIsProfileModalVisible(true);
+          }
+        }
+      });
+    }
+  }, [isAboutModalVisible, aboutMounted, aboutAnim, shouldReopenProfile]);
 
   // Fetch the current session and listen for authentication state changes
   useEffect(() => {
@@ -400,6 +509,11 @@ export default function Home() {
     setIsProfileModalVisible(!isProfileModalVisible);
   };
 
+  // Toggle the visibility of the account settings modal
+  const toggleAccountModal = () => {
+    setIsAccountModalVisible(!isAccountModalVisible);
+  };
+
   // Toggle the visibility of the email modal
   const toggleEmailModal = () => {
     setIsEmailModalVisible(!isEmailModalVisible);
@@ -438,6 +552,11 @@ export default function Home() {
     setIsNotificationsModalVisible(!isNotificationsModalVisible);
   };
 
+  // Toggle the visibility of the about modal
+  const toggleAboutModal = () => {
+    setIsAboutModalVisible(!isAboutModalVisible);
+  };
+
   // Handle saving the new distance unit
   const handleSaveUnit = async () => {
     if (session) {
@@ -470,7 +589,6 @@ export default function Home() {
         }
       }
     }
-    setIsUnitModalVisible(false);
   };
 
   // Handle user sign out
@@ -487,22 +605,37 @@ export default function Home() {
       return;
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      session.user.email,
-      {
-        redirectTo: 'myapp://reset-password',
-      }
-    );
+    Alert.alert(
+      'Reset Password',
+      'Are you sure you want to reset your password? We will send a password reset link to your email.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes, Send Link',
+          onPress: async () => {
+            const { error } = await supabase.auth.resetPasswordForEmail(
+              session.user.email,
+              {
+                redirectTo: 'myapp://reset-password',
+              }
+            );
 
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert(
-        'Check Your Email',
-        "We've sent you a password reset link. Please check your email inbox.",
-        [{ text: 'OK', onPress: () => setIsProfileModalVisible(false) }]
-      );
-    }
+            if (error) {
+              Alert.alert('Error', error.message);
+            } else {
+              Alert.alert(
+                'Check Your Email',
+                "We've sent you a password reset link. Please check your email inbox.",
+                [{ text: 'OK', onPress: () => setIsAccountModalVisible(false) }]
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Handle email change request
@@ -540,6 +673,7 @@ export default function Home() {
             text: 'OK',
             onPress: () => {
               setIsEmailModalVisible(false);
+              setIsAccountModalVisible(false);
               setNewEmail('');
             },
           },
@@ -652,11 +786,10 @@ export default function Home() {
         visible={profileSheetMounted}
         animation={settingsAnim}
         onRequestClose={toggleProfileModal}
-        onPressChangeEmail={() => {
-          setNextModal('email');
+        onPressAccountSettings={() => {
+          setNextModal('account');
           setIsProfileModalVisible(false);
         }}
-        onPressChangePassword={handleChangePassword}
         onPressChangeDistance={() => {
           setNextModal('distance');
           setIsProfileModalVisible(false);
@@ -669,7 +802,29 @@ export default function Home() {
           setNextModal('notifications');
           setIsProfileModalVisible(false);
         }}
+        onPressAbout={() => {
+          setNextModal('about');
+          setIsProfileModalVisible(false);
+        }}
         onPressSignOut={handleSignOut}
+        insetsBottom={insets.bottom}
+        uiTheme={uiTheme}
+      />
+
+      <AccountSettingsSheet
+        visible={accountMounted}
+        animation={accountAnim}
+        onRequestClose={toggleAccountModal}
+        onPressBack={() => {
+          setShouldReopenProfile(true);
+          setIsAccountModalVisible(false);
+        }}
+        onPressChangeEmail={() => {
+          setIsAccountModalVisible(false);
+          // Small delay to allow account modal to close before opening email modal
+          setTimeout(() => setIsEmailModalVisible(true), 250);
+        }}
+        onPressChangePassword={handleChangePassword}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}
       />
@@ -678,6 +833,10 @@ export default function Home() {
         visible={emailMounted}
         animation={emailAnim}
         onRequestClose={toggleEmailModal}
+        onPressBack={() => {
+          setShouldReopenAccount(true);
+          setIsEmailModalVisible(false);
+        }}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}
         currentEmail={session?.user?.email || ''}
@@ -690,6 +849,10 @@ export default function Home() {
         visible={distanceMounted}
         animation={distanceAnim}
         onRequestClose={toggleDistanceModal}
+        onPressBack={() => {
+          setShouldReopenProfile(true);
+          setIsDistanceModalVisible(false);
+        }}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}
         sliderValue={sliderValue}
@@ -702,6 +865,10 @@ export default function Home() {
         visible={unitMounted}
         animation={unitAnim}
         onRequestClose={toggleUnitModal}
+        onPressBack={() => {
+          setShouldReopenProfile(true);
+          setIsUnitModalVisible(false);
+        }}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}
         distanceUnit={distanceUnit}
@@ -714,8 +881,20 @@ export default function Home() {
         animation={notificationsAnim}
         onRequestClose={toggleNotificationsModal}
         onPressBack={() => {
+          setShouldReopenProfile(true);
           setIsNotificationsModalVisible(false);
-          setIsProfileModalVisible(true);
+        }}
+        insetsBottom={insets.bottom}
+        uiTheme={uiTheme}
+      />
+
+      <AboutSheet
+        visible={aboutMounted}
+        animation={aboutAnim}
+        onRequestClose={toggleAboutModal}
+        onPressBack={() => {
+          setShouldReopenProfile(true);
+          setIsAboutModalVisible(false);
         }}
         insetsBottom={insets.bottom}
         uiTheme={uiTheme}

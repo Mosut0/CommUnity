@@ -239,30 +239,40 @@ export default function ReportDetails() {
     const { latitude, longitude } = coords;
 
     try {
-      // Try Google Maps first
-      const googleMapsUrl =
-        Platform.OS === 'ios'
-          ? `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`
-          : `google.navigation:q=${latitude},${longitude}`;
-
-      const canOpenGoogleMaps = await Linking.canOpenURL(googleMapsUrl);
-
-      if (canOpenGoogleMaps) {
-        await Linking.openURL(googleMapsUrl);
-      } else {
-        // Fallback to platform-specific maps
-        const fallbackUrl =
-          Platform.OS === 'ios'
-            ? `maps://app?daddr=${latitude},${longitude}`
-            : `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
-
-        const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
-
-        if (canOpenFallback) {
-          await Linking.openURL(fallbackUrl);
-        } else {
-          Alert.alert('Error', 'No maps application available');
+      if (Platform.OS === 'ios') {
+        // Try Google Maps first
+        const googleMapsUrl = `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`;
+        
+        try {
+          const supported = await Linking.canOpenURL(googleMapsUrl);
+          if (supported) {
+            await Linking.openURL(googleMapsUrl);
+            return;
+          }
+        } catch (e) {
+          // Google Maps not installed, will fall through to Apple Maps
         }
+        
+        // Fall back to Apple Maps
+        const appleMapsUrl = `maps://app?daddr=${latitude},${longitude}`;
+        await Linking.openURL(appleMapsUrl);
+      } else {
+        // Android: try Google Maps navigation first
+        const googleMapsUrl = `google.navigation:q=${latitude},${longitude}`;
+        
+        try {
+          const supported = await Linking.canOpenURL(googleMapsUrl);
+          if (supported) {
+            await Linking.openURL(googleMapsUrl);
+            return;
+          }
+        } catch (e) {
+          // Google Maps not installed, fall through
+        }
+        
+        // Fall back to web version of Google Maps
+        const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+        await Linking.openURL(webMapsUrl);
       }
     } catch (error) {
       console.error('Error opening directions:', error);
@@ -297,7 +307,9 @@ export default function ReportDetails() {
       shareMessage += `\nDistance: ${distanceText}`;
     }
 
-    shareMessage += `\n\nShared from CommUnity app`;
+    // Add deep link to the report
+    const deepLink = `myapp://report/${report.reportid}`;
+    shareMessage += `\n\nView in CommUnity app: ${deepLink}`;
 
     try {
       const result = await Share.share({
@@ -406,6 +418,32 @@ export default function ReportDetails() {
           <Ionicons name='chevron-back' size={24} color={uiTheme.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Report Details</Text>
+        {report && currentUserId && (
+          <View style={styles.headerActions}>
+            <ReportActions
+              report={{
+                reportid: report.reportid,
+                userid: report.userid || '',
+                category: report.category as any,
+                description: report.description,
+                location: report.location,
+                createdat: report.created_at,
+                eventtype: report.eventtype,
+                time: report.eventtime,
+                hazardtype: report.hazardtype,
+                itemtype: report.itemtype,
+                contactinfo: report.contactinfo,
+              }}
+              currentUserId={currentUserId}
+              onUpdate={() => {
+                fetchReportDetails();
+              }}
+              onDelete={() => {
+                router.back();
+              }}
+            />
+          </View>
+        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -650,29 +688,6 @@ export default function ReportDetails() {
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* Edit/Delete Actions for report owner */}
-        {report && currentUserId && (
-          <ReportActions
-            report={{
-              reportid: report.reportid,
-              userid: report.userid || '',
-              category: report.category as any,
-              description: report.description,
-              location: report.location,
-              createdat: report.created_at,
-            }}
-            currentUserId={currentUserId}
-            onUpdate={() => {
-              // Refresh the report data
-              fetchReportDetails();
-            }}
-            onDelete={() => {
-              // Navigate back after deletion
-              router.back();
-            }}
-          />
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -702,6 +717,10 @@ const makeStyles = (t: ThemeColors) =>
       color: t.textPrimary,
       fontSize: 18,
       fontWeight: '600',
+      flex: 1,
+    },
+    headerActions: {
+      marginLeft: 'auto',
     },
 
     content: {

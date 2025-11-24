@@ -6,9 +6,6 @@ export type ReportCategory =
   | 'hazard'
   | 'lost'
   | 'found'
-  | 'infrastructure'
-  | 'wildlife'
-  | 'health'
   | 'other';
 
 export interface BaseReport {
@@ -47,10 +44,6 @@ export type CategorySpecificData =
   | { category: 'hazard'; data: HazardData }
   | { category: 'lost'; data: LostItemData }
   | { category: 'found'; data: FoundItemData }
-  | {
-      category: 'infrastructure' | 'wildlife' | 'health' | 'other';
-      data: null;
-    };
 
 // Complete report interface with category-specific data
 export interface Report extends BaseReport {

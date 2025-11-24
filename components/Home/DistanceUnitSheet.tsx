@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, CommonColors, type ThemeName } from '@/constants/Colors';
@@ -19,6 +20,7 @@ type DistanceUnitSheetProps = {
   visible: boolean;
   animation: Animated.Value;
   onRequestClose: () => void;
+  onPressBack?: () => void;
   insetsBottom: number;
   uiTheme: ThemeConfig;
   distanceUnit: DistanceUnit;
@@ -30,6 +32,7 @@ export const DistanceUnitSheet: React.FC<DistanceUnitSheetProps> = ({
   visible,
   animation,
   onRequestClose,
+  onPressBack,
   insetsBottom,
   uiTheme,
   distanceUnit,
@@ -72,19 +75,27 @@ export const DistanceUnitSheet: React.FC<DistanceUnitSheetProps> = ({
           },
         ]}
       >
-        <View style={styles.sheetHandleWrap}>
-          <View
-            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
-          />
+        <View style={styles.sheetHeaderRow}>
+          <TouchableOpacity
+            onPress={onPressBack || onRequestClose}
+            style={styles.backButton}
+          >
+            <MaterialIcons
+              name='arrow-back'
+              size={24}
+              color={uiTheme.textPrimary}
+            />
+          </TouchableOpacity>
+          <ThemedText
+            style={[
+              styles.sheetTitle,
+              { color: uiTheme.textPrimary },
+            ]}
+          >
+            Distance Unit
+          </ThemedText>
+          <View style={styles.placeholder} />
         </View>
-        <ThemedText
-          style={[
-            styles.sheetTitle,
-            { color: uiTheme.textPrimary, marginBottom: 20 },
-          ]}
-        >
-          Distance Unit
-        </ThemedText>
 
         <View style={styles.radioGroup}>
           <TouchableOpacity
@@ -164,20 +175,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 10,
+    paddingTop: 16,
   },
-  sheetHandleWrap: {
+  sheetHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    marginBottom: 20,
   },
-  sheetHandle: {
-    width: 42,
-    height: 5,
-    borderRadius: 3,
+  backButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  placeholder: {
+    width: 32,
   },
   sheetTitle: {
     fontSize: 16,
     fontWeight: '700',
+    flex: 1,
   },
   radioGroup: {
     gap: 2,
