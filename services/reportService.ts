@@ -17,7 +17,10 @@ import {
   ReportQueryOptions,
   ReportCategory,
 } from '@/types/report';
-import { getShadowbannedUserIds, isUserShadowbanned } from '@/services/pinReportService';
+import {
+  getShadowbannedUserIds,
+  isUserShadowbanned,
+} from '@/services/pinReportService';
 
 /**
  * Convert location string to latitude and longitude
@@ -226,7 +229,7 @@ export async function createReport(
       // Silently "succeed" but don't actually create the report
       // This maintains the illusion for shadowbanned users
       console.log('Shadowbanned user attempted to create report:', userId);
-      
+
       // Return a fake success response with dummy data
       // The user won't know their report wasn't actually created
       return {

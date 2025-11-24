@@ -282,11 +282,15 @@ export default function ReportActions({
     if (isReporting) return;
 
     setIsReporting(true);
-    
+
     try {
       const { reportPin } = await import('@/services/pinReportService');
-      const result = await reportPin(report.reportid, currentUserId, reportReason.trim() || undefined);
-      
+      const result = await reportPin(
+        report.reportid,
+        currentUserId,
+        reportReason.trim() || undefined
+      );
+
       if (result.success) {
         Alert.alert(
           'Report Submitted',
@@ -662,7 +666,10 @@ export default function ReportActions({
                       }}
                       style={sharedModalStyles.closeButton}
                     >
-                      <IconSymbol name='chevron.left' color={theme.textPrimary} />
+                      <IconSymbol
+                        name='chevron.left'
+                        color={theme.textPrimary}
+                      />
                     </TouchableOpacity>
                     <ThemedText
                       type='subtitle'

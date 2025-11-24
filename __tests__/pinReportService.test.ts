@@ -18,7 +18,6 @@ jest.mock('@/lib/supabase', () => ({
   supabase: {
     from: jest.fn(),
     rpc: jest.fn(),
-    sql: jest.fn((strings, ...values) => ({ strings, values })),
   },
 }));
 
@@ -59,7 +58,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         insert: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: duplicateError }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: duplicateError }),
       });
 
       const result = await reportPin(100, 'user123', 'Test');
@@ -124,7 +125,9 @@ describe('pinReportService', () => {
     it('should return 0 on error', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ count: null, error: new Error('DB error') }),
+        eq: jest
+          .fn()
+          .mockResolvedValue({ count: null, error: new Error('DB error') }),
       });
 
       const count = await getPinReportCount(100);
@@ -149,7 +152,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: { report_id: 1 }, error: null }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: { report_id: 1 }, error: null }),
       });
 
       const result = await hasUserReportedPin(100, 'user123');
@@ -173,7 +178,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const result = await hasUserReportedPin(100, 'user123');
@@ -217,7 +224,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        order: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const reports = await getUserReports('user123');
@@ -261,12 +270,24 @@ describe('pinReportService', () => {
         error: new Error('RPC not found'),
       });
 
+      // Mock fetch current strike count
+      (supabase.from as jest.Mock).mockReturnValueOnce({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ 
+          data: { strike_count: 2 }, 
+          error: null 
+        }),
+      });
+
       // Mock manual update
       (supabase.from as jest.Mock).mockReturnValueOnce({
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockModStatus, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockModStatus, error: null }),
       });
 
       const result = await addStrikeToUser('user123');
@@ -303,12 +324,24 @@ describe('pinReportService', () => {
         error: new Error('RPC not found'),
       });
 
-      // Mock manual update (add strike)
+      // Mock fetch current strike count (at 4, will become 5)
+      (supabase.from as jest.Mock).mockReturnValueOnce({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ 
+          data: { strike_count: 4 }, 
+          error: null 
+        }),
+      });
+
+      // Mock manual update (add strike to 5)
       (supabase.from as jest.Mock).mockReturnValueOnce({
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockModStatusWith5Strikes, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockModStatusWith5Strikes, error: null }),
       });
 
       // Mock shadowban update
@@ -316,7 +349,9 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
       });
 
       const result = await addStrikeToUser('user123');
@@ -336,6 +371,16 @@ describe('pinReportService', () => {
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({
         data: null,
         error: new Error('RPC not found'),
+      });
+
+      // Mock fetch current strike count
+      (supabase.from as jest.Mock).mockReturnValueOnce({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ 
+          data: { strike_count: 2 }, 
+          error: null 
+        }),
       });
 
       // Mock manual update with error
@@ -369,10 +414,15 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
       });
 
-      const result = await shadowbanUser('user123', 'Manual shadowban for spam');
+      const result = await shadowbanUser(
+        'user123',
+        'Manual shadowban for spam'
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.is_shadowbanned).toBe(true);
@@ -394,7 +444,9 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockShadowbannedStatus, error: null }),
       });
 
       const result = await shadowbanUser('user123');
@@ -408,7 +460,9 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: new Error('Update failed') }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('Update failed') }),
       });
 
       const result = await shadowbanUser('user123');
@@ -433,7 +487,9 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: mockUnshadowbannedStatus, error: null }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: mockUnshadowbannedStatus, error: null }),
       });
 
       const result = await unshadowbanUser('user123');
@@ -448,7 +504,9 @@ describe('pinReportService', () => {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: new Error('Update failed') }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('Update failed') }),
       });
 
       const result = await unshadowbanUser('user123');
@@ -504,7 +562,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const result = await isUserShadowbanned('user123');
@@ -545,7 +605,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const count = await getUserStrikeCount('user123');
@@ -569,7 +631,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: mockStatus, error: null }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: mockStatus, error: null }),
       });
 
       const result = await getUserModerationStatus('user123');
@@ -614,7 +678,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
-        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        maybeSingle: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const result = await getUserModerationStatus('user123');
@@ -634,7 +700,9 @@ describe('pinReportService', () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         insert: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: new Error('Insert failed') }),
+        single: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('Insert failed') }),
       });
 
       const result = await getUserModerationStatus('newuser');
@@ -676,7 +744,9 @@ describe('pinReportService', () => {
     it('should return empty array on database error', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ data: null, error: new Error('DB error') }),
+        eq: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: new Error('DB error') }),
       });
 
       const result = await getShadowbannedUserIds();
@@ -728,6 +798,7 @@ describe('pinReportService', () => {
       let strikeCount = 4;
 
       for (let i = 0; i < 2; i++) {
+        const currentStrikes = strikeCount;
         strikeCount++;
         const shouldBeShadowbanned = strikeCount >= 5;
 
@@ -740,6 +811,16 @@ describe('pinReportService', () => {
         (supabase.rpc as jest.Mock).mockResolvedValueOnce({
           data: null,
           error: new Error('RPC not found'),
+        });
+
+        // Mock fetch current strike count
+        (supabase.from as jest.Mock).mockReturnValueOnce({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { strike_count: currentStrikes },
+            error: null,
+          }),
         });
 
         // Mock manual update (add strike)
@@ -790,4 +871,3 @@ describe('pinReportService', () => {
     });
   });
 });
-

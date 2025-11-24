@@ -201,10 +201,26 @@ export async function addStrikeToUser(
 
     if (error) {
       // If the RPC doesn't exist, do it manually
+      // First get current strike count
+      const { data: currentData, error: fetchError } = await supabase
+        .from('user_moderation')
+        .select('strike_count')
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError || !currentData) {
+        console.error('Error fetching current strikes:', fetchError);
+        return {
+          success: false,
+          error: fetchError?.message || 'Failed to fetch current strikes',
+        };
+      }
+
+      // Increment the strike count
       const { data: updateData, error: updateError } = await supabase
         .from('user_moderation')
         .update({
-          strike_count: supabase.sql`strike_count + 1`,
+          strike_count: currentData.strike_count + 1,
         })
         .eq('user_id', userId)
         .select()
@@ -459,4 +475,3 @@ export async function getShadowbannedUserIds(): Promise<string[]> {
     return [];
   }
 }
-
