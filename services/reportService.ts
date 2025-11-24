@@ -17,6 +17,7 @@ import {
   ReportQueryOptions,
   ReportCategory,
 } from '@/types/report';
+import { getShadowbannedUserIds, isUserShadowbanned } from '@/services/pinReportService';
 
 /**
  * Convert location string to latitude and longitude
@@ -41,10 +42,18 @@ export async function fetchReports(
   options: ReportQueryOptions = {}
 ): Promise<ReportServiceResponse<Report[]>> {
   try {
+    // Get shadowbanned user IDs to filter them out
+    const shadowbannedUserIds = await getShadowbannedUserIds();
+
     let query = supabase
       .from('reports')
       .select('*')
       .order('createdat', { ascending: false });
+
+    // Filter out reports from shadowbanned users
+    if (shadowbannedUserIds.length > 0) {
+      query = query.not('userid', 'in', `(${shadowbannedUserIds.join(',')})`);
+    }
 
     // Apply filters
     if (options.filters?.category) {
@@ -211,6 +220,28 @@ export async function createReport(
   userId: string
 ): Promise<ReportServiceResponse<Report>> {
   try {
+    // Check if user is shadowbanned
+    const isShadowbanned = await isUserShadowbanned(userId);
+    if (isShadowbanned) {
+      // Silently "succeed" but don't actually create the report
+      // This maintains the illusion for shadowbanned users
+      console.log('Shadowbanned user attempted to create report:', userId);
+      
+      // Return a fake success response with dummy data
+      // The user won't know their report wasn't actually created
+      return {
+        success: true,
+        data: {
+          reportid: -1, // Fake ID that won't match any real reports
+          userid: userId,
+          category: reportData.type as ReportCategory,
+          description: reportData.data.description,
+          location: `(${locationToPoint(reportData.data.location).lat},${locationToPoint(reportData.data.location).lng})`,
+          createdat: new Date().toISOString(),
+        } as Report,
+      };
+    }
+
     // Upload image if provided
     let imageUrl = null;
     if (reportData.data.imageUri) {

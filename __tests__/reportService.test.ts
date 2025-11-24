@@ -29,6 +29,12 @@ jest.mock('@/services/imageService', () => ({
   uploadImage: jest.fn().mockResolvedValue('https://example.com/image.jpg'),
 }));
 
+// Mock the pin report service
+jest.mock('@/services/pinReportService', () => ({
+  getShadowbannedUserIds: jest.fn().mockResolvedValue([]),
+  isUserShadowbanned: jest.fn().mockResolvedValue(false),
+}));
+
 describe('reportService', () => {
   beforeEach(() => {
     jest.clearAllMocks();

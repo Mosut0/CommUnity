@@ -14,6 +14,8 @@ import {
   ScrollView,
   Platform,
   Animated,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,6 +43,7 @@ interface ReportActionsProps {
   currentUserId: string;
   onUpdate?: () => void;
   onDelete?: () => void;
+  onReport?: () => void;
 }
 
 export default function ReportActions({
@@ -48,11 +51,15 @@ export default function ReportActions({
   currentUserId,
   onUpdate,
   onDelete,
+  onReport,
 }: ReportActionsProps) {
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportReason, setReportReason] = useState('');
   const colorScheme = useColorScheme() ?? 'light';
   const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
   const formStyles = useMemo(() => makeFormStyles(theme), [theme]);
@@ -81,10 +88,6 @@ export default function ReportActions({
 
   // Check if current user owns this report
   const canEdit = isOwner(report, currentUserId);
-
-  if (!canEdit) {
-    return null;
-  }
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
@@ -270,6 +273,46 @@ export default function ReportActions({
     setTimeout(() => handleDelete(), 200);
   };
 
+  const handleReportPress = () => {
+    toggleMenu();
+    setTimeout(() => setShowReportModal(true), 200);
+  };
+
+  const handleSubmitReport = async () => {
+    if (isReporting) return;
+
+    setIsReporting(true);
+    
+    try {
+      const { reportPin } = await import('@/services/pinReportService');
+      const result = await reportPin(report.reportid, currentUserId, reportReason.trim() || undefined);
+      
+      if (result.success) {
+        Alert.alert(
+          'Report Submitted',
+          'Thank you for helping keep our community safe. We will review this report.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowReportModal(false);
+                setReportReason('');
+                onReport?.();
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', result.error || 'Failed to submit report');
+      }
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   const menuScale = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [0.8, 1],
@@ -316,58 +359,93 @@ export default function ReportActions({
                 },
               ]}
             >
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={handleEditPress}
-                disabled={isUpdating}
-              >
-                <Ionicons
-                  name='pencil-outline'
-                  size={20}
-                  color={colorScheme === 'dark' ? '#60A5FA' : '#3B82F6'}
-                />
-                <Text
-                  style={[
-                    styles.menuItemText,
-                    { color: colorScheme === 'dark' ? '#fff' : '#000' },
-                  ]}
-                >
-                  Edit Report
-                </Text>
-              </TouchableOpacity>
-
-              <View
-                style={[
-                  styles.menuDivider,
-                  colorScheme === 'dark'
-                    ? styles.menuDividerDark
-                    : styles.menuDividerLight,
-                ]}
-              />
-
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={handleDeletePress}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <ActivityIndicator
-                    size='small'
-                    color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
-                  />
-                ) : (
-                  <>
+              {canEdit && (
+                <>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleEditPress}
+                    disabled={isUpdating}
+                  >
                     <Ionicons
-                      name='trash-outline'
+                      name='pencil-outline'
                       size={20}
-                      color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
+                      color={colorScheme === 'dark' ? '#60A5FA' : '#3B82F6'}
                     />
-                    <Text style={[styles.menuItemText, styles.deleteText]}>
-                      Delete Report
+                    <Text
+                      style={[
+                        styles.menuItemText,
+                        { color: colorScheme === 'dark' ? '#fff' : '#000' },
+                      ]}
+                    >
+                      Edit Report
                     </Text>
-                  </>
-                )}
-              </TouchableOpacity>
+                  </TouchableOpacity>
+
+                  <View
+                    style={[
+                      styles.menuDivider,
+                      colorScheme === 'dark'
+                        ? styles.menuDividerDark
+                        : styles.menuDividerLight,
+                    ]}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={handleDeletePress}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <ActivityIndicator
+                        size='small'
+                        color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
+                      />
+                    ) : (
+                      <>
+                        <Ionicons
+                          name='trash-outline'
+                          size={20}
+                          color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
+                        />
+                        <Text style={[styles.menuItemText, styles.deleteText]}>
+                          Delete Report
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+
+                  <View
+                    style={[
+                      styles.menuDivider,
+                      colorScheme === 'dark'
+                        ? styles.menuDividerDark
+                        : styles.menuDividerLight,
+                    ]}
+                  />
+                </>
+              )}
+
+              {!canEdit && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleReportPress}
+                  disabled={isReporting}
+                >
+                  <Ionicons
+                    name='flag-outline'
+                    size={20}
+                    color={colorScheme === 'dark' ? '#FCD34D' : '#F59E0B'}
+                  />
+                  <Text
+                    style={[
+                      styles.menuItemText,
+                      { color: colorScheme === 'dark' ? '#fff' : '#000' },
+                    ]}
+                  >
+                    Report Pin
+                  </Text>
+                </TouchableOpacity>
+              )}
             </Animated.View>
           </View>
         </TouchableOpacity>
@@ -558,6 +636,99 @@ export default function ReportActions({
           </ThemedView>
         </View>
       </Modal>
+
+      {/* Report Modal */}
+      <Modal
+        visible={showReportModal}
+        transparent
+        animationType='slide'
+        onRequestClose={() => setShowReportModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.editModalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <ThemedView style={styles.editModalView}>
+                <ScrollView
+                  style={sharedModalStyles.scrollView}
+                  contentContainerStyle={sharedModalStyles.scrollContent}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps='handled'
+                >
+                  <View style={[sharedModalStyles.header, styles.reportHeader]}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        setShowReportModal(false);
+                      }}
+                      style={sharedModalStyles.closeButton}
+                    >
+                      <IconSymbol name='chevron.left' color={theme.textPrimary} />
+                    </TouchableOpacity>
+                    <ThemedText
+                      type='subtitle'
+                      style={sharedModalStyles.headerTitle}
+                    >
+                      Report Pin
+                    </ThemedText>
+                    <View style={sharedModalStyles.placeholder} />
+                  </View>
+
+                  <ThemedText style={styles.reportModalDescription}>
+                    Help us keep the community safe by reporting inappropriate
+                    content. Your report will be reviewed by our team.
+                  </ThemedText>
+
+                  <View style={formStyles.inputGroup}>
+                    <ThemedText style={formStyles.label}>
+                      Reason (Optional)
+                    </ThemedText>
+                    <TextInput
+                      style={formStyles.textArea}
+                      value={reportReason}
+                      onChangeText={setReportReason}
+                      placeholder='Why are you reporting this pin?'
+                      placeholderTextColor={theme.textSecondary}
+                      editable={!isReporting}
+                      multiline
+                      numberOfLines={4}
+                    />
+                  </View>
+
+                  <View style={styles.modalActions}>
+                    <TouchableOpacity
+                      style={[formStyles.submitButton, styles.cancelButton]}
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        setShowReportModal(false);
+                        setReportReason('');
+                      }}
+                      disabled={isReporting}
+                    >
+                      <ThemedText style={styles.cancelButtonText}>
+                        Cancel
+                      </ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[formStyles.submitButton, styles.reportButton]}
+                      onPress={handleSubmitReport}
+                      disabled={isReporting}
+                    >
+                      {isReporting ? (
+                        <ActivityIndicator size='small' color='#fff' />
+                      ) : (
+                        <ThemedText style={formStyles.submitButtonText}>
+                          Submit Report
+                        </ThemedText>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </ThemedView>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
@@ -670,5 +841,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  reportButton: {
+    backgroundColor: '#F59E0B',
+  },
+  reportModalDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 20,
+    opacity: 0.7,
+  },
+  reportHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 30,
   },
 });

@@ -58,6 +58,16 @@ CREATE TABLE public.notifications_audit (
   CONSTRAINT notifications_audit_pkey PRIMARY KEY (id),
   CONSTRAINT notifications_audit_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
+CREATE TABLE public.pin_reports (
+  report_id bigint NOT NULL DEFAULT nextval('pin_reports_report_id_seq'::regclass),
+  pin_id integer NOT NULL,
+  reporter_user_id uuid NOT NULL,
+  reason text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT pin_reports_pkey PRIMARY KEY (report_id),
+  CONSTRAINT pin_reports_pin_id_fkey FOREIGN KEY (pin_id) REFERENCES public.reports(reportid),
+  CONSTRAINT pin_reports_reporter_user_id_fkey FOREIGN KEY (reporter_user_id) REFERENCES auth.users(id)
+);
 CREATE TABLE public.reports (
   reportid integer NOT NULL DEFAULT nextval('reports_reportid_seq'::regclass),
   userid uuid NOT NULL,
@@ -68,4 +78,15 @@ CREATE TABLE public.reports (
   imageurl text,
   CONSTRAINT reports_pkey PRIMARY KEY (reportid),
   CONSTRAINT reports_userid_fkey FOREIGN KEY (userid) REFERENCES auth.users(id)
+);
+CREATE TABLE public.user_moderation (
+  id bigint NOT NULL DEFAULT nextval('user_moderation_id_seq'::regclass),
+  user_id uuid NOT NULL UNIQUE,
+  strike_count integer NOT NULL DEFAULT 0,
+  is_shadowbanned boolean NOT NULL DEFAULT false,
+  shadowban_reason text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_moderation_pkey PRIMARY KEY (id),
+  CONSTRAINT user_moderation_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

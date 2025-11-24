@@ -441,6 +441,11 @@ export default function ReportDetails() {
               onDelete={() => {
                 router.back();
               }}
+              onReport={() => {
+                // Refresh details to check if pin was deleted
+                // (in case it reached 10 reports)
+                fetchReportDetails();
+              }}
             />
           </View>
         )}
