@@ -133,7 +133,6 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
     }
 
     Alert.alert('Saved', 'Notification preferences updated');
-    onRequestClose();
   };
 
   return (
@@ -176,11 +175,6 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
             },
           ]}
         >
-          <View style={styles.sheetHandleWrap}>
-            <View
-              style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
-            />
-          </View>
           <View style={styles.sheetHeaderRow}>
             <TouchableOpacity onPress={onPressBack} style={styles.backButton}>
               <MaterialIcons
@@ -370,17 +364,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 10,
+    paddingTop: 16,
     maxHeight: '90%',
-  },
-  sheetHandleWrap: {
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  sheetHandle: {
-    width: 42,
-    height: 5,
-    borderRadius: 3,
   },
   sheetHeaderRow: {
     flexDirection: 'row',

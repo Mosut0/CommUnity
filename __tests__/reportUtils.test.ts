@@ -90,7 +90,7 @@ describe('reportUtils', () => {
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Event: Community Meeting');
+      expect(title).toBe('Community Meeting');
     });
 
     it('should return hazard title', () => {
@@ -100,7 +100,7 @@ describe('reportUtils', () => {
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Hazard: Pothole');
+      expect(title).toBe('Pothole');
     });
 
     it('should return lost item title', () => {
@@ -110,7 +110,7 @@ describe('reportUtils', () => {
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Lost: Wallet');
+      expect(title).toBe('Wallet');
     });
 
     it('should return default title for unknown category', () => {

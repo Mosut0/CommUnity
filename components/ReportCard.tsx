@@ -54,28 +54,40 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
     const { latitude, longitude } = coords;
 
     try {
-      const googleMapsUrl =
-        Platform.OS === 'ios'
-          ? `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`
-          : `google.navigation:q=${latitude},${longitude}`;
+      if (Platform.OS === 'ios') {
+        // Try Google Maps first
+        const googleMapsUrl = `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`;
 
-      const canOpenGoogleMaps = await Linking.canOpenURL(googleMapsUrl);
-
-      if (canOpenGoogleMaps) {
-        await Linking.openURL(googleMapsUrl);
-      } else {
-        const fallbackUrl =
-          Platform.OS === 'ios'
-            ? `maps://app?daddr=${latitude},${longitude}`
-            : `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
-
-        const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
-
-        if (canOpenFallback) {
-          await Linking.openURL(fallbackUrl);
-        } else {
-          Alert.alert('Error', 'No maps application available');
+        try {
+          const supported = await Linking.canOpenURL(googleMapsUrl);
+          if (supported) {
+            await Linking.openURL(googleMapsUrl);
+            return;
+          }
+        } catch {
+          // Google Maps not installed, will fall through to Apple Maps
         }
+
+        // Fall back to Apple Maps
+        const appleMapsUrl = `maps://app?daddr=${latitude},${longitude}`;
+        await Linking.openURL(appleMapsUrl);
+      } else {
+        // Android: try Google Maps navigation first
+        const googleMapsUrl = `google.navigation:q=${latitude},${longitude}`;
+
+        try {
+          const supported = await Linking.canOpenURL(googleMapsUrl);
+          if (supported) {
+            await Linking.openURL(googleMapsUrl);
+            return;
+          }
+        } catch {
+          // Google Maps not installed, fall through
+        }
+
+        // Fall back to web version of Google Maps
+        const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+        await Linking.openURL(webMapsUrl);
       }
     } catch (error) {
       console.error('Error opening directions:', error);
@@ -100,7 +112,10 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
     }
 
     shareMessage += `Posted: ${postedDate}`;
-    shareMessage += `\n\nShared from CommUnity app`;
+
+    // Add deep link to the report
+    const deepLink = `myapp://report/${report.reportid}`;
+    shareMessage += `\n\nView in CommUnity app: ${deepLink}`;
 
     try {
       await Share.share({
@@ -417,11 +432,14 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
+    left: 0,
+    right: 0,
+    bottom: 0,
     maxHeight: Dimensions.get('window').height * 0.7,
-    borderRadius: 16,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     padding: 16,
     ...Platform.select({
       ios: {

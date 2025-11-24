@@ -87,21 +87,13 @@ export function getIconSize(context: keyof typeof ICON_SIZES): number {
 export function getReportTitle(report: Report): string {
   switch (report.category) {
     case 'event':
-      return `Event: ${report.eventtype || 'Unknown Event'}`;
+      return `${report.eventtype || 'Unknown Event'}`;
     case 'hazard':
-      return `Hazard: ${report.hazardtype || 'Unknown Hazard'}`;
+      return `${report.hazardtype || 'Unknown Hazard'}`;
     case 'lost':
-      return `Lost: ${report.itemtype || 'Unknown Item'}`;
+      return `${report.itemtype || 'Unknown Item'}`;
     case 'found':
-      return `Found: ${report.itemtype || 'Unknown Item'}`;
-    case 'infrastructure':
-      return 'Infrastructure Issue';
-    case 'wildlife':
-      return 'Wildlife Sighting';
-    case 'health':
-      return 'Health Concern';
-    case 'other':
-      return 'Other Report';
+      return `${report.itemtype || 'Unknown Item'}`;
     default:
       return 'Report';
   }

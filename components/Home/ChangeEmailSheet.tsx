@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, CommonColors, type ThemeName } from '@/constants/Colors';
@@ -18,6 +19,7 @@ type ChangeEmailSheetProps = {
   visible: boolean;
   animation: Animated.Value;
   onRequestClose: () => void;
+  onPressBack?: () => void;
   insetsBottom: number;
   uiTheme: ThemeConfig;
   currentEmail: string;
@@ -30,6 +32,7 @@ export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
   visible,
   animation,
   onRequestClose,
+  onPressBack,
   insetsBottom,
   uiTheme,
   currentEmail,
@@ -73,19 +76,24 @@ export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
           },
         ]}
       >
-        <View style={styles.sheetHandleWrap}>
-          <View
-            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
-          />
+        <View style={styles.sheetHeaderRow}>
+          <TouchableOpacity
+            onPress={onPressBack || onRequestClose}
+            style={styles.backButton}
+          >
+            <MaterialIcons
+              name='arrow-back'
+              size={24}
+              color={uiTheme.textPrimary}
+            />
+          </TouchableOpacity>
+          <ThemedText
+            style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
+          >
+            Change Email
+          </ThemedText>
+          <View style={styles.placeholder} />
         </View>
-        <ThemedText
-          style={[
-            styles.sheetTitle,
-            { color: uiTheme.textPrimary, marginBottom: 8 },
-          ]}
-        >
-          Change Email
-        </ThemedText>
         <ThemedText
           style={[
             styles.subtitle,
@@ -166,20 +174,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 10,
+    paddingTop: 16,
   },
-  sheetHandleWrap: {
+  sheetHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    marginBottom: 8,
   },
-  sheetHandle: {
-    width: 42,
-    height: 5,
-    borderRadius: 3,
+  backButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  placeholder: {
+    width: 32,
   },
   sheetTitle: {
     fontSize: 18,
     fontWeight: '700',
+    flex: 1,
   },
   subtitle: {
     fontSize: 13,
