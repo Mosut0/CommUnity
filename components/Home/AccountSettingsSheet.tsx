@@ -240,4 +240,3 @@ const styles = StyleSheet.create({
 });
 
 AccountSettingsSheet.displayName = 'AccountSettingsSheet';
-

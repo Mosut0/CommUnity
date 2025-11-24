@@ -11,10 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "LSApplicationQueriesSchemes": [
-          "comgooglemaps",
-          "comgooglemaps"
-        ]
+        "LSApplicationQueriesSchemes": ["comgooglemaps", "comgooglemaps"]
       },
       "bundleIdentifier": "com.anonymous.community"
     },
@@ -23,9 +20,7 @@
         "foregroundImage": "./assets/images/community_logo.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ],
+      "permissions": ["android.permission.RECORD_AUDIO"],
       "package": "com.anonymous.community"
     },
     "web": {

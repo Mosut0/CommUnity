@@ -57,34 +57,34 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
       if (Platform.OS === 'ios') {
         // Try Google Maps first
         const googleMapsUrl = `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`;
-        
+
         try {
           const supported = await Linking.canOpenURL(googleMapsUrl);
           if (supported) {
             await Linking.openURL(googleMapsUrl);
             return;
           }
-        } catch (e) {
+        } catch {
           // Google Maps not installed, will fall through to Apple Maps
         }
-        
+
         // Fall back to Apple Maps
         const appleMapsUrl = `maps://app?daddr=${latitude},${longitude}`;
         await Linking.openURL(appleMapsUrl);
       } else {
         // Android: try Google Maps navigation first
         const googleMapsUrl = `google.navigation:q=${latitude},${longitude}`;
-        
+
         try {
           const supported = await Linking.canOpenURL(googleMapsUrl);
           if (supported) {
             await Linking.openURL(googleMapsUrl);
             return;
           }
-        } catch (e) {
+        } catch {
           // Google Maps not installed, fall through
         }
-        
+
         // Fall back to web version of Google Maps
         const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
         await Linking.openURL(webMapsUrl);
@@ -112,7 +112,7 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
     }
 
     shareMessage += `Posted: ${postedDate}`;
-    
+
     // Add deep link to the report
     const deepLink = `myapp://report/${report.reportid}`;
     shareMessage += `\n\nView in CommUnity app: ${deepLink}`;

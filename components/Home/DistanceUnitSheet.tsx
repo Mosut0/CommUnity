@@ -87,10 +87,7 @@ export const DistanceUnitSheet: React.FC<DistanceUnitSheetProps> = ({
             />
           </TouchableOpacity>
           <ThemedText
-            style={[
-              styles.sheetTitle,
-              { color: uiTheme.textPrimary },
-            ]}
+            style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
           >
             Distance Unit
           </ThemedText>

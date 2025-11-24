@@ -128,9 +128,7 @@ serve(async req => {
       );
       const events = await eventResp.json();
       additionalDetails = events?.[0];
-    } else if (
-      report.type === 'hazard'
-    ) {
+    } else if (report.type === 'hazard') {
       const hazardResp = await fetch(
         `${SUPABASE_URL}/rest/v1/hazards?reportid=eq.${reportId}&select=hazardtype`,
         {

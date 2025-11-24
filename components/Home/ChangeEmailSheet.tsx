@@ -88,10 +88,7 @@ export const ChangeEmailSheet: React.FC<ChangeEmailSheetProps> = ({
             />
           </TouchableOpacity>
           <ThemedText
-            style={[
-              styles.sheetTitle,
-              { color: uiTheme.textPrimary },
-            ]}
+            style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
           >
             Change Email
           </ThemedText>

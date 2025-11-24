@@ -172,10 +172,10 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
                 },
               ],
               opacity: animation,
-          },
-        ]}
-      >
-        <View style={styles.sheetHeaderRow}>
+            },
+          ]}
+        >
+          <View style={styles.sheetHeaderRow}>
             <TouchableOpacity onPress={onPressBack} style={styles.backButton}>
               <MaterialIcons
                 name='arrow-back'

@@ -29,7 +29,11 @@ import { useReports } from '@/hooks/useReports';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { makeFormStyles, getTheme, modalStyles as sharedModalStyles } from './formStyles';
+import {
+  makeFormStyles,
+  getTheme,
+  modalStyles as sharedModalStyles,
+} from './formStyles';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 interface ReportActionsProps {
@@ -317,19 +321,19 @@ export default function ReportActions({
                 onPress={handleEditPress}
                 disabled={isUpdating}
               >
-              <Ionicons
-                name='pencil-outline'
-                size={20}
-                color={colorScheme === 'dark' ? '#60A5FA' : '#3B82F6'}
-              />
-              <Text
-                style={[
-                  styles.menuItemText,
-                  { color: colorScheme === 'dark' ? '#fff' : '#000' },
-                ]}
-              >
-                Edit Report
-              </Text>
+                <Ionicons
+                  name='pencil-outline'
+                  size={20}
+                  color={colorScheme === 'dark' ? '#60A5FA' : '#3B82F6'}
+                />
+                <Text
+                  style={[
+                    styles.menuItemText,
+                    { color: colorScheme === 'dark' ? '#fff' : '#000' },
+                  ]}
+                >
+                  Edit Report
+                </Text>
               </TouchableOpacity>
 
               <View
@@ -390,7 +394,10 @@ export default function ReportActions({
                 >
                   <IconSymbol name='chevron.left' color={theme.textPrimary} />
                 </TouchableOpacity>
-                <ThemedText type='subtitle' style={sharedModalStyles.headerTitle}>
+                <ThemedText
+                  type='subtitle'
+                  style={sharedModalStyles.headerTitle}
+                >
                   Edit{' '}
                   {report.category.charAt(0).toUpperCase() +
                     report.category.slice(1)}{' '}
@@ -417,7 +424,9 @@ export default function ReportActions({
               {/* Hazard-specific fields */}
               {report.category === 'hazard' && (
                 <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>Hazard Title*</ThemedText>
+                  <ThemedText style={formStyles.label}>
+                    Hazard Title*
+                  </ThemedText>
                   <TextInput
                     style={formStyles.input}
                     value={editHazardType}
@@ -480,7 +489,9 @@ export default function ReportActions({
                       size={20}
                       color={theme.textPrimary}
                     />
-                    <Text style={[styles.dateText, { color: theme.textPrimary }]}>
+                    <Text
+                      style={[styles.dateText, { color: theme.textPrimary }]}
+                    >
                       {formatDateTime(editEventTime)}
                     </Text>
                   </TouchableOpacity>
@@ -500,7 +511,9 @@ export default function ReportActions({
               {/* Lost/Found contact info */}
               {(report.category === 'lost' || report.category === 'found') && (
                 <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>Contact Info*</ThemedText>
+                  <ThemedText style={formStyles.label}>
+                    Contact Info*
+                  </ThemedText>
                   <TextInput
                     style={formStyles.input}
                     value={editContactInfo}
@@ -519,7 +532,9 @@ export default function ReportActions({
                   onPress={() => setShowEditModal(false)}
                   disabled={isUpdating}
                 >
-                  <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+                  <ThemedText style={styles.cancelButtonText}>
+                    Cancel
+                  </ThemedText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -528,7 +543,10 @@ export default function ReportActions({
                   disabled={isUpdating}
                 >
                   {isUpdating ? (
-                    <ActivityIndicator size='small' color={theme.primaryBtnText} />
+                    <ActivityIndicator
+                      size='small'
+                      color={theme.primaryBtnText}
+                    />
                   ) : (
                     <ThemedText style={formStyles.submitButtonText}>
                       Save Changes

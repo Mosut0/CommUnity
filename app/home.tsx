@@ -329,7 +329,13 @@ export default function Home() {
         }
       });
     }
-  }, [isEmailModalVisible, emailMounted, emailAnim, shouldReopenAccount, shouldReopenProfile]);
+  }, [
+    isEmailModalVisible,
+    emailMounted,
+    emailAnim,
+    shouldReopenAccount,
+    shouldReopenProfile,
+  ]);
 
   // Animate distance modal
   useEffect(() => {
@@ -359,7 +365,12 @@ export default function Home() {
         }
       });
     }
-  }, [isDistanceModalVisible, distanceMounted, distanceAnim, shouldReopenProfile]);
+  }, [
+    isDistanceModalVisible,
+    distanceMounted,
+    distanceAnim,
+    shouldReopenProfile,
+  ]);
 
   // Animate unit modal
   useEffect(() => {
@@ -419,7 +430,12 @@ export default function Home() {
         }
       });
     }
-  }, [isNotificationsModalVisible, notificationsMounted, notificationsAnim, shouldReopenProfile]);
+  }, [
+    isNotificationsModalVisible,
+    notificationsMounted,
+    notificationsAnim,
+    shouldReopenProfile,
+  ]);
 
   // Animate about modal
   useEffect(() => {
@@ -605,6 +621,8 @@ export default function Home() {
       return;
     }
 
+    const userEmail = session.user.email;
+
     Alert.alert(
       'Reset Password',
       'Are you sure you want to reset your password? We will send a password reset link to your email.',
@@ -617,7 +635,7 @@ export default function Home() {
           text: 'Yes, Send Link',
           onPress: async () => {
             const { error } = await supabase.auth.resetPasswordForEmail(
-              session.user.email,
+              userEmail,
               {
                 redirectTo: 'myapp://reset-password',
               }

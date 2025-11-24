@@ -34,14 +34,14 @@ export const AboutSheet: React.FC<AboutSheetProps> = ({
 }) => {
   const handleOpenTOS = () => {
     const tosUrl = 'https://www.community-app.ca/terms-of-service.html';
-    Linking.openURL(tosUrl).catch((err) =>
+    Linking.openURL(tosUrl).catch(err =>
       console.error('Failed to open TOS URL:', err)
     );
   };
 
   const handleOpenPrivacyPolicy = () => {
     const privacyUrl = 'https://www.community-app.ca/privacy-policy.html';
-    Linking.openURL(privacyUrl).catch((err) =>
+    Linking.openURL(privacyUrl).catch(err =>
       console.error('Failed to open Privacy Policy URL:', err)
     );
   };
@@ -250,4 +250,3 @@ const styles = StyleSheet.create({
 });
 
 AboutSheet.displayName = 'AboutSheet';
-

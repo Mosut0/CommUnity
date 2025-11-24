@@ -88,276 +88,217 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({
               Settings
             </ThemedText>
           </View>
-          <View
-            style={[styles.sheetSection, { borderColor: uiTheme.divider }]}
-          >
+          <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}>
             <TouchableOpacity
               style={styles.sheetRow}
               onPress={onPressAccountSettings}
             >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='person-outline'
-                      size={20}
-                      color={uiTheme.textSecondary}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowTitle,
-                        { color: uiTheme.textPrimary },
-                      ]}
-                    >
-                      Account Settings
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Email, password & security
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
-                <View
-                  style={[
-                    styles.rowDivider,
-                    { backgroundColor: uiTheme.divider },
-                  ]}
-                />
-                <TouchableOpacity
-                  style={styles.sheetRow}
-                  onPress={onPressChangeDistance}
-                >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='my-location'
-                      size={20}
-                      color={uiTheme.textSecondary}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowTitle,
-                        { color: uiTheme.textPrimary },
-                      ]}
-                    >
-                      Change Distance
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Radius filter for reports
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
-                <View
-                  style={[
-                    styles.rowDivider,
-                    { backgroundColor: uiTheme.divider },
-                  ]}
-                />
-                <TouchableOpacity
-                  style={styles.sheetRow}
-                  onPress={onPressChangeUnit}
-                >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='straighten'
-                      size={20}
-                      color={uiTheme.textSecondary}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowTitle,
-                        { color: uiTheme.textPrimary },
-                      ]}
-                    >
-                      Distance Unit
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Switch between km and miles
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
-                <View
-                  style={[
-                    styles.rowDivider,
-                    { backgroundColor: uiTheme.divider },
-                  ]}
-                />
-                <TouchableOpacity
-                  style={styles.sheetRow}
-                  onPress={onPressNotifications}
-                >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='notifications-none'
-                      size={20}
-                      color={uiTheme.textSecondary}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowTitle,
-                        { color: uiTheme.textPrimary },
-                      ]}
-                    >
-                      Notifications
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Manage notification preferences
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
-                <View
-                  style={[
-                    styles.rowDivider,
-                    { backgroundColor: uiTheme.divider },
-                  ]}
-                />
-                <TouchableOpacity
-                  style={styles.sheetRow}
-                  onPress={onPressAbout}
-                >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='info-outline'
-                      size={20}
-                      color={uiTheme.textSecondary}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowTitle,
-                        { color: uiTheme.textPrimary },
-                      ]}
-                    >
-                      About
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Terms of service and privacy policy
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
-              </View>
-
               <View
-                style={[styles.sheetSection, { borderColor: uiTheme.divider }]}
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
               >
-                <TouchableOpacity
-                  style={styles.sheetRow}
-                  onPress={onPressSignOut}
-                >
-                  <View
-                    style={[
-                      styles.sheetIcon,
-                      { backgroundColor: uiTheme.chipBg },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name='logout'
-                      size={20}
-                      color={uiTheme.danger}
-                    />
-                  </View>
-                  <View style={styles.sheetRowTextWrap}>
-                    <ThemedText
-                      style={[styles.sheetRowTitle, { color: uiTheme.danger }]}
-                    >
-                      Sign Out
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.sheetRowSubtitle,
-                        { color: uiTheme.textSecondary },
-                      ]}
-                    >
-                      Return to login screen
-                    </ThemedText>
-                  </View>
-                  <MaterialIcons
-                    name='chevron-right'
-                    size={20}
-                    color={uiTheme.textSecondary}
-                  />
-                </TouchableOpacity>
+                <MaterialIcons
+                  name='person-outline'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
               </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                >
+                  Account Settings
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Email, password & security
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+            <View
+              style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
+            />
+            <TouchableOpacity
+              style={styles.sheetRow}
+              onPress={onPressChangeDistance}
+            >
+              <View
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+              >
+                <MaterialIcons
+                  name='my-location'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                >
+                  Change Distance
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Radius filter for reports
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+            <View
+              style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
+            />
+            <TouchableOpacity
+              style={styles.sheetRow}
+              onPress={onPressChangeUnit}
+            >
+              <View
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+              >
+                <MaterialIcons
+                  name='straighten'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                >
+                  Distance Unit
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Switch between km and miles
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+            <View
+              style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
+            />
+            <TouchableOpacity
+              style={styles.sheetRow}
+              onPress={onPressNotifications}
+            >
+              <View
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+              >
+                <MaterialIcons
+                  name='notifications-none'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                >
+                  Notifications
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Manage notification preferences
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+            <View
+              style={[styles.rowDivider, { backgroundColor: uiTheme.divider }]}
+            />
+            <TouchableOpacity style={styles.sheetRow} onPress={onPressAbout}>
+              <View
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+              >
+                <MaterialIcons
+                  name='info-outline'
+                  size={20}
+                  color={uiTheme.textSecondary}
+                />
+              </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.textPrimary }]}
+                >
+                  About
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Terms of service and privacy policy
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.sheetSection, { borderColor: uiTheme.divider }]}>
+            <TouchableOpacity style={styles.sheetRow} onPress={onPressSignOut}>
+              <View
+                style={[styles.sheetIcon, { backgroundColor: uiTheme.chipBg }]}
+              >
+                <MaterialIcons name='logout' size={20} color={uiTheme.danger} />
+              </View>
+              <View style={styles.sheetRowTextWrap}>
+                <ThemedText
+                  style={[styles.sheetRowTitle, { color: uiTheme.danger }]}
+                >
+                  Sign Out
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.sheetRowSubtitle,
+                    { color: uiTheme.textSecondary },
+                  ]}
+                >
+                  Return to login screen
+                </ThemedText>
+              </View>
+              <MaterialIcons
+                name='chevron-right'
+                size={20}
+                color={uiTheme.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </Animated.View>
     </Modal>

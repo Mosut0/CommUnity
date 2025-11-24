@@ -91,10 +91,7 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
             />
           </TouchableOpacity>
           <ThemedText
-            style={[
-              styles.sheetTitle,
-              { color: uiTheme.textPrimary },
-            ]}
+            style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
           >
             Distance Radius
           </ThemedText>
