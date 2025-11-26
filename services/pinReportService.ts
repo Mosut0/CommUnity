@@ -229,7 +229,8 @@ export async function addStrikeToUser(
 
     // Check if we need to shadowban
     if (
-      modStatus.strike_count >= MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN &&
+      modStatus.strike_count >=
+        MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN &&
       !modStatus.is_shadowbanned
     ) {
       const shadowbanResult = await shadowbanUser(

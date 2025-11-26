@@ -31,4 +31,3 @@ export const MODERATION_CONFIG = {
  * Type for moderation config (for type safety)
  */
 export type ModerationConfig = typeof MODERATION_CONFIG;
-
