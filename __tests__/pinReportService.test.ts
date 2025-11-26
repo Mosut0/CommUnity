@@ -13,6 +13,8 @@ import {
 } from '@/services/pinReportService';
 import { supabase } from '@/lib/supabase';
 
+import { MODERATION_CONFIG } from '@/config/moderation';
+
 // Mock the supabase client
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -264,30 +266,10 @@ describe('pinReportService', () => {
         upsert: jest.fn().mockResolvedValue({ error: null }),
       });
 
-      // Mock rpc call (will fail and fall back to manual update)
+      // Mock rpc call (atomically increments strike_count)
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({
-        data: null,
-        error: new Error('RPC not found'),
-      });
-
-      // Mock fetch current strike count
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { strike_count: 2 },
-          error: null,
-        }),
-      });
-
-      // Mock manual update
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest
-          .fn()
-          .mockResolvedValue({ data: mockModStatus, error: null }),
+        data: [mockModStatus], // RPC returns array
+        error: null,
       });
 
       const result = await addStrikeToUser('user123');
@@ -296,11 +278,11 @@ describe('pinReportService', () => {
       expect(result.data?.strike_count).toBe(3);
     });
 
-    it('should trigger shadowban at 5 strikes', async () => {
+    it(`should trigger shadowban at ${MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN} strikes`, async () => {
       const mockModStatusWith5Strikes = {
         id: 1,
         user_id: 'user123',
-        strike_count: 5,
+        strike_count: MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN,
         is_shadowbanned: false,
         shadowban_reason: null,
         created_at: '2024-01-01T00:00:00Z',
@@ -310,7 +292,7 @@ describe('pinReportService', () => {
       const mockShadowbannedStatus = {
         ...mockModStatusWith5Strikes,
         is_shadowbanned: true,
-        shadowban_reason: 'Automatic: 5 or more strikes',
+        shadowban_reason: MODERATION_CONFIG.AUTO_SHADOWBAN_REASON,
       };
 
       // Mock upsert
@@ -318,30 +300,10 @@ describe('pinReportService', () => {
         upsert: jest.fn().mockResolvedValue({ error: null }),
       });
 
-      // Mock rpc call (will fail and fall back to manual update)
+      // Mock rpc call (atomically increments to threshold)
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({
-        data: null,
-        error: new Error('RPC not found'),
-      });
-
-      // Mock fetch current strike count (at 4, will become 5)
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { strike_count: 4 },
-          error: null,
-        }),
-      });
-
-      // Mock manual update (add strike to 5)
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest
-          .fn()
-          .mockResolvedValue({ data: mockModStatusWith5Strikes, error: null }),
+        data: [mockModStatusWith5Strikes], // RPC returns array
+        error: null,
       });
 
       // Mock shadowban update
@@ -359,42 +321,25 @@ describe('pinReportService', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should handle update errors', async () => {
-      const dbError = new Error('Update failed');
+    it('should handle RPC errors', async () => {
+      const rpcError = { message: 'RPC failed' };
 
       // Mock upsert
       (supabase.from as jest.Mock).mockReturnValueOnce({
         upsert: jest.fn().mockResolvedValue({ error: null }),
       });
 
-      // Mock rpc call (will fail and fall back to manual update)
+      // Mock rpc call with error
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({
         data: null,
-        error: new Error('RPC not found'),
-      });
-
-      // Mock fetch current strike count
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { strike_count: 2 },
-          error: null,
-        }),
-      });
-
-      // Mock manual update with error
-      (supabase.from as jest.Mock).mockReturnValueOnce({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: dbError }),
+        error: rpcError,
       });
 
       const result = await addStrikeToUser('user123');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Update failed');
+      expect(result.error).toContain('Failed to increment strikes');
+      expect(result.error).toContain('RPC failed');
     });
   });
 
@@ -794,50 +739,32 @@ describe('pinReportService', () => {
     });
 
     it('should handle strike accumulation leading to shadowban', async () => {
-      // Start with 4 strikes
-      let strikeCount = 4;
+      // Start with threshold - 1 strikes
+      let strikeCount = MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN - 1;
 
       for (let i = 0; i < 2; i++) {
-        const currentStrikes = strikeCount;
         strikeCount++;
-        const shouldBeShadowbanned = strikeCount >= 5;
+        const shouldBeShadowbanned =
+          strikeCount >= MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN;
 
         // Mock upsert
         (supabase.from as jest.Mock).mockReturnValueOnce({
           upsert: jest.fn().mockResolvedValue({ error: null }),
         });
 
-        // Mock rpc call (will fail and fall back to manual update)
+        // Mock rpc call (atomically increments)
         (supabase.rpc as jest.Mock).mockResolvedValueOnce({
-          data: null,
-          error: new Error('RPC not found'),
-        });
-
-        // Mock fetch current strike count
-        (supabase.from as jest.Mock).mockReturnValueOnce({
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: { strike_count: currentStrikes },
-            error: null,
-          }),
-        });
-
-        // Mock manual update (add strike)
-        (supabase.from as jest.Mock).mockReturnValueOnce({
-          update: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          select: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: {
+          data: [
+            {
               strike_count: strikeCount,
               is_shadowbanned: false,
+              user_id: 'spammer',
             },
-            error: null,
-          }),
+          ],
+          error: null,
         });
 
-        // If reaching 5 strikes, mock shadowban call
+        // If reaching threshold, mock shadowban call
         if (shouldBeShadowbanned) {
           (supabase.from as jest.Mock).mockReturnValueOnce({
             update: jest.fn().mockReturnThis(),

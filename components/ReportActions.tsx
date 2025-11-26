@@ -37,6 +37,7 @@ import {
   modalStyles as sharedModalStyles,
 } from './formStyles';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { reportPin, isUserShadowbanned } from '@/services/pinReportService';
 
 interface ReportActionsProps {
   report: Report;
@@ -275,6 +276,7 @@ export default function ReportActions({
 
   const handleReportPress = () => {
     toggleMenu();
+    setReportReason('');
     setTimeout(() => setShowReportModal(true), 200);
   };
 
@@ -284,7 +286,32 @@ export default function ReportActions({
     setIsReporting(true);
 
     try {
-      const { reportPin } = await import('@/services/pinReportService');
+      // Check if user is shadowbanned FIRST (before any network calls)
+      const isShadowbanned = await isUserShadowbanned(currentUserId);
+
+      // For shadowbanned users, show fake success without actually submitting
+      if (isShadowbanned) {
+        // Simulate a slight delay to maintain the illusion
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        Alert.alert(
+          'Report Submitted',
+          'Thank you for helping keep our community safe. We will review this report.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setShowReportModal(false);
+                setReportReason('');
+                // Don't call onReport since nothing was actually reported
+              },
+            },
+          ]
+        );
+        return;
+      }
+
+      // Submit the report for non-shadowbanned users
       const result = await reportPin(
         report.reportid,
         currentUserId,

@@ -110,7 +110,7 @@ export default function ReportDetails() {
     }
   }, [report, location, distanceUnit]);
 
-  const fetchReportDetails = useCallback(async () => {
+  const fetchReportDetails = useCallback(async (showErrorAlert = true) => {
     try {
       setLoading(true);
       setImageError(false);
@@ -139,9 +139,11 @@ export default function ReportDetails() {
 
       if (error) {
         console.error('Error fetching report details:', error);
-        Alert.alert('Error', 'Failed to load report details');
-        router.back();
-        return;
+        if (showErrorAlert) {
+          Alert.alert('Error', 'Failed to load report details');
+          router.back();
+        }
+        throw error; // Throw error so it can be caught by caller
       }
 
       const formattedReport: DetailedReport = {
@@ -168,8 +170,13 @@ export default function ReportDetails() {
       setReport(formattedReport);
     } catch (error) {
       console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong');
-      router.back();
+      if (showErrorAlert) {
+        Alert.alert('Error', 'Something went wrong');
+        router.back();
+      } else {
+        // Re-throw error so caller can handle it
+        throw error;
+      }
     } finally {
       setLoading(false);
     }
@@ -441,10 +448,19 @@ export default function ReportDetails() {
               onDelete={() => {
                 router.back();
               }}
-              onReport={() => {
+              onReport={async () => {
                 // Refresh details to check if pin was deleted
-                // (in case it reached 10 reports)
-                fetchReportDetails();
+                // (in case it reached the report threshold for deletion)
+                try {
+                  await fetchReportDetails(false); // Don't show default error alert
+                } catch (error) {
+                  // If the pin no longer exists, it was likely deleted due to reaching the report threshold
+                  Alert.alert(
+                    'Pin Removed',
+                    'This pin has been removed due to multiple reports.',
+                    [{ text: 'OK', onPress: () => router.back() }]
+                  );
+                }
               }}
             />
           </View>

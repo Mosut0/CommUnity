@@ -2,6 +2,7 @@
 // Handles reporting pins, tracking strikes, and managing shadowbans
 
 import { supabase } from '@/lib/supabase';
+import { MODERATION_CONFIG } from '@/config/moderation';
 
 export interface UserModerationStatus {
   id: number;
@@ -194,61 +195,79 @@ export async function addStrikeToUser(
       console.error('Error ensuring moderation record:', upsertError);
     }
 
-    // Increment the strike count
-    const { data, error } = await supabase.rpc('increment_user_strikes', {
-      target_user_id: userId,
-    });
-
-    if (error) {
-      // If the RPC doesn't exist, do it manually
-      // First get current strike count
-      const { data: currentData, error: fetchError } = await supabase
-        .from('user_moderation')
-        .select('strike_count')
-        .eq('user_id', userId)
-        .single();
-
-      if (fetchError || !currentData) {
-        console.error('Error fetching current strikes:', fetchError);
-        return {
-          success: false,
-          error: fetchError?.message || 'Failed to fetch current strikes',
-        };
+    // Atomically increment the strike count using the database RPC function
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'increment_user_strikes',
+      {
+        target_user_id: userId,
       }
+    );
 
-      // Increment the strike count
-      const { data: updateData, error: updateError } = await supabase
-        .from('user_moderation')
-        .update({
-          strike_count: currentData.strike_count + 1,
-        })
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-      if (updateError) {
-        console.error('Error adding strike to user:', updateError);
-        return {
-          success: false,
-          error: updateError.message || 'Failed to add strike',
-        };
-      }
-
-      // Check if we need to shadowban
-      const modStatus = updateData as UserModerationStatus;
-      if (modStatus.strike_count >= 5 && !modStatus.is_shadowbanned) {
-        await shadowbanUser(userId, 'Automatic: 5 or more strikes');
-      }
-
+    if (rpcError) {
+      console.error(
+        'CRITICAL: increment_user_strikes RPC failed. Have you run the database migration?',
+        rpcError
+      );
       return {
-        success: true,
-        data: updateData as UserModerationStatus,
+        success: false,
+        error: `Failed to increment strikes: ${rpcError.message}. Please ensure the database migration has been run.`,
       };
     }
 
-    // Fetch the updated status
-    const status = await getUserModerationStatus(userId);
-    return status;
+    // The RPC returns an array with the updated row
+    const modStatus = (
+      Array.isArray(rpcData) ? rpcData[0] : rpcData
+    ) as UserModerationStatus;
+
+    if (!modStatus) {
+      console.error('CRITICAL: increment_user_strikes returned no data');
+      return {
+        success: false,
+        error: 'Failed to retrieve updated moderation status',
+      };
+    }
+
+    // Check if we need to shadowban
+    if (
+      modStatus.strike_count >= MODERATION_CONFIG.STRIKE_THRESHOLD_FOR_SHADOWBAN &&
+      !modStatus.is_shadowbanned
+    ) {
+      const shadowbanResult = await shadowbanUser(
+        userId,
+        MODERATION_CONFIG.AUTO_SHADOWBAN_REASON
+      );
+
+      if (!shadowbanResult.success) {
+        console.error(
+          'CRITICAL: Failed to shadowban user after reaching strike threshold:',
+          {
+            userId,
+            strikeCount: modStatus.strike_count,
+            error: shadowbanResult.error,
+          }
+        );
+        // Return error to indicate the operation didn't complete fully
+        return {
+          success: false,
+          error: `User received strike but shadowban failed: ${shadowbanResult.error}`,
+        };
+      }
+
+      // Update the modStatus with shadowban info
+      return {
+        success: true,
+        data: {
+          ...modStatus,
+          is_shadowbanned: true,
+          shadowban_reason: MODERATION_CONFIG.AUTO_SHADOWBAN_REASON,
+        } as UserModerationStatus,
+      };
+    }
+
+    return {
+      success: true,
+      data: modStatus,
+    };
   } catch (error) {
     console.error('Unexpected error adding strike to user:', error);
     return {
@@ -285,6 +304,16 @@ export async function shadowbanUser(
         success: false,
         error: error.message || 'Failed to shadowban user',
       };
+    }
+
+    // Invalidate cache so the shadowban takes effect immediately
+    try {
+      const { invalidateShadowbanCache } = await import(
+        '@/services/reportService'
+      );
+      invalidateShadowbanCache();
+    } catch (e) {
+      console.warn('Failed to invalidate shadowban cache:', e);
     }
 
     return {
@@ -325,6 +354,16 @@ export async function unshadowbanUser(
         success: false,
         error: error.message || 'Failed to remove shadowban',
       };
+    }
+
+    // Invalidate cache so the user's content appears immediately
+    try {
+      const { invalidateShadowbanCache } = await import(
+        '@/services/reportService'
+      );
+      invalidateShadowbanCache();
+    } catch (e) {
+      console.warn('Failed to invalidate shadowban cache:', e);
     }
 
     return {

@@ -1,5 +1,12 @@
 -- Migration: Create moderation tables for pin reporting system
 -- This migration adds tables to track user strikes, shadowbans, and pin reports
+--
+-- CONFIGURATION (defined in config/moderation.ts):
+-- - REPORT_THRESHOLD_FOR_PIN_DELETION: 10 reports
+-- - STRIKE_THRESHOLD_FOR_SHADOWBAN: 5 strikes
+--
+-- IMPORTANT: If you change these values in config/moderation.ts, you MUST also
+-- update the hardcoded values in the trigger function below (search for >= 10 and >= 5)
 
 -- Table to track user moderation status (strikes and shadowbans)
 CREATE TABLE IF NOT EXISTS public.user_moderation (
@@ -47,7 +54,7 @@ BEGIN
   FROM public.pin_reports
   WHERE pin_id = NEW.pin_id;
   
-  -- If we've reached the threshold of 10 reports
+  -- If we've reached the threshold (REPORT_THRESHOLD_FOR_PIN_DELETION = 10)
   IF report_count >= 10 THEN
     -- Get the pin owner's user ID
     SELECT userid INTO pin_owner_id
@@ -68,7 +75,7 @@ BEGIN
       WHERE user_id = pin_owner_id
       RETURNING strike_count INTO current_strikes;
       
-      -- If user now has 5 or more strikes, shadowban them
+      -- If user now has 5 or more strikes, shadowban them (STRIKE_THRESHOLD_FOR_SHADOWBAN = 5)
       IF current_strikes >= 5 THEN
         UPDATE public.user_moderation
         SET 
@@ -78,11 +85,17 @@ BEGIN
         WHERE user_id = pin_owner_id;
       END IF;
       
-      -- Delete the pin (cascade will delete related records)
+      -- Delete all reports for this pin FIRST to avoid foreign key issues
+      -- This must happen before deleting the pin to prevent cascade conflicts
+      DELETE FROM public.pin_reports WHERE pin_id = NEW.pin_id;
+      
+      -- Now delete the pin (this will cascade to other related tables like events, hazards, etc.)
       DELETE FROM public.reports WHERE reportid = NEW.pin_id;
     END IF;
   END IF;
   
+  -- For AFTER triggers, the return value is ignored
+  -- We return NEW to indicate the insert operation completed successfully
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -107,6 +120,36 @@ CREATE TRIGGER trigger_user_moderation_updated_at
 BEFORE UPDATE ON public.user_moderation
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
+
+-- RPC function to atomically increment user strikes
+-- This prevents race conditions when multiple reports trigger strikes simultaneously
+CREATE OR REPLACE FUNCTION public.increment_user_strikes(target_user_id uuid)
+RETURNS TABLE (
+  id bigint,
+  user_id uuid,
+  strike_count integer,
+  is_shadowbanned boolean,
+  shadowban_reason text,
+  created_at timestamp with time zone,
+  updated_at timestamp with time zone
+) AS $$
+BEGIN
+  -- Atomically increment strike_count and return the updated row
+  RETURN QUERY
+  UPDATE public.user_moderation
+  SET strike_count = strike_count + 1,
+      updated_at = now()
+  WHERE user_moderation.user_id = target_user_id
+  RETURNING 
+    user_moderation.id,
+    user_moderation.user_id,
+    user_moderation.strike_count,
+    user_moderation.is_shadowbanned,
+    user_moderation.shadowban_reason,
+    user_moderation.created_at,
+    user_moderation.updated_at;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant permissions (adjust as needed for your RLS policies)
 -- These are basic permissions; you may want to add RLS policies
