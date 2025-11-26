@@ -17,47 +17,8 @@ import {
   ReportQueryOptions,
   ReportCategory,
 } from '@/types/report';
-import {
-  getShadowbannedUserIds,
-  isUserShadowbanned,
-} from '@/services/pinReportService';
-
-// Cache for shadowbanned user IDs to reduce database queries
-// Tradeoff: Newly shadowbanned users might appear for up to CACHE_TTL duration
-let cachedShadowbannedIds: string[] | null = null;
-let cacheExpiry: number = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-/**
- * Get shadowbanned user IDs with caching
- * @returns Array of shadowbanned user IDs
- */
-async function getCachedShadowbannedUserIds(): Promise<string[]> {
-  const now = Date.now();
-
-  // Return cached data if still valid
-  if (cachedShadowbannedIds && now < cacheExpiry) {
-    return cachedShadowbannedIds;
-  }
-
-  // Fetch fresh data
-  const shadowbannedIds = await getShadowbannedUserIds();
-
-  // Update cache
-  cachedShadowbannedIds = shadowbannedIds;
-  cacheExpiry = now + CACHE_TTL;
-
-  return shadowbannedIds;
-}
-
-/**
- * Manually invalidate the shadowbanned users cache
- * Call this when a user is shadowbanned or unshadowbanned to ensure immediate effect
- */
-export function invalidateShadowbanCache(): void {
-  cachedShadowbannedIds = null;
-  cacheExpiry = 0;
-}
+import { isUserShadowbanned } from '@/services/pinReportService';
+import { getCachedShadowbannedUserIds } from '@/services/shadowbanCache';
 
 /**
  * Validate UUID format (for security)
@@ -101,15 +62,7 @@ export async function fetchReports(
 
     // Filter out reports from shadowbanned users
     if (shadowbannedUserIds.length > 0) {
-      // Validate all UUIDs before using them (security best practice)
-      const validUserIds = shadowbannedUserIds.filter(isValidUUID);
-
-      if (validUserIds.length > 0) {
-        // Safely construct the query with validated UUIDs
-        query = query.not('userid', 'in', `(${validUserIds.join(',')})`);
-      } else {
-        console.warn('No valid UUIDs found in shadowbanned user IDs');
-      }
+      query = query.not('userid', 'in', shadowbannedUserIds);
     }
 
     // Apply filters

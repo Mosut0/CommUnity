@@ -291,9 +291,6 @@ export default function ReportActions({
 
       // For shadowbanned users, show fake success without actually submitting
       if (isShadowbanned) {
-        // Simulate a slight delay to maintain the illusion
-        await new Promise(resolve => setTimeout(resolve, 500));
-
         Alert.alert(
           'Report Submitted',
           'Thank you for helping keep our community safe. We will review this report.',

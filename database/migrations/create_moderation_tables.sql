@@ -42,6 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_pin_reports_pin_id ON public.pin_reports(pin_id);
 CREATE INDEX IF NOT EXISTS idx_pin_reports_reporter_user_id ON public.pin_reports(reporter_user_id);
 
 -- Function to handle automatic pin deletion and strike assignment
+-- Uses row-level locking to prevent race conditions from concurrent reports
 CREATE OR REPLACE FUNCTION public.handle_pin_report_threshold()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -49,6 +50,23 @@ DECLARE
   pin_owner_id uuid;
   current_strikes integer;
 BEGIN
+  -- Lock the pin row to prevent race conditions from concurrent reports
+  -- FOR UPDATE NOWAIT: If another trigger is already processing this pin, skip
+  -- This ensures only ONE trigger processes the pin deletion/strike logic
+  BEGIN
+    SELECT userid INTO STRICT pin_owner_id
+    FROM public.reports
+    WHERE reportid = NEW.pin_id
+    FOR UPDATE NOWAIT;
+  EXCEPTION
+    WHEN lock_not_available THEN
+      -- Another trigger is already processing this pin, skip
+      RETURN NEW;
+    WHEN no_data_found THEN
+      -- Pin doesn't exist (already deleted by another trigger), skip
+      RETURN NEW;
+  END;
+  
   -- Count total reports for this pin
   SELECT COUNT(DISTINCT reporter_user_id) INTO report_count
   FROM public.pin_reports
@@ -56,11 +74,7 @@ BEGIN
   
   -- If we've reached the threshold (REPORT_THRESHOLD_FOR_PIN_DELETION = 10)
   IF report_count >= 10 THEN
-    -- Get the pin owner's user ID
-    SELECT userid INTO pin_owner_id
-    FROM public.reports
-    WHERE reportid = NEW.pin_id;
-    
+    -- pin_owner_id is already set from the FOR UPDATE query above
     IF pin_owner_id IS NOT NULL THEN
       -- Ensure user has a moderation record
       INSERT INTO public.user_moderation (user_id, strike_count, is_shadowbanned)
@@ -91,11 +105,14 @@ BEGIN
       
       -- Now delete the pin (this will cascade to other related tables like events, hazards, etc.)
       DELETE FROM public.reports WHERE reportid = NEW.pin_id;
+      
+      -- Return NULL since we deleted the NEW record that triggered this
+      -- Note: For AFTER triggers, return values are ignored by PostgreSQL anyway
+      RETURN NULL;
     END IF;
   END IF;
   
-  -- For AFTER triggers, the return value is ignored
-  -- We return NEW to indicate the insert operation completed successfully
+  -- If we didn't delete anything, return NEW (but this is also ignored for AFTER triggers)
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

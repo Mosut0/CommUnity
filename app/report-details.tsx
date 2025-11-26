@@ -458,11 +458,9 @@ export default function ReportDetails() {
                   await fetchReportDetails(false); // Don't show default error alert
                 } catch {
                   // If the pin no longer exists, it was likely deleted due to reaching the report threshold
-                  Alert.alert(
-                    'Pin Removed',
-                    'This pin has been removed due to multiple reports.',
-                    [{ text: 'OK', onPress: () => router.back() }]
-                  );
+                  Alert.alert('Pin Removed', 'This pin has been removed', [
+                    { text: 'OK', onPress: () => router.back() },
+                  ]);
                 }
               }}
             />

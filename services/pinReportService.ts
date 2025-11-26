@@ -3,6 +3,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { MODERATION_CONFIG } from '@/config/moderation';
+import { invalidateShadowbanCache } from '@/services/shadowbanCache';
 
 export interface UserModerationStatus {
   id: number;
@@ -308,14 +309,7 @@ export async function shadowbanUser(
     }
 
     // Invalidate cache so the shadowban takes effect immediately
-    try {
-      const { invalidateShadowbanCache } = await import(
-        '@/services/reportService'
-      );
-      invalidateShadowbanCache();
-    } catch (e) {
-      console.warn('Failed to invalidate shadowban cache:', e);
-    }
+    invalidateShadowbanCache();
 
     return {
       success: true,
@@ -358,14 +352,7 @@ export async function unshadowbanUser(
     }
 
     // Invalidate cache so the user's content appears immediately
-    try {
-      const { invalidateShadowbanCache } = await import(
-        '@/services/reportService'
-      );
-      invalidateShadowbanCache();
-    } catch (e) {
-      console.warn('Failed to invalidate shadowban cache:', e);
-    }
+    invalidateShadowbanCache();
 
     return {
       success: true,
@@ -494,7 +481,9 @@ export async function getUserModerationStatus(
 }
 
 /**
- * Get all shadowbanned user IDs (for filtering)
+ * Get all shadowbanned user IDs directly from database (for filtering)
+ * Note: For most use cases, use getCachedShadowbannedUserIds from shadowbanCache module instead
+ * This function bypasses the cache and queries the database directly
  * @returns Array of shadowbanned user IDs
  */
 export async function getShadowbannedUserIds(): Promise<string[]> {
