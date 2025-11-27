@@ -51,7 +51,8 @@ BEGIN
   
   SELECT COUNT(DISTINCT reporter_user_id) INTO report_count
   FROM public.pin_reports
-  WHERE pin_id = NEW.pin_id;
+  WHERE pin_id = NEW.pin_id
+  FOR UPDATE;
   
   IF report_count >= 10 THEN
     IF pin_owner_id IS NOT NULL THEN

@@ -3,10 +3,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { MODERATION_CONFIG } from '@/config/moderation';
-import {
-  invalidateShadowbanCache,
-  getShadowbannedUserIds,
-} from '@/services/shadowbanCache';
+import { invalidateShadowbanCache } from '@/services/shadowbanCache';
 
 export interface UserModerationStatus {
   id: number;
@@ -197,6 +194,10 @@ export async function addStrikeToUser(
 
     if (upsertError) {
       console.error('Error ensuring moderation record:', upsertError);
+      return {
+        success: false,
+        error: `Failed to ensure moderation record: ${upsertError.message || upsertError}`,
+      };
     }
 
     // Atomically increment the strike count using the database RPC function
