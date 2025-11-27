@@ -3,7 +3,10 @@
 
 import { supabase } from '@/lib/supabase';
 import { MODERATION_CONFIG } from '@/config/moderation';
-import { invalidateShadowbanCache } from '@/services/shadowbanCache';
+import {
+  invalidateShadowbanCache,
+  getShadowbannedUserIds,
+} from '@/services/shadowbanCache';
 
 export interface UserModerationStatus {
   id: number;
@@ -480,27 +483,7 @@ export async function getUserModerationStatus(
   }
 }
 
-/**
- * Get all shadowbanned user IDs directly from database (for filtering)
- * Note: For most use cases, use getCachedShadowbannedUserIds from shadowbanCache module instead
- * This function bypasses the cache and queries the database directly
- * @returns Array of shadowbanned user IDs
- */
-export async function getShadowbannedUserIds(): Promise<string[]> {
-  try {
-    const { data, error } = await supabase
-      .from('user_moderation')
-      .select('user_id')
-      .eq('is_shadowbanned', true);
-
-    if (error) {
-      console.error('Error getting shadowbanned users:', error);
-      return [];
-    }
-
-    return (data || []).map((record: any) => record.user_id);
-  } catch (error) {
-    console.error('Unexpected error getting shadowbanned users:', error);
-    return [];
-  }
-}
+// Re-export getShadowbannedUserIds from shadowbanCache for backward compatibility
+// This allows existing code to continue importing from pinReportService
+// New code should import directly from shadowbanCache instead
+export { getShadowbannedUserIds } from '@/services/shadowbanCache';

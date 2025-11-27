@@ -21,15 +21,6 @@ import { isUserShadowbanned } from '@/services/pinReportService';
 import { getCachedShadowbannedUserIds } from '@/services/shadowbanCache';
 
 /**
- * Validate UUID format (for security)
- */
-function isValidUUID(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
-}
-
-/**
  * Convert location string to latitude and longitude
  */
 function locationToPoint(locationStr: string): { lat: number; lng: number } {

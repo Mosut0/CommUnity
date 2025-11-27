@@ -29,9 +29,15 @@ jest.mock('@/services/imageService', () => ({
   uploadImage: jest.fn().mockResolvedValue('https://example.com/image.jpg'),
 }));
 
+// Mock the shadowban cache
+jest.mock('@/services/shadowbanCache', () => ({
+  getCachedShadowbannedUserIds: jest.fn().mockResolvedValue([]),
+  getShadowbannedUserIds: jest.fn().mockResolvedValue([]),
+  invalidateShadowbanCache: jest.fn(),
+}));
+
 // Mock the pin report service
 jest.mock('@/services/pinReportService', () => ({
-  getShadowbannedUserIds: jest.fn().mockResolvedValue([]),
   isUserShadowbanned: jest.fn().mockResolvedValue(false),
 }));
 
