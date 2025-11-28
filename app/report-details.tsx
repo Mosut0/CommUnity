@@ -110,17 +110,18 @@ export default function ReportDetails() {
     }
   }, [report, location, distanceUnit]);
 
-  const fetchReportDetails = useCallback(async () => {
-    try {
-      setLoading(true);
-      setImageError(false);
-      setImageLoading(true);
-      setRetryCount(0);
+  const fetchReportDetails = useCallback(
+    async (showErrorAlert = true) => {
+      try {
+        setLoading(true);
+        setImageError(false);
+        setImageLoading(true);
+        setRetryCount(0);
 
-      const { data, error } = await supabase
-        .from('reports')
-        .select(
-          `
+        const { data, error } = await supabase
+          .from('reports')
+          .select(
+            `
           reportid,
           category,
           description,
@@ -133,47 +134,56 @@ export default function ReportDetails() {
           founditemtype:founditems(itemtype, contactinfo),
           hazardtype:hazards(hazardtype)
         `
-        )
-        .eq('reportid', reportId)
-        .single();
+          )
+          .eq('reportid', reportId)
+          .single();
 
-      if (error) {
-        console.error('Error fetching report details:', error);
-        Alert.alert('Error', 'Failed to load report details');
-        router.back();
-        return;
+        if (error) {
+          console.error('Error fetching report details:', error);
+          if (showErrorAlert) {
+            Alert.alert('Error', 'Failed to load report details');
+            router.back();
+          }
+          throw error; // Throw error so it can be caught by caller
+        }
+
+        const formattedReport: DetailedReport = {
+          reportid: data.reportid,
+          category: data.category,
+          description: data.description,
+          location: data.location,
+          created_at: data.createdat,
+          userid: data.userid,
+          imageurl: data.imageurl,
+          eventtype: data.eventtype?.[0]?.eventtype || '',
+          eventtime: data.eventtype?.[0]?.time || '',
+          itemtype:
+            data.lostitemtype?.[0]?.itemtype ||
+            data.founditemtype?.[0]?.itemtype ||
+            '',
+          contactinfo:
+            data.lostitemtype?.[0]?.contactinfo ||
+            data.founditemtype?.[0]?.contactinfo ||
+            '',
+          hazardtype: data.hazardtype?.[0]?.hazardtype || '',
+        };
+
+        setReport(formattedReport);
+      } catch (error) {
+        console.error('Error:', error);
+        if (showErrorAlert) {
+          Alert.alert('Error', 'Something went wrong');
+          router.back();
+        } else {
+          // Re-throw error so caller can handle it
+          throw error;
+        }
+      } finally {
+        setLoading(false);
       }
-
-      const formattedReport: DetailedReport = {
-        reportid: data.reportid,
-        category: data.category,
-        description: data.description,
-        location: data.location,
-        created_at: data.createdat,
-        userid: data.userid,
-        imageurl: data.imageurl,
-        eventtype: data.eventtype?.[0]?.eventtype || '',
-        eventtime: data.eventtype?.[0]?.time || '',
-        itemtype:
-          data.lostitemtype?.[0]?.itemtype ||
-          data.founditemtype?.[0]?.itemtype ||
-          '',
-        contactinfo:
-          data.lostitemtype?.[0]?.contactinfo ||
-          data.founditemtype?.[0]?.contactinfo ||
-          '',
-        hazardtype: data.hazardtype?.[0]?.hazardtype || '',
-      };
-
-      setReport(formattedReport);
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong');
-      router.back();
-    } finally {
-      setLoading(false);
-    }
-  }, [reportId, router]);
+    },
+    [reportId, router]
+  );
 
   useEffect(() => {
     if (reportId) {
@@ -440,6 +450,18 @@ export default function ReportDetails() {
               }}
               onDelete={() => {
                 router.back();
+              }}
+              onReport={async () => {
+                // Refresh details to check if pin was deleted
+                // (in case it reached the report threshold for deletion)
+                try {
+                  await fetchReportDetails(false); // Don't show default error alert
+                } catch {
+                  // If the pin no longer exists, it was likely deleted due to reaching the report threshold
+                  Alert.alert('Pin Removed', 'This pin has been removed', [
+                    { text: 'OK', onPress: () => router.back() },
+                  ]);
+                }
               }}
             />
           </View>
