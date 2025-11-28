@@ -128,7 +128,12 @@ serve(async req => {
       );
       const events = await eventResp.json();
       additionalDetails = events?.[0];
-    } else if (report.type === 'hazard') {
+    } else if (
+      report.type === 'safety' ||
+      report.type === 'infrastructure' ||
+      report.type === 'wildlife' ||
+      report.type === 'health'
+    ) {
       const hazardResp = await fetch(
         `${SUPABASE_URL}/rest/v1/hazards?reportid=eq.${reportId}&select=hazardtype`,
         {
@@ -216,7 +221,7 @@ serve(async req => {
           }
           break;
 
-        case 'hazard':
+        case 'safety':
           if (additionalDetails?.hazardtype) {
             title = `Safety Alert: ${additionalDetails.hazardtype}`;
             body =
@@ -228,6 +233,46 @@ serve(async req => {
               report.description || 'A safety hazard has been reported nearby';
           }
           break;
+
+        case 'infrastructure':
+          if (additionalDetails?.hazardtype) {
+            title = `Infrastructure Issue: ${additionalDetails.hazardtype}`;
+            body =
+              report.description ||
+              `${additionalDetails.hazardtype} infrastructure issue reported nearby`;
+          } else {
+            title = 'Infrastructure Issue';
+            body =
+              report.description ||
+              'An infrastructure issue has been reported nearby';
+          }
+          break;
+
+        case 'wildlife':
+          if (additionalDetails?.hazardtype) {
+            title = `Wildlife Alert: ${additionalDetails.hazardtype}`;
+            body =
+              report.description ||
+              `${additionalDetails.hazardtype} spotted nearby`;
+          } else {
+            title = 'Wildlife Alert';
+            body = report.description || 'Wildlife has been spotted nearby';
+          }
+          break;
+
+        case 'health':
+          if (additionalDetails?.hazardtype) {
+            title = `Health Alert: ${additionalDetails.hazardtype}`;
+            body =
+              report.description ||
+              `${additionalDetails.hazardtype} health concern reported nearby`;
+          } else {
+            title = 'Health Alert';
+            body =
+              report.description || 'A health concern has been reported nearby';
+          }
+          break;
+
         default:
           title = `Nearby ${report.type}`;
           body = report.description || `New ${report.type} reported nearby`;

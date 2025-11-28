@@ -1,7 +1,7 @@
 // Component for update/delete actions on reports
 // Only visible to the report owner
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
-  Animated,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,14 +26,6 @@ import {
 } from '@/types/report';
 import { useReports } from '@/hooks/useReports';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import {
-  makeFormStyles,
-  getTheme,
-  modalStyles as sharedModalStyles,
-} from './formStyles';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
 interface ReportActionsProps {
   report: Report;
@@ -50,13 +41,9 @@ export default function ReportActions({
   onDelete,
 }: ReportActionsProps) {
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const colorScheme = useColorScheme() ?? 'light';
-  const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
-  const formStyles = useMemo(() => makeFormStyles(theme), [theme]);
-  const menuAnimation = useRef(new Animated.Value(0)).current;
 
   // Common fields
   const [editDescription, setEditDescription] = useState(report.description);
@@ -106,7 +93,7 @@ export default function ReportActions({
         Alert.alert('Error', 'Event type cannot be empty');
         return;
       }
-    } else if (report.category === 'hazard') {
+    } else if (report.category === 'safety') {
       if (!editHazardType.trim()) {
         Alert.alert('Error', 'Hazard type cannot be empty');
         return;
@@ -151,7 +138,7 @@ export default function ReportActions({
         } as UpdateEventData;
         break;
 
-      case 'hazard':
+      case 'safety':
         categoryData = {
           hazardtype: editHazardType.trim(),
         } as UpdateHazardData;
@@ -172,6 +159,7 @@ export default function ReportActions({
         break;
 
       default:
+        // For other categories (infrastructure, wildlife, health, other)
         // only update common fields
         categoryData = undefined;
     }
@@ -243,135 +231,33 @@ export default function ReportActions({
     });
   };
 
-  const toggleMenu = () => {
-    if (showMenu) {
-      Animated.timing(menuAnimation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => setShowMenu(false));
-    } else {
-      setShowMenu(true);
-      Animated.timing(menuAnimation, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    }
-  };
-
-  const handleEditPress = () => {
-    toggleMenu();
-    setTimeout(() => setShowEditModal(true), 200);
-  };
-
-  const handleDeletePress = () => {
-    toggleMenu();
-    setTimeout(() => handleDelete(), 200);
-  };
-
-  const menuScale = menuAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1],
-  });
-
-  const menuOpacity = menuAnimation;
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={styles.menuButton}
-        onPress={toggleMenu}
-        disabled={isDeleting || isUpdating}
+        style={[styles.button, styles.editButton]}
+        onPress={() => setShowEditModal(true)}
+        disabled={isDeleting}
         activeOpacity={0.7}
       >
-        <Ionicons
-          name='ellipsis-horizontal'
-          size={24}
-          color={colorScheme === 'dark' ? '#fff' : '#000'}
-        />
+        <Ionicons name='pencil' size={20} color='#fff' />
+        <Text style={styles.buttonText}>Edit Report</Text>
       </TouchableOpacity>
 
-      <Modal
-        visible={showMenu}
-        transparent
-        animationType='none'
-        onRequestClose={toggleMenu}
+      <TouchableOpacity
+        style={[styles.button, styles.deleteButton]}
+        onPress={handleDelete}
+        disabled={isDeleting}
+        activeOpacity={0.7}
       >
-        <TouchableOpacity
-          style={styles.menuModalOverlay}
-          activeOpacity={1}
-          onPress={toggleMenu}
-        >
-          <View style={styles.menuPositioner}>
-            <Animated.View
-              style={[
-                styles.menuDropdown,
-                colorScheme === 'dark'
-                  ? styles.menuDropdownDark
-                  : styles.menuDropdownLight,
-                {
-                  opacity: menuOpacity,
-                  transform: [{ scale: menuScale }],
-                },
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={handleEditPress}
-                disabled={isUpdating}
-              >
-                <Ionicons
-                  name='pencil-outline'
-                  size={20}
-                  color={colorScheme === 'dark' ? '#60A5FA' : '#3B82F6'}
-                />
-                <Text
-                  style={[
-                    styles.menuItemText,
-                    { color: colorScheme === 'dark' ? '#fff' : '#000' },
-                  ]}
-                >
-                  Edit Report
-                </Text>
-              </TouchableOpacity>
-
-              <View
-                style={[
-                  styles.menuDivider,
-                  colorScheme === 'dark'
-                    ? styles.menuDividerDark
-                    : styles.menuDividerLight,
-                ]}
-              />
-
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={handleDeletePress}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <ActivityIndicator
-                    size='small'
-                    color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
-                  />
-                ) : (
-                  <>
-                    <Ionicons
-                      name='trash-outline'
-                      size={20}
-                      color={colorScheme === 'dark' ? '#F87171' : '#EF4444'}
-                    />
-                    <Text style={[styles.menuItemText, styles.deleteText]}>
-                      Delete Report
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        {isDeleting ? (
+          <ActivityIndicator size='small' color='#fff' />
+        ) : (
+          <>
+            <Ionicons name='trash' size={20} color='#fff' />
+            <Text style={styles.buttonText}>Delete Report</Text>
+          </>
+        )}
+      </TouchableOpacity>
 
       {/* Edit Modal */}
       <Modal
@@ -380,106 +266,110 @@ export default function ReportActions({
         animationType='slide'
         onRequestClose={() => setShowEditModal(false)}
       >
-        <View style={styles.editModalOverlay}>
-          <ThemedView style={styles.editModalView}>
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContent,
+              colorScheme === 'dark'
+                ? styles.modalContentDark
+                : styles.modalContentLight,
+            ]}
+          >
+            <View style={styles.modalHeader}>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                ]}
+              >
+                Edit{' '}
+                {report.category.charAt(0).toUpperCase() +
+                  report.category.slice(1)}{' '}
+                Report
+              </Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Ionicons
+                  name='close'
+                  size={24}
+                  color={colorScheme === 'dark' ? '#fff' : '#000'}
+                />
+              </TouchableOpacity>
+            </View>
+
             <ScrollView
-              style={sharedModalStyles.scrollView}
-              contentContainerStyle={sharedModalStyles.scrollContent}
+              style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >
-              <View style={sharedModalStyles.header}>
-                <TouchableOpacity
-                  onPress={() => setShowEditModal(false)}
-                  style={sharedModalStyles.closeButton}
-                >
-                  <IconSymbol name='chevron.left' color={theme.textPrimary} />
-                </TouchableOpacity>
-                <ThemedText
-                  type='subtitle'
-                  style={sharedModalStyles.headerTitle}
-                >
-                  Edit{' '}
-                  {report.category.charAt(0).toUpperCase() +
-                    report.category.slice(1)}{' '}
-                  Report
-                </ThemedText>
-                <View style={sharedModalStyles.placeholder} />
-              </View>
+              {/* Common Description Field */}
+              <Text
+                style={[
+                  styles.label,
+                  colorScheme === 'dark' ? styles.textDark : styles.textLight,
+                ]}
+              >
+                Description
+              </Text>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  colorScheme === 'dark'
+                    ? styles.textInputDark
+                    : styles.textInputLight,
+                ]}
+                value={editDescription}
+                onChangeText={setEditDescription}
+                multiline
+                placeholder='Description'
+                placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
+                editable={!isUpdating}
+              />
 
               {/* Event-specific fields */}
               {report.category === 'event' && (
-                <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>Event Title*</ThemedText>
+                <>
+                  <Text
+                    style={[
+                      styles.label,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
+                    ]}
+                  >
+                    Event Type
+                  </Text>
                   <TextInput
-                    style={formStyles.input}
+                    style={[
+                      styles.textInput,
+                      styles.singleLineInput,
+                      colorScheme === 'dark'
+                        ? styles.textInputDark
+                        : styles.textInputLight,
+                    ]}
                     value={editEventType}
                     onChangeText={setEditEventType}
                     placeholder='e.g., Community Meetup, Workshop'
-                    placeholderTextColor={theme.textSecondary}
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
                   />
-                </View>
-              )}
 
-              {/* Hazard-specific fields */}
-              {report.category === 'hazard' && (
-                <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>
-                    Hazard Title*
-                  </ThemedText>
-                  <TextInput
-                    style={formStyles.input}
-                    value={editHazardType}
-                    onChangeText={setEditHazardType}
-                    placeholder='e.g., Pothole, Broken Glass'
-                    placeholderTextColor={theme.textSecondary}
-                    editable={!isUpdating}
-                  />
-                </View>
-              )}
-
-              {/* Lost/Found item title */}
-              {(report.category === 'lost' || report.category === 'found') && (
-                <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>Item Title*</ThemedText>
-                  <TextInput
-                    style={formStyles.input}
-                    value={editItemType}
-                    onChangeText={setEditItemType}
-                    placeholder='e.g., Keys, Wallet, Phone'
-                    placeholderTextColor={theme.textSecondary}
-                    editable={!isUpdating}
-                  />
-                </View>
-              )}
-
-              {/* Common Description Field */}
-              <View style={formStyles.inputGroup}>
-                <ThemedText style={formStyles.label}>Description*</ThemedText>
-                <TextInput
-                  style={formStyles.textArea}
-                  value={editDescription}
-                  onChangeText={setEditDescription}
-                  placeholder='Description'
-                  placeholderTextColor={theme.textSecondary}
-                  editable={!isUpdating}
-                  multiline
-                />
-              </View>
-
-              {/* Event Date & Time */}
-              {report.category === 'event' && (
-                <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>
-                    Event Date & Time*
-                  </ThemedText>
+                  <Text
+                    style={[
+                      styles.label,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
+                    ]}
+                  >
+                    Event Date & Time
+                  </Text>
                   <TouchableOpacity
                     style={[
-                      styles.datePickerButton,
-                      {
-                        backgroundColor: theme.inputBg,
-                        borderColor: theme.divider,
-                      },
+                      styles.dateButton,
+                      colorScheme === 'dark'
+                        ? styles.textInputDark
+                        : styles.textInputLight,
                     ]}
                     onPress={() => setShowDatePicker(true)}
                     disabled={isUpdating}
@@ -487,10 +377,15 @@ export default function ReportActions({
                     <Ionicons
                       name='calendar-outline'
                       size={20}
-                      color={theme.textPrimary}
+                      color={colorScheme === 'dark' ? '#fff' : '#000'}
                     />
                     <Text
-                      style={[styles.dateText, { color: theme.textPrimary }]}
+                      style={[
+                        styles.dateText,
+                        colorScheme === 'dark'
+                          ? styles.textDark
+                          : styles.textLight,
+                      ]}
                     >
                       {formatDateTime(editEventTime)}
                     </Text>
@@ -505,57 +400,124 @@ export default function ReportActions({
                       onChange={handleDateChange}
                     />
                   )}
-                </View>
+                </>
               )}
 
-              {/* Lost/Found contact info */}
-              {(report.category === 'lost' || report.category === 'found') && (
-                <View style={formStyles.inputGroup}>
-                  <ThemedText style={formStyles.label}>
-                    Contact Info*
-                  </ThemedText>
+              {/* Hazard-specific fields */}
+              {report.category === 'safety' && (
+                <>
+                  <Text
+                    style={[
+                      styles.label,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
+                    ]}
+                  >
+                    Hazard Type
+                  </Text>
                   <TextInput
-                    style={formStyles.input}
+                    style={[
+                      styles.textInput,
+                      styles.singleLineInput,
+                      colorScheme === 'dark'
+                        ? styles.textInputDark
+                        : styles.textInputLight,
+                    ]}
+                    value={editHazardType}
+                    onChangeText={setEditHazardType}
+                    placeholder='e.g., Pothole, Broken Glass'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
+                    editable={!isUpdating}
+                  />
+                </>
+              )}
+
+              {/* Lost/Found item fields */}
+              {(report.category === 'lost' || report.category === 'found') && (
+                <>
+                  <Text
+                    style={[
+                      styles.label,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
+                    ]}
+                  >
+                    Item Type
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      styles.singleLineInput,
+                      colorScheme === 'dark'
+                        ? styles.textInputDark
+                        : styles.textInputLight,
+                    ]}
+                    value={editItemType}
+                    onChangeText={setEditItemType}
+                    placeholder='e.g., Keys, Wallet, Phone'
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
+                    editable={!isUpdating}
+                  />
+
+                  <Text
+                    style={[
+                      styles.label,
+                      colorScheme === 'dark'
+                        ? styles.textDark
+                        : styles.textLight,
+                    ]}
+                  >
+                    Contact Info
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      styles.singleLineInput,
+                      colorScheme === 'dark'
+                        ? styles.textInputDark
+                        : styles.textInputLight,
+                    ]}
                     value={editContactInfo}
                     onChangeText={setEditContactInfo}
                     placeholder='Email or phone number'
-                    placeholderTextColor={theme.textSecondary}
+                    placeholderTextColor={
+                      colorScheme === 'dark' ? '#666' : '#999'
+                    }
                     editable={!isUpdating}
                     keyboardType='email-address'
                   />
-                </View>
+                </>
               )}
-              {/* Action Buttons */}
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={[formStyles.submitButton, styles.cancelButton]}
-                  onPress={() => setShowEditModal(false)}
-                  disabled={isUpdating}
-                >
-                  <ThemedText style={styles.cancelButtonText}>
-                    Cancel
-                  </ThemedText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={formStyles.submitButton}
-                  onPress={handleUpdate}
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? (
-                    <ActivityIndicator
-                      size='small'
-                      color={theme.primaryBtnText}
-                    />
-                  ) : (
-                    <ThemedText style={formStyles.submitButtonText}>
-                      Save Changes
-                    </ThemedText>
-                  )}
-                </TouchableOpacity>
-              </View>
             </ScrollView>
-          </ThemedView>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowEditModal(false)}
+                disabled={isUpdating}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleUpdate}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <ActivityIndicator size='small' color='#fff' />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </View>
@@ -564,96 +526,107 @@ export default function ReportActions({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
-  menuButton: {
-    padding: 8,
-    borderRadius: 8,
-  },
-  menuModalOverlay: {
+  button: {
     flex: 1,
-    backgroundColor: 'transparent',
-  },
-  menuPositioner: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 100 : 60,
-    right: 16,
-  },
-  menuDropdown: {
-    minWidth: 180,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-    overflow: 'hidden',
-  },
-  menuDropdownLight: {
-    backgroundColor: '#fff',
-  },
-  menuDropdownDark: {
-    backgroundColor: '#1F2937',
-  },
-  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    gap: 12,
+    borderRadius: 8,
+    gap: 8,
   },
-  menuItemText: {
-    fontSize: 15,
-    fontWeight: '500',
+  editButton: {
+    backgroundColor: '#3B82F6',
   },
-  deleteText: {
-    color: '#EF4444',
+  deleteButton: {
+    backgroundColor: '#EF4444',
   },
-  menuDivider: {
-    height: 1,
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
-  menuDividerLight: {
-    backgroundColor: '#E5E7EB',
-  },
-  menuDividerDark: {
-    backgroundColor: '#374151',
-  },
-  editModalOverlay: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 20,
   },
-  editModalView: {
+  modalContent: {
     width: '100%',
-    maxWidth: 500,
-    maxHeight: '85%',
-    borderRadius: 20,
-    padding: 0,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  datePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
+    maxWidth: 400,
+    maxHeight: '80%',
     borderRadius: 12,
-    padding: 14,
+    padding: 20,
+  },
+  modalContentLight: {
+    backgroundColor: '#fff',
+  },
+  modalContentDark: {
+    backgroundColor: '#1F2937',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  scrollView: {
+    maxHeight: 400,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  textLight: {
+    color: '#000',
+  },
+  textDark: {
+    color: '#fff',
+  },
+  textInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  singleLineInput: {
     minHeight: 50,
+  },
+  textInputLight: {
+    borderColor: '#D1D5DB',
+    backgroundColor: '#F9FAFB',
+    color: '#000',
+  },
+  textInputDark: {
+    borderColor: '#374151',
+    backgroundColor: '#111827',
+    color: '#fff',
   },
   dateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 50,
+    marginBottom: 8,
   },
   dateText: {
     fontSize: 16,
@@ -661,12 +634,28 @@ const styles = StyleSheet.create({
   modalActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 16,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
   },
   cancelButton: {
     backgroundColor: '#6B7280',
   },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+  },
   cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

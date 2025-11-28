@@ -54,8 +54,8 @@ describe('reportUtils', () => {
       expect(color).toBe('#7C3AED');
     });
 
-    it('should return correct color for hazard', () => {
-      const color = getMarkerColor('hazard');
+    it('should return correct color for safety', () => {
+      const color = getMarkerColor('safety');
       expect(color).toBe('#EF4444');
     });
 
@@ -71,8 +71,8 @@ describe('reportUtils', () => {
       expect(icon).toBe('calendar-outline');
     });
 
-    it('should return correct icon for hazard', () => {
-      const icon = getCategoryIcon('hazard');
+    it('should return correct icon for safety', () => {
+      const icon = getCategoryIcon('safety');
       expect(icon).toBe('alert-circle-outline');
     });
 
@@ -90,17 +90,17 @@ describe('reportUtils', () => {
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Community Meeting');
+      expect(title).toBe('Event: Community Meeting');
     });
 
     it('should return hazard title', () => {
       const report = {
-        category: 'hazard',
+        category: 'safety',
         hazardtype: 'Pothole',
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Pothole');
+      expect(title).toBe('Hazard: Pothole');
     });
 
     it('should return lost item title', () => {
@@ -110,7 +110,7 @@ describe('reportUtils', () => {
       } as Report;
 
       const title = getReportTitle(report);
-      expect(title).toBe('Wallet');
+      expect(title).toBe('Lost: Wallet');
     });
 
     it('should return default title for unknown category', () => {
@@ -158,7 +158,7 @@ describe('reportUtils', () => {
 
     it('should return plain description for reports without extras', () => {
       const report = {
-        category: 'hazard',
+        category: 'safety',
         description: 'Pothole on road',
       } as Report;
 
@@ -178,8 +178,8 @@ describe('reportUtils', () => {
       expect(matchesFilter(report, 'event')).toBe(true);
     });
 
-    it('should match hazard filter for hazard category', () => {
-      const report = { category: 'hazard' } as Report;
+    it('should match hazard filter for safety category', () => {
+      const report = { category: 'safety' } as Report;
       expect(matchesFilter(report, 'hazard')).toBe(true);
     });
 
@@ -251,7 +251,7 @@ describe('reportUtils', () => {
         {
           reportid: 2,
           location: '(40.7128,-74.0060)',
-          category: 'hazard',
+          category: 'safety',
         } as Report,
         {
           reportid: 3,

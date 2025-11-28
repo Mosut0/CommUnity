@@ -96,7 +96,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
   const getIconColor = (key: string) => {
     switch (key) {
       case 'hazard':
-        return MARKER_COLORS.hazard;
+        return MARKER_COLORS.safety;
       case 'event':
         return MARKER_COLORS.event;
       case 'lost':
@@ -133,6 +133,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
     }
 
     Alert.alert('Saved', 'Notification preferences updated');
+    onRequestClose();
   };
 
   return (
@@ -175,6 +176,11 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
             },
           ]}
         >
+          <View style={styles.sheetHandleWrap}>
+            <View
+              style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
+            />
+          </View>
           <View style={styles.sheetHeaderRow}>
             <TouchableOpacity onPress={onPressBack} style={styles.backButton}>
               <MaterialIcons
@@ -364,8 +370,17 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 16,
+    paddingTop: 10,
     maxHeight: '90%',
+  },
+  sheetHandleWrap: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  sheetHandle: {
+    width: 42,
+    height: 5,
+    borderRadius: 3,
   },
   sheetHeaderRow: {
     flexDirection: 'row',

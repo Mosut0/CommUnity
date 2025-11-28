@@ -154,6 +154,26 @@ export default function SignUpScreen() {
                 />
               </View>
 
+              <View style={styles.termsContainer}>
+                <Text style={styles.termsText}>
+                  By signing up, you agree to our{' '}
+                  <Text
+                    style={styles.termsLink}
+                    onPress={() => router.push('/terms-of-service')}
+                  >
+                    Terms of Service
+                  </Text>{' '}
+                  and{' '}
+                  <Text
+                    style={styles.termsLink}
+                    onPress={() => router.push('/privacy-policy')}
+                  >
+                    Privacy Policy
+                  </Text>
+                  .
+                </Text>
+              </View>
+
               <TouchableOpacity
                 style={styles.primaryBtn}
                 onPress={handleSignUp}
@@ -240,6 +260,21 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
       color: t.primaryBtnText,
       fontWeight: '700',
       fontSize: 16,
+    },
+    termsContainer: {
+      marginTop: 8,
+      marginBottom: 16,
+    },
+    termsText: {
+      color: t.textSecondary,
+      fontSize: 12,
+      lineHeight: 18,
+      textAlign: 'center',
+    },
+    termsLink: {
+      color: t.primaryBtnBg,
+      fontWeight: '600',
+      textDecorationLine: 'underline',
     },
     divider: { height: 1, backgroundColor: t.divider, marginVertical: 20 },
     switchRow: {

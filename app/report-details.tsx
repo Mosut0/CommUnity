@@ -11,6 +11,8 @@ import {
   Platform,
   Share,
   Image,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -59,6 +61,7 @@ export default function ReportDetails() {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [imageExpanded, setImageExpanded] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -206,8 +209,8 @@ export default function ReportDetails() {
             name: 'checkmark-circle-outline',
             color: MARKER_COLORS.found,
           };
-        case 'hazard':
-          return { name: 'alert-circle-outline', color: MARKER_COLORS.hazard };
+        case 'safety':
+          return { name: 'alert-circle-outline', color: MARKER_COLORS.safety };
         default:
           return { name: 'information-circle-outline', color: uiTheme.accent };
       }
@@ -239,40 +242,30 @@ export default function ReportDetails() {
     const { latitude, longitude } = coords;
 
     try {
-      if (Platform.OS === 'ios') {
-        // Try Google Maps first
-        const googleMapsUrl = `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`;
+      // Try Google Maps first
+      const googleMapsUrl =
+        Platform.OS === 'ios'
+          ? `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`
+          : `google.navigation:q=${latitude},${longitude}`;
 
-        try {
-          const supported = await Linking.canOpenURL(googleMapsUrl);
-          if (supported) {
-            await Linking.openURL(googleMapsUrl);
-            return;
-          }
-        } catch {
-          // Google Maps not installed, will fall through to Apple Maps
-        }
+      const canOpenGoogleMaps = await Linking.canOpenURL(googleMapsUrl);
 
-        // Fall back to Apple Maps
-        const appleMapsUrl = `maps://app?daddr=${latitude},${longitude}`;
-        await Linking.openURL(appleMapsUrl);
+      if (canOpenGoogleMaps) {
+        await Linking.openURL(googleMapsUrl);
       } else {
-        // Android: try Google Maps navigation first
-        const googleMapsUrl = `google.navigation:q=${latitude},${longitude}`;
+        // Fallback to platform-specific maps
+        const fallbackUrl =
+          Platform.OS === 'ios'
+            ? `maps://app?daddr=${latitude},${longitude}`
+            : `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
 
-        try {
-          const supported = await Linking.canOpenURL(googleMapsUrl);
-          if (supported) {
-            await Linking.openURL(googleMapsUrl);
-            return;
-          }
-        } catch {
-          // Google Maps not installed, fall through
+        const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
+
+        if (canOpenFallback) {
+          await Linking.openURL(fallbackUrl);
+        } else {
+          Alert.alert('Error', 'No maps application available');
         }
-
-        // Fall back to web version of Google Maps
-        const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-        await Linking.openURL(webMapsUrl);
       }
     } catch (error) {
       console.error('Error opening directions:', error);
@@ -307,9 +300,7 @@ export default function ReportDetails() {
       shareMessage += `\nDistance: ${distanceText}`;
     }
 
-    // Add deep link to the report
-    const deepLink = `myapp://report/${report.reportid}`;
-    shareMessage += `\n\nView in CommUnity app: ${deepLink}`;
+    shareMessage += `\n\nShared from CommUnity app`;
 
     try {
       const result = await Share.share({
@@ -418,32 +409,6 @@ export default function ReportDetails() {
           <Ionicons name='chevron-back' size={24} color={uiTheme.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Report Details</Text>
-        {report && currentUserId && (
-          <View style={styles.headerActions}>
-            <ReportActions
-              report={{
-                reportid: report.reportid,
-                userid: report.userid || '',
-                category: report.category as any,
-                description: report.description,
-                location: report.location,
-                createdat: report.created_at,
-                eventtype: report.eventtype,
-                time: report.eventtime,
-                hazardtype: report.hazardtype,
-                itemtype: report.itemtype,
-                contactinfo: report.contactinfo,
-              }}
-              currentUserId={currentUserId}
-              onUpdate={() => {
-                fetchReportDetails();
-              }}
-              onDelete={() => {
-                router.back();
-              }}
-            />
-          </View>
-        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -483,7 +448,11 @@ export default function ReportDetails() {
           {report.imageurl && isValidImageUrl(report.imageurl) && (
             <View style={styles.imageSection}>
               <Text style={styles.sectionTitle}>Image</Text>
-              <View style={styles.imageContainer}>
+              <TouchableOpacity
+                style={styles.imageContainer}
+                activeOpacity={0.9}
+                onPress={() => setImageExpanded(true)}
+              >
                 {!imageError ? (
                   <>
                     {imageLoading && (
@@ -522,6 +491,15 @@ export default function ReportDetails() {
                         setImageLoading(false);
                       }}
                     />
+                    {!imageLoading && (
+                      <View style={styles.imageTapIndicator}>
+                        <Ionicons
+                          name='expand-outline'
+                          size={20}
+                          color={uiTheme.textPrimary}
+                        />
+                      </View>
+                    )}
                   </>
                 ) : (
                   <View style={styles.imageErrorContainer}>
@@ -545,7 +523,7 @@ export default function ReportDetails() {
                     )}
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -581,8 +559,8 @@ export default function ReportDetails() {
             </View>
           )}
 
-          {/* Hazard-specific details */}
-          {report.category === 'hazard' && report.hazardtype && (
+          {/* Safety/Hazard-specific details */}
+          {report.category === 'safety' && report.hazardtype && (
             <View style={styles.detailRow}>
               <Ionicons
                 name='warning-outline'
@@ -688,7 +666,60 @@ export default function ReportDetails() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Edit/Delete Actions for report owner */}
+        {report && currentUserId && (
+          <ReportActions
+            report={{
+              reportid: report.reportid,
+              userid: report.userid || '',
+              category: report.category as any,
+              description: report.description,
+              location: report.location,
+              createdat: report.created_at,
+            }}
+            currentUserId={currentUserId}
+            onUpdate={() => {
+              // Refresh the report data
+              fetchReportDetails();
+            }}
+            onDelete={() => {
+              // Navigate back after deletion
+              router.back();
+            }}
+          />
+        )}
       </ScrollView>
+
+      {/* Expanded Image Modal */}
+      {report.imageurl && isValidImageUrl(report.imageurl) && (
+        <Modal
+          visible={imageExpanded}
+          transparent
+          animationType='fade'
+          onRequestClose={() => setImageExpanded(false)}
+        >
+          <Pressable
+            style={styles.expandedImageOverlay}
+            onPress={() => setImageExpanded(false)}
+          >
+            <View style={styles.expandedImageContainer}>
+              <TouchableOpacity
+                style={styles.expandedImageCloseButton}
+                onPress={() => setImageExpanded(false)}
+                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+              >
+                <Ionicons name='close' size={28} color={uiTheme.textPrimary} />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: report.imageurl }}
+                style={styles.expandedImage}
+                resizeMode='contain'
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -717,10 +748,6 @@ const makeStyles = (t: ThemeColors) =>
       color: t.textPrimary,
       fontSize: 18,
       fontWeight: '600',
-      flex: 1,
-    },
-    headerActions: {
-      marginLeft: 'auto',
     },
 
     content: {
@@ -799,6 +826,14 @@ const makeStyles = (t: ThemeColors) =>
     reportImage: {
       width: '100%',
       height: 200,
+    },
+    imageTapIndicator: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 16,
+      padding: 6,
     },
     imageLoadingContainer: {
       position: 'absolute',
@@ -911,5 +946,46 @@ const makeStyles = (t: ThemeColors) =>
     errorText: {
       color: t.errorText,
       fontSize: 16,
+    },
+
+    expandedImageOverlay: {
+      flex: 1,
+      backgroundColor: t.overlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    expandedImageContainer: {
+      flex: 1,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative',
+    },
+    expandedImageCloseButton: {
+      position: 'absolute',
+      top: 16,
+      right: 16,
+      zIndex: 10,
+      backgroundColor: t.cardBg,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: t.divider,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+        },
+        android: { elevation: 4 },
+      }),
+    },
+    expandedImage: {
+      width: '100%',
+      height: '100%',
     },
   });

@@ -1,71 +1,56 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+-- Create Reports Table
+CREATE TABLE Reports (
+    reportID SERIAL PRIMARY KEY,
+    userID UUID NOT NULL,  -- References Supabase's auth.users table
+    category VARCHAR(50) NOT NULL,
+    description TEXT,
+    location POINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    imageurl TEXT,
+    FOREIGN KEY (userID) REFERENCES auth.users(id) ON DELETE CASCADE
+);
 
-CREATE TABLE public.events (
-  eventid integer NOT NULL DEFAULT nextval('events_eventid_seq'::regclass),
-  reportid integer NOT NULL,
-  eventtype character varying NOT NULL,
-  time timestamp without time zone NOT NULL,
-  CONSTRAINT events_pkey PRIMARY KEY (eventid),
-  CONSTRAINT events_reportid_fkey FOREIGN KEY (reportid) REFERENCES public.reports(reportid)
+-- Create Events Table
+CREATE TABLE Events (
+    eventID SERIAL PRIMARY KEY,
+    reportID INT NOT NULL,
+    eventType VARCHAR(50) NOT NULL,
+    time TIMESTAMP NOT NULL,
+    FOREIGN KEY (reportID) REFERENCES Reports(reportID) ON DELETE CASCADE
 );
-CREATE TABLE public.founditems (
-  foundid integer NOT NULL DEFAULT nextval('founditems_foundid_seq'::regclass),
-  reportid integer NOT NULL,
-  itemtype character varying NOT NULL,
-  contactinfo character varying,
-  CONSTRAINT founditems_pkey PRIMARY KEY (foundid),
-  CONSTRAINT founditems_reportid_fkey FOREIGN KEY (reportid) REFERENCES public.reports(reportid)
+
+-- Create Hazards Table
+CREATE TABLE Hazards (
+    hazardID SERIAL PRIMARY KEY,
+    reportID INT NOT NULL,
+    hazardType VARCHAR(50) NOT NULL,
+    FOREIGN KEY (reportID) REFERENCES Reports(reportID) ON DELETE CASCADE
 );
-CREATE TABLE public.hazards (
-  hazardid integer NOT NULL DEFAULT nextval('hazards_hazardid_seq'::regclass),
-  reportid integer NOT NULL,
-  hazardtype character varying NOT NULL,
-  CONSTRAINT hazards_pkey PRIMARY KEY (hazardid),
-  CONSTRAINT hazards_reportid_fkey FOREIGN KEY (reportid) REFERENCES public.reports(reportid)
+
+-- Create LostItems Table
+CREATE TABLE LostItems (
+    lostID SERIAL PRIMARY KEY,
+    reportID INT NOT NULL,
+    itemType VARCHAR(100) NOT NULL,
+    contactInfo VARCHAR(100),
+    FOREIGN KEY (reportID) REFERENCES Reports(reportID) ON DELETE CASCADE
 );
-CREATE TABLE public.lostitems (
-  lostid integer NOT NULL DEFAULT nextval('lostitems_lostid_seq'::regclass),
-  reportid integer NOT NULL,
-  itemtype character varying NOT NULL,
-  contactinfo character varying,
-  CONSTRAINT lostitems_pkey PRIMARY KEY (lostid),
-  CONSTRAINT lostitems_reportid_fkey FOREIGN KEY (reportid) REFERENCES public.reports(reportid)
+
+-- Create FoundItems Table
+CREATE TABLE FoundItems (
+    foundID SERIAL PRIMARY KEY,
+    reportID INT NOT NULL,
+    itemType VARCHAR(100) NOT NULL,
+    contactInfo VARCHAR(100),
+    FOREIGN KEY (reportID) REFERENCES Reports(reportID) ON DELETE CASCADE
 );
-CREATE TABLE public.notification_preferences (
-  id bigint NOT NULL DEFAULT nextval('notification_preferences_id_seq'::regclass),
-  user_id uuid UNIQUE,
-  expo_push_token text,
-  notify_types jsonb DEFAULT '[]'::jsonb,
-  notify_radius_m integer DEFAULT 1000,
-  last_location_lat double precision,
-  last_location_lon double precision,
-  last_location_updated_at timestamp with time zone,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT notification_preferences_pkey PRIMARY KEY (id),
-  CONSTRAINT notification_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+
+-- Add Constraints for Valid Categories and Event Types
+ALTER TABLE Reports
+ADD CONSTRAINT valid_category CHECK (
+    category IN ('safety', 'infrastructure', 'wildlife', 'health', 'lost', 'found', 'other', 'event')
 );
-CREATE TABLE public.notifications_audit (
-  id bigint NOT NULL DEFAULT nextval('notifications_audit_id_seq'::regclass),
-  user_id uuid,
-  report_id uuid,
-  expo_push_token text,
-  payload jsonb,
-  sent_at timestamp with time zone DEFAULT now(),
-  status text,
-  error text,
-  CONSTRAINT notifications_audit_pkey PRIMARY KEY (id),
-  CONSTRAINT notifications_audit_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
-);
-CREATE TABLE public.reports (
-  reportid integer NOT NULL DEFAULT nextval('reports_reportid_seq'::regclass),
-  userid uuid NOT NULL,
-  category character varying NOT NULL CHECK (category::text = ANY (ARRAY['hazard'::character varying::text, 'infrastructure'::character varying::text, 'wildlife'::character varying::text, 'health'::character varying::text, 'lost'::character varying::text, 'found'::character varying::text, 'other'::character varying::text, 'event'::character varying::text])),
-  description text,
-  location point NOT NULL,
-  createdat timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-  imageurl text,
-  CONSTRAINT reports_pkey PRIMARY KEY (reportid),
-  CONSTRAINT reports_userid_fkey FOREIGN KEY (userid) REFERENCES auth.users(id)
-);
+
+-- Add column for distance radius in users table
+ALTER TABLE auth.users
+ADD COLUMN distance_radius INT DEFAULT 20; -- Default distance radius of 20 km

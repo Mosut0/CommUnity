@@ -16,7 +16,7 @@ describe('Markers Constants', () => {
       expect(MARKER_COLORS.event).toBe('#7C3AED');
       expect(MARKER_COLORS.lost).toBe('#EAB308');
       expect(MARKER_COLORS.found).toBe('#22C55E');
-      expect(MARKER_COLORS.hazard).toBe('#EF4444');
+      expect(MARKER_COLORS.safety).toBe('#EF4444');
       expect(MARKER_COLORS.default).toBe('#9E9E9E');
     });
 
@@ -42,7 +42,7 @@ describe('Markers Constants', () => {
   describe('DB_CATEGORY_NAMES', () => {
     it('should have all required database category names', () => {
       expect(DB_CATEGORY_NAMES.event).toBe('event');
-      expect(DB_CATEGORY_NAMES.hazard).toBe('hazard');
+      expect(DB_CATEGORY_NAMES.safety).toBe('safety');
       expect(DB_CATEGORY_NAMES.lost).toBe('lost');
       expect(DB_CATEGORY_NAMES.found).toBe('found');
     });
@@ -51,7 +51,7 @@ describe('Markers Constants', () => {
   describe('CATEGORY_ICONS', () => {
     it('should have all required category icons', () => {
       expect(CATEGORY_ICONS.event).toBe('calendar-outline');
-      expect(CATEGORY_ICONS.hazard).toBe('alert-circle-outline');
+      expect(CATEGORY_ICONS.safety).toBe('alert-circle-outline');
       expect(CATEGORY_ICONS.lost).toBe('help-circle-outline');
       expect(CATEGORY_ICONS.found).toBe('checkmark-circle-outline');
       expect(CATEGORY_ICONS.default).toBe('information-circle-outline');

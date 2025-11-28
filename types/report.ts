@@ -1,7 +1,15 @@
 // Unified Report Types for the CommUnity App
 // This file provides type-safe interfaces for all report-related data
 
-export type ReportCategory = 'event' | 'hazard' | 'lost' | 'found' | 'other';
+export type ReportCategory =
+  | 'event'
+  | 'safety'
+  | 'lost'
+  | 'found'
+  | 'infrastructure'
+  | 'wildlife'
+  | 'health'
+  | 'other';
 
 export interface BaseReport {
   reportid: number;
@@ -36,9 +44,13 @@ export interface FoundItemData {
 // Union type for category-specific data
 export type CategorySpecificData =
   | { category: 'event'; data: EventData }
-  | { category: 'hazard'; data: HazardData }
+  | { category: 'safety'; data: HazardData }
   | { category: 'lost'; data: LostItemData }
-  | { category: 'found'; data: FoundItemData };
+  | { category: 'found'; data: FoundItemData }
+  | {
+      category: 'infrastructure' | 'wildlife' | 'health' | 'other';
+      data: null;
+    };
 
 // Complete report interface with category-specific data
 export interface Report extends BaseReport {
@@ -86,7 +98,7 @@ export interface CreateFoundItemReportData {
 
 export type CreateReportData =
   | { type: 'event'; data: CreateEventReportData }
-  | { type: 'hazard'; data: CreateHazardReportData }
+  | { type: 'safety'; data: CreateHazardReportData }
   | { type: 'lost'; data: CreateLostItemReportData }
   | { type: 'found'; data: CreateFoundItemReportData };
 

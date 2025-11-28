@@ -15,7 +15,7 @@ interface HazardData {
 export async function submitHazard(data: HazardData, userId: string) {
   try {
     const reportData = {
-      type: 'hazard' as const,
+      type: 'safety' as const,
       data: {
         hazardType: data.hazardType,
         description: data.description,

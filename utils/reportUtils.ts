@@ -87,13 +87,21 @@ export function getIconSize(context: keyof typeof ICON_SIZES): number {
 export function getReportTitle(report: Report): string {
   switch (report.category) {
     case 'event':
-      return `${report.eventtype || 'Unknown Event'}`;
-    case 'hazard':
-      return `${report.hazardtype || 'Unknown Hazard'}`;
+      return `Event: ${report.eventtype || 'Unknown Event'}`;
+    case 'safety':
+      return `Hazard: ${report.hazardtype || 'Unknown Hazard'}`;
     case 'lost':
-      return `${report.itemtype || 'Unknown Item'}`;
+      return `Lost: ${report.itemtype || 'Unknown Item'}`;
     case 'found':
-      return `${report.itemtype || 'Unknown Item'}`;
+      return `Found: ${report.itemtype || 'Unknown Item'}`;
+    case 'infrastructure':
+      return 'Infrastructure Issue';
+    case 'wildlife':
+      return 'Wildlife Sighting';
+    case 'health':
+      return 'Health Concern';
+    case 'other':
+      return 'Other Report';
     default:
       return 'Report';
   }
@@ -129,7 +137,7 @@ export function matchesFilter(
   filter: 'all' | 'hazard' | 'event' | 'lost' | 'found'
 ): boolean {
   if (filter === 'all') return true;
-  if (filter === 'hazard') return report.category === 'hazard';
+  if (filter === 'hazard') return report.category === 'safety';
   if (filter === 'event') return report.category === 'event';
   if (filter === 'lost') return report.category === 'lost';
   if (filter === 'found') return report.category === 'found';

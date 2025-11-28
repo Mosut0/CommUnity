@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   useColorScheme,
   Dimensions,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -28,11 +27,11 @@ export default function WelcomeScreen() {
       <View style={styles.content}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@/assets/images/community_logo.png')}
-              style={styles.logo}
-              resizeMode='contain'
+          <View style={styles.iconContainer}>
+            <Ionicons
+              name='people-circle'
+              size={100}
+              color={theme.primaryBtnBg}
             />
           </View>
           <Text style={styles.appTitle}>CommUnity</Text>
@@ -130,18 +129,8 @@ const makeStyles = (t: UiTheme) => {
       alignItems: 'center',
       marginTop: isSmallScreen ? 10 : 20,
     },
-    logoContainer: {
+    iconContainer: {
       marginBottom: isSmallScreen ? 15 : 25,
-      width: isSmallScreen ? 120 : 140,
-      height: isSmallScreen ? 120 : 140,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: isSmallScreen ? 60 : 70,
-      overflow: 'hidden',
-    },
-    logo: {
-      width: '100%',
-      height: '100%',
     },
     appTitle: {
       color: t.textPrimary,

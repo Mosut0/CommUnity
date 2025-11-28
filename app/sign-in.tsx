@@ -10,7 +10,6 @@ import {
   useColorScheme,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -91,7 +90,10 @@ export default function SignInScreen() {
       style={styles.safeArea}
       edges={['top', 'bottom']}
     >
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
         <TouchableOpacity
           testID='sign-in-back'
           style={styles.backButton}
@@ -100,103 +102,85 @@ export default function SignInScreen() {
           <Ionicons name='arrow-back' size={24} color={theme.textPrimary} />
         </TouchableOpacity>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-          keyboardVerticalOffset={0}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps='handled'
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
-            <View style={styles.contentWrapper}>
-              <View style={styles.headerWrap}>
-                <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subtitle}>
-                  Sign in to continue to CommUnity
-                </Text>
-              </View>
+        <View style={styles.contentWrapper}>
+          <View style={styles.headerWrap}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>
+              Sign in to continue to CommUnity
+            </Text>
+          </View>
 
-              <View style={styles.formCard}>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    autoCapitalize='none'
-                    autoCorrect={false}
-                    autoComplete='email'
-                    keyboardType='email-address'
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder='you@example.com'
-                    placeholderTextColor={theme.textSecondary + '99'}
-                    style={styles.input}
-                  />
-                </View>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>Password</Text>
-                  <View style={styles.passwordRow}>
-                    <TextInput
-                      autoCapitalize='none'
-                      autoCorrect={false}
-                      autoComplete='password'
-                      value={password}
-                      onChangeText={setPassword}
-                      placeholder='••••••••'
-                      placeholderTextColor={theme.textSecondary + '99'}
-                      secureTextEntry={!showPassword}
-                      style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                    />
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(s => !s)}
-                      style={styles.iconBtn}
-                    >
-                      <Ionicons
-                        name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                        size={20}
-                        color={theme.textSecondary}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity
-                    testID='forgot-password-btn'
-                    onPress={handleForgotPassword}
-                    disabled={loading}
-                    style={styles.forgotPasswordBtn}
-                  >
-                    <Text style={styles.forgotText}>Forgot Password?</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.primaryBtn}
-                  onPress={handleSignIn}
-                  disabled={loading}
-                  activeOpacity={0.8}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={theme.primaryBtnText} />
-                  ) : (
-                    <Text style={styles.primaryBtnText}>Sign In</Text>
-                  )}
-                </TouchableOpacity>
-
-                <View style={styles.divider} />
-                <View style={styles.switchRow}>
-                  <Text style={styles.switchText}>Don't have an account?</Text>
-                  <TouchableOpacity
-                    testID='sign-in-to-sign-up'
-                    onPress={() => router.push('/sign-up')}
-                  >
-                    <Text style={styles.linkText}>Create one</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+          <View style={styles.formCard}>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                autoCapitalize='none'
+                keyboardType='email-address'
+                value={email}
+                onChangeText={setEmail}
+                placeholder='you@example.com'
+                placeholderTextColor={theme.textSecondary + '99'}
+                style={styles.input}
+              />
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </View>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordRow}>
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder='••••••••'
+                  placeholderTextColor={theme.textSecondary + '99'}
+                  secureTextEntry={!showPassword}
+                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(s => !s)}
+                  style={styles.iconBtn}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                testID='forgot-password-btn'
+                onPress={handleForgotPassword}
+                disabled={loading}
+                style={styles.forgotPasswordBtn}
+              >
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={handleSignIn}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color={theme.primaryBtnText} />
+              ) : (
+                <Text style={styles.primaryBtnText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+            <View style={styles.switchRow}>
+              <Text style={styles.switchText}>Don't have an account?</Text>
+              <TouchableOpacity
+                testID='sign-in-to-sign-up'
+                onPress={() => router.push('/sign-up')}
+              >
+                <Text style={styles.linkText}>Create one</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -205,10 +189,8 @@ const makeStyles = (t: UiTheme, themeName: ThemeName) =>
   StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: t.pageBg },
     container: { flex: 1, padding: 20 },
-    backButton: { marginBottom: 16, padding: 8, alignSelf: 'flex-start' },
-    keyboardView: { flex: 1 },
-    scrollContent: { flexGrow: 1 },
-    contentWrapper: { flex: 1, justifyContent: 'center', paddingTop: 20 },
+    backButton: { marginBottom: 10, padding: 8, alignSelf: 'flex-start' },
+    contentWrapper: { flex: 1, justifyContent: 'center' },
     headerWrap: { marginBottom: 24 },
     title: {
       color: t.textPrimary,

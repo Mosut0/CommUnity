@@ -8,7 +8,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { kmToMiles } from '@/utils/distance';
@@ -22,7 +21,6 @@ type DistanceSheetProps = {
   visible: boolean;
   animation: Animated.Value;
   onRequestClose: () => void;
-  onPressBack?: () => void;
   insetsBottom: number;
   uiTheme: ThemeConfig;
   sliderValue: number;
@@ -35,7 +33,6 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
   visible,
   animation,
   onRequestClose,
-  onPressBack,
   insetsBottom,
   uiTheme,
   sliderValue,
@@ -79,24 +76,19 @@ export const DistanceSheet: React.FC<DistanceSheetProps> = ({
           },
         ]}
       >
-        <View style={styles.sheetHeaderRow}>
-          <TouchableOpacity
-            onPress={onPressBack || onRequestClose}
-            style={styles.backButton}
-          >
-            <MaterialIcons
-              name='arrow-back'
-              size={24}
-              color={uiTheme.textPrimary}
-            />
-          </TouchableOpacity>
-          <ThemedText
-            style={[styles.sheetTitle, { color: uiTheme.textPrimary }]}
-          >
-            Distance Radius
-          </ThemedText>
-          <View style={styles.placeholder} />
+        <View style={styles.sheetHandleWrap}>
+          <View
+            style={[styles.sheetHandle, { backgroundColor: uiTheme.divider }]}
+          />
         </View>
+        <ThemedText
+          style={[
+            styles.sheetTitle,
+            { color: uiTheme.textPrimary, marginBottom: 12 },
+          ]}
+        >
+          Distance Radius
+        </ThemedText>
         <Slider
           style={styles.slider}
           minimumValue={2}
@@ -143,26 +135,20 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 16,
+    paddingTop: 10,
   },
-  sheetHeaderRow: {
-    flexDirection: 'row',
+  sheetHandleWrap: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    marginBottom: 12,
+    paddingVertical: 4,
   },
-  backButton: {
-    padding: 4,
-    marginRight: 8,
-  },
-  placeholder: {
-    width: 32,
+  sheetHandle: {
+    width: 42,
+    height: 5,
+    borderRadius: 3,
   },
   sheetTitle: {
     fontSize: 16,
     fontWeight: '700',
-    flex: 1,
   },
   slider: {
     width: '100%',
