@@ -11,6 +11,7 @@ import {
   Alert,
   Linking,
   Share,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Report } from '@/types/report';
@@ -34,6 +35,7 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
   const accentColor =
     (MARKER_COLORS as any)[report.category] || MARKER_COLORS.default;
   const [imageError, setImageError] = useState(false);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -208,12 +210,20 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
         {report.imageurl && isValidImageUrl(report.imageurl) && (
           <View style={styles.imageContainer}>
             {!imageError ? (
-              <Image
-                source={{ uri: report.imageurl }}
-                style={styles.reportImage}
-                resizeMode='cover'
-                onError={() => setImageError(true)}
-              />
+              <TouchableOpacity
+                onPress={() => setImageModalVisible(true)}
+                activeOpacity={0.85}
+              >
+                <Image
+                  source={{ uri: report.imageurl }}
+                  style={styles.reportImage}
+                  resizeMode='cover'
+                  onError={() => setImageError(true)}
+                />
+                <View style={styles.expandIconContainer}>
+                  <Ionicons name='expand-outline' size={20} color='#fff' />
+                </View>
+              </TouchableOpacity>
             ) : (
               <View style={styles.imageErrorContainer}>
                 <Ionicons
@@ -425,6 +435,36 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Image Modal */}
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        animationType='slide'
+        onRequestClose={() => setImageModalVisible(false)}
+      >
+        <View style={styles.imageModalContainer}>
+          <TouchableOpacity
+            style={styles.imageModalOverlay}
+            activeOpacity={1}
+            onPress={() => setImageModalVisible(false)}
+          >
+            <View style={styles.imageModalHeader}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setImageModalVisible(false)}
+              >
+                <Ionicons name='close' size={30} color='#fff' />
+              </TouchableOpacity>
+            </View>
+            <Image
+              source={{ uri: report.imageurl }}
+              style={styles.fullScreenImage}
+              resizeMode='contain'
+            />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -552,4 +592,42 @@ const styles = StyleSheet.create({
   textDark: { color: '#F9FAFB' },
   textSecondaryLight: { color: '#374151' },
   textSecondaryDark: { color: '#D1D5DB' },
+  expandIconContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  imageModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageModalHeader: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    right: 20,
+    zIndex: 10,
+  },
+  closeButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
 });

@@ -11,6 +11,7 @@ import {
   Platform,
   Share,
   Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -59,6 +60,7 @@ export default function ReportDetails() {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -515,35 +517,47 @@ export default function ReportDetails() {
                         </Text>
                       </View>
                     )}
-                    <Image
-                      key={`${report.reportid}-${retryCount}`} // Force re-render on retry
-                      source={{ uri: report.imageurl }}
-                      style={styles.reportImage}
-                      resizeMode='cover'
-                      onLoadStart={() => {
-                        console.log(
-                          'Image loading started for:',
-                          report.imageurl
-                        );
-                        setImageLoading(true);
-                      }}
-                      onLoad={() => {
-                        console.log(
-                          'Image loaded successfully:',
-                          report.imageurl
-                        );
-                        setImageLoading(false);
-                      }}
-                      onError={error => {
-                        console.log(
-                          `Image failed to load (attempt ${retryCount + 1}):`,
-                          report.imageurl,
-                          error.nativeEvent.error
-                        );
-                        setImageError(true);
-                        setImageLoading(false);
-                      }}
-                    />
+                    <TouchableOpacity
+                      onPress={() => setImageModalVisible(true)}
+                      activeOpacity={0.85}
+                    >
+                      <Image
+                        key={`${report.reportid}-${retryCount}`} // Force re-render on retry
+                        source={{ uri: report.imageurl }}
+                        style={styles.reportImage}
+                        resizeMode='cover'
+                        onLoadStart={() => {
+                          console.log(
+                            'Image loading started for:',
+                            report.imageurl
+                          );
+                          setImageLoading(true);
+                        }}
+                        onLoad={() => {
+                          console.log(
+                            'Image loaded successfully:',
+                            report.imageurl
+                          );
+                          setImageLoading(false);
+                        }}
+                        onError={error => {
+                          console.log(
+                            `Image failed to load (attempt ${retryCount + 1}):`,
+                            report.imageurl,
+                            error.nativeEvent.error
+                          );
+                          setImageError(true);
+                          setImageLoading(false);
+                        }}
+                      />
+                      <View style={styles.expandIconContainer}>
+                        <Ionicons
+                          name='expand-outline'
+                          size={24}
+                          color='#fff'
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </>
                 ) : (
                   <View style={styles.imageErrorContainer}>
@@ -711,6 +725,38 @@ export default function ReportDetails() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Image Modal */}
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        animationType='slide'
+        onRequestClose={() => setImageModalVisible(false)}
+      >
+        <View style={styles.imageModalContainer}>
+          <TouchableOpacity
+            style={styles.imageModalOverlay}
+            activeOpacity={1}
+            onPress={() => setImageModalVisible(false)}
+          >
+            <View style={styles.imageModalHeader}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setImageModalVisible(false)}
+              >
+                <Ionicons name='close' size={30} color='#fff' />
+              </TouchableOpacity>
+            </View>
+            {report?.imageurl && (
+              <Image
+                source={{ uri: report.imageurl }}
+                style={styles.fullScreenImage}
+                resizeMode='contain'
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -933,5 +979,43 @@ const makeStyles = (t: ThemeColors) =>
     errorText: {
       color: t.errorText,
       fontSize: 16,
+    },
+    expandIconContainer: {
+      position: 'absolute',
+      top: 12,
+      right: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      borderRadius: 24,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageModalContainer: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+    imageModalOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageModalHeader: {
+      position: 'absolute',
+      top: Platform.OS === 'ios' ? 50 : 20,
+      right: 20,
+      zIndex: 10,
+    },
+    closeButton: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    fullScreenImage: {
+      width: '100%',
+      height: '100%',
     },
   });
