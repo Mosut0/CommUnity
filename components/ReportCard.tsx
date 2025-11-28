@@ -221,11 +221,7 @@ export default function ReportCard({ report, onClose, onDetails }: Props) {
                   onError={() => setImageError(true)}
                 />
                 <View style={styles.expandIconContainer}>
-                  <Ionicons
-                    name='expand-outline'
-                    size={20}
-                    color='#fff'
-                  />
+                  <Ionicons name='expand-outline' size={20} color='#fff' />
                 </View>
               </TouchableOpacity>
             ) : (
