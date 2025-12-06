@@ -104,7 +104,7 @@ CommUnity/
 
 ### Prerequisites
 - Node.js (v18 or higher recommended)
-- npm or yarn
+- npm
 - Expo CLI (`npm install -g expo-cli`)
 - iOS Simulator (for iOS development) or Android Emulator (for Android development)
 - Supabase account and project
