@@ -5,6 +5,7 @@ A crowd-powered mobile application that enables users to report and access real-
 ## Features
 
 ### Core Functionality
+
 - **Interactive Map View**: Browse community reports on an interactive map with location-based filtering
 - **Report Creation**: Submit four types of reports:
   - **Events**: Community events with date/time information
@@ -17,6 +18,7 @@ A crowd-powered mobile application that enables users to report and access real-
 - **User Authentication**: Secure sign-up, sign-in, and password reset functionality
 
 ### User Features
+
 - **Customizable Distance Radius**: Set your preferred radius (km or miles) for viewing reports
 - **Category Filtering**: Filter reports by type (All, Events, Hazards, Lost, Found)
 - **User Profile & Settings**: Manage account settings, email, password, and notification preferences
@@ -25,6 +27,7 @@ A crowd-powered mobile application that enables users to report and access real-
 - **Dark Mode Support**: Automatic theme switching based on system preferences
 
 ### Moderation & Safety
+
 - **User Moderation System**: Shadowbanning and strike system for content moderation
 - **Report Flagging**: Users can flag inappropriate content
 - **Content Filtering**: Shadowbanned users' content is automatically filtered from public views
@@ -32,6 +35,7 @@ A crowd-powered mobile application that enables users to report and access real-
 ## Tech Stack
 
 ### Frontend
+
 - **React Native** (0.81.5) with **Expo** (54.0.25)
 - **TypeScript** (5.9.2)
 - **Expo Router** (6.0.15) - File-based routing
@@ -40,11 +44,13 @@ A crowd-powered mobile application that enables users to report and access real-
 - **React Native Paper** (5.14.5) - UI components
 
 ### Backend & Database
+
 - **Supabase** - Backend-as-a-Service (authentication, database, storage)
 - **PostgreSQL** - Database (via Supabase)
 - **Supabase Storage** - Image storage
 
 ### Key Libraries
+
 - **expo-location** - Location services
 - **expo-notifications** - Push notifications
 - **expo-image-picker** - Image selection
@@ -52,6 +58,7 @@ A crowd-powered mobile application that enables users to report and access real-
 - **react-native-reanimated** - Animations
 
 ### Development Tools
+
 - **Jest** (29.7.0) - Unit testing
 - **Detox** (20.43.0) - End-to-end testing
 - **ESLint** - Code linting
@@ -103,8 +110,9 @@ CommUnity/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v18 or higher recommended)
-- npm or yarn
+- npm
 - Expo CLI (`npm install -g expo-cli`)
 - iOS Simulator (for iOS development) or Android Emulator (for Android development)
 - Supabase account and project
@@ -112,18 +120,21 @@ CommUnity/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd CommUnity
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
+
    ```env
    EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -137,6 +148,7 @@ CommUnity/
 ## Database Schema
 
 The application uses PostgreSQL with the following main tables:
+
 - `reports` - Main report table
 - `events` - Event-specific data
 - `hazards` - Hazard-specific data
@@ -151,13 +163,17 @@ See `schema.sql` for the complete database schema.
 ## Testing
 
 ### Unit Tests
+
 Unit tests are written with Jest and React Native Testing Library:
+
 ```bash
 npm test
 ```
 
 ### End-to-End Tests
+
 E2E tests use Detox:
+
 ```bash
 # Build and run iOS tests
 npm run test:e2e:build:ios
@@ -171,6 +187,7 @@ npm run test:e2e:android
 ## CI/CD
 
 The project includes GitHub Actions workflows for:
+
 - Running tests on push/PR
 - Type checking
 - Linting
