@@ -91,6 +91,7 @@
     "jest": "^29.7.0",
     "jest-expo": "~54.0.13",
     "prettier": "^3.6.2",
+    "react-test-renderer": "19.2.1",
     "typescript": "~5.9.2"
   },
   "expo": {
